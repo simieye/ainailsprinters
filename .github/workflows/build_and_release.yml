@@ -1,0 +1,223 @@
+name: Build & Release Multi-Platform
+
+on:
+  push:
+    branches: [main, master]
+    tags: ['v*']
+  pull_request:
+    branches: [main, master]
+  workflow_dispatch:
+
+env:
+  FLUTTER_VERSION: '3.22.0'
+
+jobs:
+  # ==================== 代码质量检查 ====================
+  analyze:
+    name: Code Analysis
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: 'stable'
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Analyze code
+        run: flutter analyze
+
+      - name: Run tests
+        run: flutter test
+
+  # ==================== Android Build ====================
+  build-android:
+    name: Build Android APK & AAB
+    runs-on: ubuntu-latest
+    needs: analyze
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: 'stable'
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build APK (arm64-v8a + armeabi-v7a + x86_64)
+        run: flutter build apk --release --split-per-abi
+
+      - name: Build AAB (Google Play)
+        run: flutter build appbundle --release
+
+      - name: Upload APK artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-apks
+          path: |
+            build/app/outputs/flutter-apk/*.apk
+            build/app/outputs/bundle/release/*.aab
+          retention-days: 30
+
+  # ==================== iOS Build ====================
+  build-ios:
+    name: Build iOS (macOS runner only)
+    runs-on: macos-latest
+    needs: analyze
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: 'stable'
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build iOS (no code sign - for archive only)
+        run: |
+          cd ios
+          pod install || true
+          cd ..
+          flutter build ios --release --no-codesign
+
+      - name: Package IPA
+        run: |
+          mkdir -p Payload
+          cp -r build/ios/Release-iphoneos/Runner.app Payload/
+          zip -r ai_nails_ios.zip Payload
+          mv ai_nails_ios.zip ai_nails_ios.ipa
+
+      - name: Upload iOS artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-build
+          path: ai_nails_ios.ipa
+          retention-days: 30
+
+  # ==================== macOS Build ====================
+  build-macos:
+    name: Build macOS
+    runs-on: macos-latest
+    needs: analyze
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: 'stable'
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build macOS
+        run: flutter build macos --release
+
+      - name: Package macOS app
+        run: |
+          cd build/macos/Build/Products/Release
+          zip -r ai_nails_macos.zip "AI NAILS.app"
+
+      - name: Upload macOS artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos-build
+          path: build/macos/Build/Products/Release/ai_nails_macos.zip
+          retention-days: 30
+
+  # ==================== Windows Build ====================
+  build-windows:
+    name: Build Windows
+    runs-on: windows-latest
+    needs: analyze
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: 'stable'
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Enable Windows build
+        run: flutter config --enable-windows-desktop
+
+      - name: Build Windows
+        run: flutter build windows --release
+
+      - name: Package Windows (MSIX)
+        run: |
+          Compress-Archive -Path "build/windows/x64/runner/Release/*" -DestinationPath "ai_nails_windows.zip"
+
+      - name: Upload Windows artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-build
+          path: ai_nails_windows.zip
+          retention-days: 30
+
+  # ==================== 创建 GitHub Release ====================
+  create-release:
+    name: Create GitHub Release
+    runs-on: ubuntu-latest
+    needs: [build-android, build-ios, build-macos, build-windows]
+    if: startsWith(github.ref, 'refs/tags/v')
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: release-assets
+
+      - name: List release assets
+        run: find release-assets -type f
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: "AI NAILS v${{ github.ref_name }}"
+          body: |
+            ## AI NAILS APP v${{ github.ref_name }}
+
+            ### 🌍 多平台安装包
+
+            | 平台 | 文件 | 说明 |
+            |------|------|------|
+            | 🤖 Android | `android-apks/` | APK (arm64-v8a, armeabi-v7a, x86_64) + AAB |
+            | 🍎 iOS | `ios-build/` | IPA (需自签名) |
+            | 💻 macOS | `macos-build/` | macOS 桌面应用 |
+            | 🪟 Windows | `windows-build/` | Windows 桌面应用 |
+
+            ### ✨ 功能亮点
+            - 🎨 AI 创作舱：语音/文本 AI 生成美甲设计
+            - 🖼️ 灵感矩阵：10000+ 工业级图案库 + 太极64卦推荐
+            - 🖨️ 龙虾智控：3D 设备监控 + CMYK 墨盒管理
+            - 📊 商业协同：45天 ROI + 多店管理
+            - 👤 创作者空间：提示词资产 + 全球社区
+            - 📱 AR 预览：3D 甲面试戴
+
+            ### 🔧 安装说明
+            - **Android**: 下载对应架构 APK 直接安装
+            - **iOS**: 通过 Xcode 或 AltStore 侧载 IPA
+            - **macOS**: 解压后拖入 Applications 文件夹
+            - **Windows**: 解压后运行 `ai_nails_app.exe`
+          draft: false
+          prerelease: false
+          files: |
+            release-assets/**/*
+          token: ${{ secrets.GITHUB_TOKEN }}
