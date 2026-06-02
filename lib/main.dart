@@ -1,21 +1,51 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:window_manager/window_manager.dart';
 import 'core/theme/app_theme.dart';
 import 'core/router/app_router.dart';
 import 'core/di/providers.dart';
 import 'core/services/simiai_service.dart';
+import 'core/services/desktop_service.dart';
 import 'features/auth/domain/services/auth_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // ===== 桌面端初始化 =====
+  if (!kIsWeb && (Platform.isMacOS || Platform.isWindows || Platform.isLinux)) {
+    // 窗口管理器
+    await windowManager.ensureInitialized();
+
+    const windowOptions = WindowOptions(
+      size: Size(1280, 800),
+      minimumSize: Size(900, 600),
+      center: true,
+      backgroundColor: Colors.transparent,
+      skipTaskbar: false,
+      titleBarStyle: TitleBarStyle.normal,
+      title: 'AI NAILS',
+      windowButtonVisibility: true,
+    );
+
+    windowManager.waitUntilReadyToShow(windowOptions, () async {
+      await windowManager.show();
+      await windowManager.focus();
+      await windowManager.setPreventClose(false);
+    });
+  }
 
   // 初始化本地化
   await EasyLocalization.ensureInitialized();
 
   // 初始化 Hive 本地存储
   await Hive.initFlutter();
+
+  // 初始化桌面服务
+  DesktopService.instance.listenToDropEvents();
 
   // 初始化 SIMIAIOS 64智能体集群连接
   await SimiaiService.instance.initialize();

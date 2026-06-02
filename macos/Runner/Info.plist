@@ -30,6 +30,10 @@
 	<string>MainMenu</string>
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
+	<key>NSHighResolutionCapable</key>
+	<true/>
+	<key>NSSupportsAutomaticGraphicsSwitching</key>
+	<true/>
 	<key>NSCameraUsageDescription</key>
 	<string>AI NAILS needs camera access for AR nail preview</string>
 	<key>NSMicrophoneUsageDescription</key>
@@ -38,5 +42,24 @@
 	<string>AI NAILS needs photo library access for design references</string>
 	<key>NSBluetoothAlwaysUsageDescription</key>
 	<string>AI NAILS needs Bluetooth access to connect to nail printer</string>
+	<key>NSDocumentsFolderUsageDescription</key>
+	<string>AI NAILS needs access to Documents folder for saving designs</string>
+	<key>NSDesktopFolderUsageDescription</key>
+	<string>AI NAILS needs access to Desktop folder for importing images</string>
+	<key>NSDownloadsFolderUsageDescription</key>
+	<string>AI NAILS needs access to Downloads folder for exporting designs</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>com.ainails.app</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>ainails</string>
+			</array>
+		</dict>
+	</array>
+	<key>LSApplicationCategoryType</key>
+	<string>public.app-category.graphics-design</string>
 </dict>
 </plist>

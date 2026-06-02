@@ -11,6 +11,7 @@ import '../services/bluetooth_print_service.dart';
 import '../services/translation_service.dart';
 import '../services/voice_input_service.dart';
 import '../services/image_upload_service.dart';
+import '../services/desktop_service.dart';
 import '../../features/create/domain/models/design_prompt.dart';
 import '../../features/device/domain/models/device_status.dart';
 import '../../features/gallery/domain/models/nail_design.dart';
@@ -39,6 +40,7 @@ final bluetoothPrintServiceProvider = Provider<BluetoothPrintService>((ref) => B
 final translationServiceProvider = Provider<TranslationService>((ref) => TranslationService.instance);
 final voiceInputServiceProvider = Provider<VoiceInputService>((ref) => VoiceInputService.instance);
 final imageUploadServiceProvider = Provider<ImageUploadService>((ref) => ImageUploadService.instance);
+final desktopServiceProvider = Provider<DesktopService>((ref) => DesktopService.instance);
 
 // ===== 认证状态 =====
 final authStateProvider = StateProvider<AuthState>((ref) {
