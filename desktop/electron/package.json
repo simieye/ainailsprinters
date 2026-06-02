@@ -1,0 +1,65 @@
+{
+  "name": "ai-nails-desktop",
+  "version": "4.0.0",
+  "description": "AI NAILS Desktop — 智能美甲创作平台 macOS 桌面应用",
+  "main": "main.js",
+  "author": "AI NAILS (深圳市斯密爱科技有限公司)",
+  "license": "MIT",
+  "scripts": {
+    "start": "electron .",
+    "pack": "electron-builder --dir",
+    "dist": "electron-builder",
+    "dist:mac": "electron-builder --mac",
+    "dist:dmg": "electron-builder --mac dmg",
+    "dist:universal": "electron-builder --mac --universal"
+  },
+  "build": {
+    "appId": "com.ainails.desktop",
+    "productName": "AI NAILS",
+    "copyright": "Copyright © 2026 AI NAILS. All rights reserved.",
+    "mac": {
+      "category": "public.app-category.graphics-design",
+      "icon": "assets/icon.icns",
+      "target": [
+        {
+          "target": "dmg",
+          "arch": ["x64", "arm64"]
+        },
+        {
+          "target": "zip",
+          "arch": ["x64", "arm64"]
+        }
+      ],
+      "hardenedRuntime": true,
+      "gatekeeperAssess": false,
+      "entitlements": "entitlements.mac.plist",
+      "entitlementsInherit": "entitlements.mac.plist",
+      "type": "distribution"
+    },
+    "dmg": {
+      "title": "AI NAILS Installer",
+      "icon": "assets/icon.icns",
+      "contents": [
+        { "x": 130, "y": 220 },
+        { "x": 410, "y": 220, "type": "link", "path": "/Applications" }
+      ],
+      "background": "assets/dmg-background.png",
+      "window": { "width": 540, "height": 380 }
+    },
+    "directories": {
+      "output": "../../release/electron"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "../../preview/index.html",
+      "../../preview/**/*",
+      "assets/**/*"
+    ],
+    "extraResources": []
+  },
+  "devDependencies": {
+    "electron": "^28.0.0",
+    "electron-builder": "^24.9.0"
+  }
+}

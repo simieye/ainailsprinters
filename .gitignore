@@ -73,3 +73,20 @@ coverage/
 *.g.dart
 *.freezed.dart
 *.config.dart
+
+# Electron
+desktop/electron/node_modules/
+desktop/electron/assets/icon.iconset/
+desktop/electron/dist/
+
+# Release
+release/
+*.dmg
+*.zip
+*.app
+
+# Environment
+.env
+.env.local
+*.jks
+*.keystore
