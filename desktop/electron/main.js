@@ -24,7 +24,13 @@ function createWindow() {
     show: false
   });
 
-  mainWindow.loadFile(path.join(__dirname, '../../preview/index.html'));
+  // 兼容 .app 打包和本地开发两种场景
+  let indexPath = path.join(__dirname, 'preview/index.html');
+  const fs = require('fs');
+  if (!fs.existsSync(indexPath)) {
+    indexPath = path.join(__dirname, '../../preview/index.html');
+  }
+  mainWindow.loadFile(indexPath);
 
   mainWindow.once('ready-to-show', () => {
     mainWindow.show();
