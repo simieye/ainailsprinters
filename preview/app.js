@@ -40,6 +40,10 @@ function navigateTo(page){
   const t=document.getElementById('page-'+page);if(t)t.classList.add('active');
   const names={create:'创作舱 · TALK TO CREATE',device:'龙虾智控 · 设备仪表盘',community:'全球创作者社区',payment:'支付中心',agents:'智能体集群 · Skill 管理',providers:'AI 大模型提供商',openclaw:'OpenClaw 控制台',admin:'管理后台',settings:'设置'};
   document.getElementById('titlebar-page-name').textContent=names[page]||page;
+  // 进入创作舱时刷新 Skill 快速安装状态
+  if (page === 'create' && typeof refreshQuickAddChips === 'function') {
+    setTimeout(() => refreshQuickAddChips(), 100);
+  }
 }
 function toggleSidebar(){sidebarCollapsed=!sidebarCollapsed;document.getElementById('sidebar').classList.toggle('collapsed',sidebarCollapsed);document.querySelector('.sidebar-collapse-btn').textContent=sidebarCollapsed?'▶':'◀ 收起菜单'}
 
@@ -63,7 +67,7 @@ function closeQrModal(){document.getElementById('qr-modal').classList.add('hidde
 function switchCommunityTab(tab){document.querySelectorAll('#page-community .page-tab').forEach((el,i)=>{el.classList.toggle('active',['feed','market','leaderboard'][i]===tab)});document.getElementById('comm-feed').classList.toggle('hidden',tab!=='feed');document.getElementById('comm-market').classList.toggle('hidden',tab!=='market');document.getElementById('comm-leaderboard').classList.toggle('hidden',tab!=='leaderboard')}
 
 // AGENTS
-function switchAgentTab(tab){document.querySelectorAll('#page-agents .page-tab').forEach((el,i)=>{el.classList.toggle('active',['installed','hub','custom','chat'][i]===tab)});document.getElementById('agent-installed').classList.toggle('hidden',tab!=='installed');document.getElementById('agent-hub').classList.toggle('hidden',tab!=='hub');document.getElementById('agent-custom').classList.toggle('hidden',tab!=='custom');document.getElementById('agent-chat').classList.toggle('hidden',tab!=='chat')}
+function switchAgentTab(tab){document.querySelectorAll('#page-agents .page-tab').forEach((el,i)=>{el.classList.toggle('active',['installed','hub','custom','chat'][i]===tab)});document.getElementById('agent-installed').classList.toggle('hidden',tab!=='installed');document.getElementById('agent-hub').classList.toggle('hidden',tab!=='hub');document.getElementById('agent-custom').classList.toggle('hidden',tab!=='custom');document.getElementById('agent-chat').classList.toggle('hidden',tab!=='chat');if(tab==='hub'&&typeof renderSkillHub==='function')renderSkillHub();if(tab==='installed'&&typeof renderInstalledSkills==='function')renderInstalledSkills()}
 
 function installSkillFromHub(name){
   showToast(`正在从 ClawSkill Hub 安装 "${name}"...`,'info');
@@ -110,13 +114,73 @@ function sendSkillChat(){
 // AI PROVIDERS
 function setDefaultProvider(provider){
   defaultProvider=provider;
-  const names={openai:'OpenAI',anthropic:'Anthropic',google:'Google Gemini',deepseek:'DeepSeek',qwen:'通义千问',custom:'自定义端点'};
+  const names={openai:'OpenAI',anthropic:'Anthropic',google:'Google Gemini',deepseek:'DeepSeek',qwen:'通义千问',custom:'自定义端点',nanobanana:'Nano Banana Pro',ollama:'Ollama 本地模型'};
   document.getElementById('default-provider-name').textContent=names[provider]||provider;
-  document.getElementById('status-provider').textContent=provider==='openai'?'GPT-4o':provider==='anthropic'?'Claude':provider==='google'?'Gemini':provider==='deepseek'?'DeepSeek':provider==='qwen'?'Qwen':'Custom';
+  document.getElementById('status-provider').textContent=provider==='openai'?'GPT-4o':provider==='anthropic'?'Claude':provider==='google'?'Gemini':provider==='deepseek'?'DeepSeek':provider==='qwen'?'Qwen':provider==='nanobanana'?'Nano Banana':provider==='ollama'?'Ollama':'Custom';
   document.querySelectorAll('.provider-card').forEach(c=>c.classList.remove('active-provider'));
   const card=document.getElementById('provider-'+provider);
   if(card)card.classList.add('active-provider');
+  if(provider==='nanobanana' && !NanoBananaService.isConfigured()){
+    setTimeout(()=>openNanoBananaSettings(),500);
+  }
   showToast(`默认提供商已切换至 ${names[provider]}`,'success');
+}
+
+// Nano Banana Pro 配置管理
+function openNanoBananaSettings(){
+  document.getElementById('nanobanana-modal').classList.remove('hidden');
+  const key = NanoBananaService.getApiKey();
+  if(key) document.getElementById('nanobanana-api-key').value = key;
+  updateNanoBananaUI();
+}
+function closeNanoBananaSettings(){document.getElementById('nanobanana-modal').classList.add('hidden')}
+function saveNanoBananaSettings(){
+  const key = document.getElementById('nanobanana-api-key').value.trim();
+  if(!key){showToast('请输入 API Key','error');return}
+  NanoBananaService.setApiKey(key);
+  localStorage.setItem('nanobanana_resolution', nanobananaResolution);
+  localStorage.setItem('nanobanana_ratio', nanobananaRatio);
+  closeNanoBananaSettings();
+  updateNanoBananaUI();
+  showToast('✅ Nano Banana Pro 配置已保存！','success');
+}
+function selectNanoBananaRes(res, btn){
+  nanobananaResolution = res;
+  document.querySelectorAll('.nanobanana-res-btn').forEach(b=>b.classList.remove('selected'));
+  if(btn) btn.classList.add('selected');
+}
+function selectNanoBananaRatio(ratio, btn){
+  nanobananaRatio = ratio;
+  document.querySelectorAll('.nanobanana-ratio-btn').forEach(b=>b.classList.remove('selected'));
+  if(btn) btn.classList.add('selected');
+}
+function updateNanoBananaUI(){
+  const status = document.getElementById('nanobanana-status');
+  const statusText = document.getElementById('nanobanana-status-text');
+  if(NanoBananaService.isConfigured()){
+    status.className = 'status-dot status-online';
+    statusText.textContent = '已配置 · Gemini 3 Pro Image';
+  } else {
+    status.className = 'status-dot status-idle';
+    statusText.textContent = '未配置API Key · 点击设置';
+  }
+}
+async function testNanoBananaConnection(){
+  if(!NanoBananaService.isConfigured()){
+    showToast('⚠️ 请先配置 API Key','error');
+    openNanoBananaSettings();
+    return;
+  }
+  showToast('🔌 正在测试 Nano Banana Pro 连接...','info');
+  try {
+    const images = await NanoBananaService.generateImage('A simple test image: a tiny cute pink heart icon on white background, minimal', {aspectRatio:'1:1',imageSize:'1K'});
+    if(images.length>0){showToast('✅ Nano Banana Pro 连接成功！API 正常响应','success');updateNanoBananaUI();}
+  } catch(err){
+    let msg='连接失败';
+    if(err.message==='API_KEY_INVALID') msg='API Key 无效';
+    else if(err.message==='API_RATE_LIMIT') msg='API 频率限制';
+    showToast('❌ '+msg,'error');
+  }
 }
 
 // OpenClaw
@@ -129,16 +193,280 @@ function openOpenClawSession(session){
   showToast(`正在打开 ${session} 会话...`,'info');
 }
 
-// CREATE - AI generation
-function generateNailArt(){
+// CREATE - AI generation (真实 Nano Banana Pro API)
+let nanobananaResolution = localStorage.getItem('nanobanana_resolution') || '2K';
+let nanobananaRatio = localStorage.getItem('nanobanana_ratio') || '1:1';
+
+async function generateNailArt(){
   const prompt=document.getElementById('create-prompt').value;
   if(!prompt){showToast('请先描述你想要的甲面设计','error');return}
-  showToast('✨ AI 正在生成... OpenClaw 解析意图 → nanobanana 3.0 图案重构 → 甲型自适应形变 → 1200 DPI 渲染','info');
+  const resultGrid=document.getElementById('result-grid');
+  resultGrid.style.display='grid';
+  const loadingHTML = '<div class="result-item"><div class="loading-spinner"><div class="spinner"></div></div></div>';
+  resultGrid.innerHTML = loadingHTML.repeat(4);
   const preview=document.getElementById('prompt-preview-card');
   preview.style.display='block';
-  document.getElementById('optimized-prompt').textContent=`"${prompt}" — 经过 ${defaultProvider==='openai'?'GPT-4o':defaultProvider==='anthropic'?'Claude 3.5':defaultProvider==='google'?'Gemini 2.0':defaultProvider} 优化，分辨率 1200 DPI，甲型自适应拓扑形变`;
-  document.getElementById('prompt-tags').innerHTML='<span class="tag tag-accent">🎯 AI优化</span><span class="tag" style="background:rgba(180,76,255,0.12);color:var(--accent2)">94% 置信度</span><span class="tag tag-success">0.8s</span>';
-  document.getElementById('result-grid').style.display='grid';
+
+  // ====== Ollama 本地优化提示词 ======
+  let ollamaAvailable = false;
+  let enhancedPrompt = prompt;
+  
+  try {
+    ollamaAvailable = await OllamaService.checkAvailability();
+  } catch(e) { ollamaAvailable = false; }
+
+  if (ollamaAvailable) {
+    showToast('🦙 Ollama 本地模型正在优化提示词...','info');
+    document.getElementById('optimized-prompt').textContent = `"${prompt}" — 🦙 Ollama 优化中...`;
+    document.getElementById('prompt-tags').innerHTML='<span class="tag tag-accent">🦙 Ollama 本地</span><span class="tag tag-info">优化中...</span>';
+    
+    try {
+      const variantPrompts = await OllamaService.generateVariantPrompts(prompt, 4);
+      enhancedPrompt = variantPrompts[0];
+      
+      // 显示优化后的提示词
+      document.getElementById('optimized-prompt').textContent = `"${prompt}" → 🦙 Ollama 优化: "${enhancedPrompt.substring(0, 80)}..."`;
+      document.getElementById('prompt-tags').innerHTML = 
+        '<span class="tag tag-accent">🦙 Ollama 优化</span>' +
+        '<span class="tag tag-success">提示词已增强</span>' +
+        '<span class="tag tag-accent2">' + OllamaService.model + '</span>';
+      
+      // 显示变体提示词
+      console.log('[Ollama] 生成了 ' + variantPrompts.length + ' 个变体提示词:');
+      variantPrompts.forEach((p, i) => console.log(`  [${i+1}] ${p.substring(0, 80)}...`));
+      
+      showToast('✅ Ollama 提示词优化完成！','success');
+    } catch(e) {
+      console.warn('[Ollama] 优化失败，使用本地增强:', e.message);
+      enhancedPrompt = OllamaService.localEnhance(prompt);
+      document.getElementById('optimized-prompt').textContent = `"${prompt}" → 本地增强: "${enhancedPrompt}"`;
+      document.getElementById('prompt-tags').innerHTML = 
+        '<span class="tag tag-accent">📝 本地增强</span>' +
+        '<span class="tag tag-warning">Ollama 不可用</span>';
+    }
+  } else {
+    // Ollama 不可用，使用本地增强
+    enhancedPrompt = OllamaService.localEnhance(prompt);
+    document.getElementById('optimized-prompt').textContent = `"${prompt}" → 本地增强: "${enhancedPrompt}"`;
+    document.getElementById('prompt-tags').innerHTML = 
+      '<span class="tag tag-accent">📝 本地增强</span>' +
+      '<span class="tag tag-warning">Ollama 未运行</span>';
+  }
+
+  // ====== 尝试 Nano Banana Pro 生图 ======
+  if(defaultProvider==='nanobanana'){
+    if(!NanoBananaService.isConfigured()){
+      showToast('⚠️ 请先配置 Nano Banana Pro API Key（点击提供商页面的设置按钮）','error');
+      // 回退到 Canvas 本地生成
+      generateNailArtCanvas(enhancedPrompt);
+      return;
+    }
+    showToast('🍌 Nano Banana Pro 正在生成... Gemini 图片引擎 · '+nanobananaResolution+'分辨率','info');
+    try {
+      const images = await NanoBananaService.generateVariants(enhancedPrompt, 4, {aspectRatio:nanobananaRatio,imageSize:nanobananaResolution});
+      resultGrid.innerHTML = images.map((img,i)=>`
+        <div class="result-item" style="position:relative">
+          <img src="data:${img.mimeType};base64,${img.base64}" alt="AI Nail Design ${i+1}" loading="lazy">
+          <div class="download-overlay" onclick="downloadNailImage('${img.base64}','${img.mimeType}','nail-design-${i+1}')">⬇ 下载</div>
+        </div>
+      `).join('');
+      showToast(`✅ 成功生成 ${images.length} 张美甲设计！`,'success');
+      document.getElementById('prompt-tags').innerHTML='<span class="tag tag-accent">🍌 Nano Banana Pro</span><span class="tag tag-success">真实AI生图</span><span class="tag tag-accent2">'+images.length+'张</span>';
+    } catch(err){
+      console.error('[NanoBanana] 生图失败:', err);
+      let errMsg='生图失败';
+      let isNetworkError = false;
+      if(err.message==='API_KEY_MISSING') errMsg='请先配置 API Key';
+      else if(err.message==='API_KEY_INVALID') errMsg='API Key 无效，请检查';
+      else if(err.message.includes('API_RATE_LIMIT')) errMsg='图片生成配额已用完，请稍后重试';
+      else if(err.message.includes('fetch failed') || err.message.includes('NetworkError') || err.message.includes('Failed to fetch')) {
+        errMsg='Gemini API 网络不可达（需科学上网），已切换到 Canvas 本地渲染';
+        isNetworkError = true;
+      }
+      else if(err.message.startsWith('NO_IMAGE')) errMsg='提示词可能被安全过滤，请修改描述';
+      showToast('❌ '+errMsg,'error');
+      document.getElementById('prompt-tags').innerHTML='<span class="tag tag-accent">🍌 Nano Banana Pro</span><span class="tag tag-danger">生图失败</span>';
+      // 回退到 Canvas 本地生成
+      generateNailArtCanvas(enhancedPrompt, isNetworkError);
+    }
+  } else {
+    // 非 nanobanana provider，使用 Canvas 本地生成
+    generateNailArtCanvas(enhancedPrompt);
+  }
+}
+
+/**
+ * Canvas 本地渲染美甲图案（Gemini 不可用时的回退方案）
+ * 根据 Ollama 优化后的英文提示词，提取颜色/风格关键词生成图案
+ */
+function generateNailArtCanvas(prompt, isNetworkError = false) {
+  const resultGrid = document.getElementById('result-grid');
+  const colorMap = {
+    'pink': ['#FFB6C1', '#FF69B4', '#FF1493', '#DB7093'],
+    'red': ['#FF6B6B', '#DC143C', '#CD5C5C', '#B22222'],
+    'blue': ['#87CEEB', '#4169E1', '#1E90FF', '#000080'],
+    'purple': ['#DDA0DD', '#9370DB', '#8A2BE2', '#4B0082'],
+    'green': ['#90EE90', '#3CB371', '#2E8B57', '#006400'],
+    'gold': ['#FFD700', '#DAA520', '#B8860B', '#8B6914'],
+    'black': ['#555', '#333', '#1a1a2e', '#000'],
+    'white': ['#FFF', '#F5F5F5', '#E8E8E8', '#DCDCDC'],
+    'orange': ['#FFB347', '#FF8C00', '#FF6600', '#E65100'],
+    'silver': ['#E8E8E8', '#C0C0C0', '#A9A9A9', '#808080'],
+    'cyan': ['#00FFFF', '#00CED1', '#008B8B', '#006666'],
+    'yellow': ['#FFFACD', '#FFD700', '#FFA500', '#FF8C00'],
+  };
+
+  const styleKeywords = {
+    'gradient': true, 'ombre': true, 'glitter': true, 'metallic': true,
+    'matte': true, 'glossy': true, 'holographic': true, 'neon': true,
+    'pastel': true, 'dark': true, 'floral': true, 'geometric': true,
+    'marble': true, 'chrome': true, 'pearl': true, 'crystal': true,
+  };
+
+  // 从提示词中提取颜色
+  const promptLower = prompt.toLowerCase();
+  let colors = ['#FFB6C1', '#DDA0DD', '#87CEEB', '#FFD700']; // 默认柔和色
+  for (const [colorName, palette] of Object.entries(colorMap)) {
+    if (promptLower.includes(colorName)) {
+      colors = palette;
+      break;
+    }
+  }
+
+  // 检测风格特征
+  const hasGradient = styleKeywords.gradient && promptLower.includes('gradient');
+  const hasGlitter = styleKeywords.glitter && (promptLower.includes('glitter') || promptLower.includes('sparkle'));
+  const hasMetallic = styleKeywords.metallic && promptLower.includes('metallic');
+  const isDark = promptLower.includes('dark') || promptLower.includes('black');
+  const isPastel = promptLower.includes('pastel');
+
+  const bgColor = isDark ? '#1a1a2e' : '#faf8f5';
+
+  resultGrid.innerHTML = '';
+  resultGrid.style.display = 'grid';
+
+  for (let i = 0; i < 4; i++) {
+    const canvas = document.createElement('canvas');
+    canvas.width = 400;
+    canvas.height = 400;
+    const ctx = canvas.getContext('2d');
+
+    // 背景
+    ctx.fillStyle = bgColor;
+    ctx.fillRect(0, 0, 400, 400);
+
+    // 绘制5个指甲形状
+    const nailPositions = [
+      { x: 60, y: 180, w: 55, h: 120 },
+      { x: 130, y: 140, w: 55, h: 130 },
+      { x: 200, y: 120, w: 55, h: 140 },
+      { x: 270, y: 140, w: 55, h: 130 },
+      { x: 340, y: 180, w: 55, h: 120 },
+    ];
+
+    nailPositions.forEach((pos, idx) => {
+      const nailColor = colors[(i + idx) % colors.length];
+      
+      ctx.save();
+      ctx.beginPath();
+      const cx = pos.x + pos.w / 2;
+      const cy = pos.y + pos.h / 2;
+      // 指甲形状
+      const rx = pos.w / 2;
+      const ry = pos.h / 2;
+      ctx.ellipse(cx, cy, rx, ry, 0, Math.PI, 0);
+      ctx.closePath();
+
+      if (hasGradient) {
+        const grad = ctx.createLinearGradient(pos.x, pos.y, pos.x, pos.y + pos.h);
+        grad.addColorStop(0, colors[(idx) % colors.length]);
+        grad.addColorStop(0.5, colors[(idx + 1) % colors.length]);
+        grad.addColorStop(1, colors[(idx + 2) % colors.length]);
+        ctx.fillStyle = grad;
+      } else {
+        ctx.fillStyle = nailColor;
+      }
+      ctx.fill();
+
+      // 光泽高光
+      const highlightGrad = ctx.createLinearGradient(pos.x, pos.y, pos.x + pos.w / 3, pos.y);
+      highlightGrad.addColorStop(0, 'rgba(255,255,255,0.35)');
+      highlightGrad.addColorStop(1, 'rgba(255,255,255,0)');
+      ctx.fillStyle = highlightGrad;
+      ctx.fill();
+
+      // 闪光点
+      if (hasGlitter) {
+        for (let g = 0; g < 8; g++) {
+          const gx = pos.x + Math.random() * pos.w;
+          const gy = pos.y + Math.random() * pos.h;
+          ctx.beginPath();
+          ctx.arc(gx, gy, 1.5, 0, Math.PI * 2);
+          ctx.fillStyle = 'rgba(255,255,255,0.8)';
+          ctx.fill();
+        }
+      }
+
+      // 金属质感线条
+      if (hasMetallic) {
+        ctx.beginPath();
+        ctx.moveTo(pos.x + 5, pos.y + pos.h * 0.3);
+        ctx.lineTo(pos.x + pos.w - 5, pos.y + pos.h * 0.3);
+        ctx.strokeStyle = 'rgba(255,255,255,0.4)';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+      }
+
+      ctx.restore();
+
+      // 指甲轮廓
+      ctx.beginPath();
+      ctx.ellipse(cx, cy, rx, ry, 0, Math.PI, 0);
+      ctx.closePath();
+      ctx.strokeStyle = 'rgba(0,0,0,0.15)';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+    });
+
+    const dataUrl = canvas.toDataURL('image/png');
+    const variantLabel = ['主设计', '变体 A', '变体 B', '变体 C'][i];
+    
+    resultGrid.innerHTML += `
+      <div class="result-item" style="position:relative">
+        <img src="${dataUrl}" alt="Canvas Nail Design ${i+1}" loading="lazy">
+        <div class="download-overlay" onclick="downloadCanvasImage('result-item-canvas-${i}')">⬇ 下载</div>
+      </div>
+    `;
+    canvas.id = 'result-item-canvas-' + i;
+    canvas.style.display = 'none';
+    document.getElementById('result-grid').appendChild(canvas);
+  }
+
+  const engineLabel = isNetworkError ? 'Canvas 本地渲染（网络受限）' : 'Canvas 本地渲染';
+  document.getElementById('prompt-tags').innerHTML = 
+    '<span class="tag tag-accent">🎨 ' + engineLabel + '</span>' +
+    '<span class="tag tag-success">Ollama 提示词优化</span>' +
+    '<span class="tag tag-accent2">4张变体</span>';
+  showToast('🎨 Canvas 本地渲染完成！基于 Ollama 优化的提示词','success');
+}
+
+function downloadCanvasImage(canvasId) {
+  const canvas = document.getElementById(canvasId);
+  if (!canvas) return;
+  const link = document.createElement('a');
+  link.href = canvas.toDataURL('image/png');
+  link.download = 'nail-design.png';
+  link.click();
+  showToast('📥 图片已下载','success');
+}
+
+function downloadNailImage(base64, mimeType, filename) {
+  const ext = mimeType.split('/')[1] || 'png';
+  const link = document.createElement('a');
+  link.href = `data:${mimeType};base64,${base64}`;
+  link.download = `${filename}.${ext}`;
+  link.click();
+  showToast('📥 图片已下载','success');
 }
 
 function startVoiceInput(){showToast('🎤 语音输入已激活，请说话...','info');setTimeout(()=>{document.getElementById('create-prompt').value='赛博朋克风格，深蓝色微光渐变，蝴蝶翅膀纹理，金属质感';showToast('语音识别完成！','success')},2000)}
@@ -199,6 +527,57 @@ function updateStatusTime(){document.getElementById('status-time').textContent=n
 // KEYBOARD SHORTCUTS
 document.addEventListener('keydown',(e)=>{if(!isLoggedIn)return;const mod=e.metaKey||e.ctrlKey;if(mod&&e.key==='k'){e.preventDefault();openCommandPalette();return}if(mod&&e.key==='\\'){e.preventDefault();toggleSidebar();return}if(mod&&e.key===','){e.preventDefault();navigateTo('settings');return}if(mod&&e.key>='1'&&e.key<='8'){e.preventDefault();const pages=['create','device','community','payment','agents','providers','openclaw','admin'];navigateTo(pages[parseInt(e.key)-1])}});
 document.addEventListener('click',(e)=>{const p=document.getElementById('command-palette');if(!p.classList.contains('hidden')&&!p.contains(e.target))closeCommandPalette()});
+
+// OLLAMA
+async function testOllamaConnection(){
+  const statusDot = document.getElementById('ollama-status');
+  const statusText = document.getElementById('ollama-status-text');
+  statusDot.className = 'status-dot status-loading';
+  statusText.textContent = '检测中...';
+  
+  try {
+    const available = await OllamaService.checkAvailability();
+    if (available) {
+      statusDot.className = 'status-dot status-online';
+      const models = await OllamaService.listModels();
+      const modelNames = models.map(m => m.name.split(':')[0]).join(', ');
+      statusText.textContent = `已连接 · ${models.length} 个模型 (${modelNames.substring(0, 40)}...)`;
+      showToast(`🦙 Ollama 已连接！${models.length} 个模型可用`,'success');
+    } else {
+      statusDot.className = 'status-dot status-offline';
+      statusText.textContent = '未连接 · 请确认 ollama serve 已启动';
+      showToast('⚠️ Ollama 服务未运行，请执行: ollama serve','error');
+    }
+  } catch(e) {
+    statusDot.className = 'status-dot status-offline';
+    statusText.textContent = '连接失败: ' + e.message;
+    showToast('❌ Ollama 连接失败','error');
+  }
+}
+
+async function refreshOllamaModels(){
+  const statusText = document.getElementById('ollama-status-text');
+  try {
+    const models = await OllamaService.listModels();
+    if (models.length > 0) {
+      const modelList = models.map(m => `${m.name} (${m.details?.parameter_size || '?'})`).join(', ');
+      statusText.textContent = `已连接 · ${models.length} 个模型`;
+      showToast(`📋 可用模型: ${modelList}`,'info');
+    } else {
+      statusText.textContent = '已连接 · 无本地模型';
+      showToast('⚠️ 无可用模型，请拉取: ollama pull <model>','warning');
+    }
+  } catch(e) {
+    showToast('❌ 无法获取模型列表','error');
+  }
+}
+
+// 页面加载时自动检测 Ollama
+setTimeout(() => {
+  if (typeof OllamaService !== 'undefined') {
+    testOllamaConnection();
+  }
+}, 1000);
 
 // INIT
 updatePaymentSummary();

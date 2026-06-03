@@ -112,6 +112,8 @@ html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFo
 .tag-warning{background:rgba(255,171,0,0.12);color:var(--warning)}
 .tag-danger{background:rgba(255,82,82,0.12);color:var(--danger)}
 .tag-gold{background:rgba(255,215,0,0.15);color:#ffd700}
+.tag-accent3{background:rgba(255,107,157,0.12);color:var(--accent3)}
+.tag-info{background:rgba(68,138,255,0.12);color:var(--info)}
 /* PAGE TABS */
 .page-tabs{display:flex;gap:4px;background:var(--bg-tertiary);border-radius:var(--radius);padding:3px;margin-bottom:20px;width:fit-content}
 .page-tab{padding:7px 16px;border-radius:8px;cursor:pointer;font-size:12px;font-weight:600;color:var(--text-secondary);transition:var(--transition);border:none;background:none}
@@ -175,6 +177,14 @@ html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFo
 /* SKILL CARDS */
 .skill-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}
 .skill-card{background:var(--bg-secondary);border:1px solid var(--border);border-radius:var(--radius);padding:16px;transition:var(--transition)}.skill-card:hover{border-color:var(--border-light)}
+.skill-card.anygen{border-color:rgba(255,215,0,0.2);background:linear-gradient(135deg,rgba(255,215,0,0.04),var(--bg-secondary))}.skill-card.anygen:hover{border-color:rgba(255,215,0,0.4)}
+.skill-card.heygen{border-color:rgba(0,230,118,0.2);background:linear-gradient(135deg,rgba(0,230,118,0.04),var(--bg-secondary))}.skill-card.heygen:hover{border-color:rgba(0,230,118,0.4)}
+.skill-use-panel{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);display:flex;align-items:center;justify-content:center;z-index:1000;backdrop-filter:blur(4px)}.skill-use-panel.hidden{display:none}
+.skill-use-card{background:var(--bg-primary);border:1px solid var(--border);border-radius:var(--radius-lg);padding:24px;width:90%;max-width:600px;max-height:80vh;overflow-y:auto;box-shadow:var(--shadow)}
+.skill-use-card h3{margin:0 0 4px;font-size:18px}.skill-use-card .subtitle{color:var(--text-tertiary);font-size:12px;margin-bottom:16px}
+.skill-config-modal{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);display:flex;align-items:center;justify-content:center;z-index:1001;backdrop-filter:blur(4px)}.skill-config-modal.hidden{display:none}
+.skill-config-card{background:var(--bg-primary);border:1px solid var(--border);border-radius:var(--radius-lg);padding:24px;width:90%;max-width:460px;box-shadow:var(--shadow)}
+.skill-config-card h3{margin:0 0 8px}.skill-config-card .api-status{font-size:12px;margin-bottom:12px}
 .skill-header{display:flex;align-items:center;gap:10px;margin-bottom:10px}.skill-icon{font-size:28px}.skill-name{font-weight:700;font-size:14px}.skill-version{font-size:11px;color:var(--text-tertiary)}.skill-desc{font-size:12px;color:var(--text-secondary);margin-bottom:10px;line-height:1.5}.skill-tags{margin-bottom:10px;display:flex;flex-wrap:wrap;gap:4px}.skill-actions{display:flex;align-items:center;justify-content:space-between}
 /* TOGGLE SWITCH */
 .toggle-switch{position:relative;display:inline-block;width:40px;height:22px}.toggle-switch input{opacity:0;width:0;height:0}.toggle-slider{position:absolute;cursor:pointer;inset:0;background:var(--bg-tertiary);border-radius:22px;transition:var(--transition)}.toggle-slider:before{content:'';position:absolute;height:16px;width:16px;left:3px;bottom:3px;background:#fff;border-radius:50%;transition:var(--transition)}.toggle-switch input:checked+.toggle-slider{background:var(--accent)}.toggle-switch input:checked+.toggle-slider:before{transform:translateX(18px)}
@@ -226,18 +236,125 @@ html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFo
 .processing-animation{text-align:center;padding:30px}.processing-animation .spinner{margin:0 auto 16px}
 /* RESPONSIVE */
 @media(max-width:1024px){.create-layout{grid-template-columns:1fr}.stat-grid{grid-template-columns:repeat(2,1fr)}.provider-grid{grid-template-columns:1fr}}
+/* QUICK ADD SKILLS */
+.quick-add-section{margin-top:12px;padding:12px 14px;background:var(--bg-tertiary);border:1px solid var(--border);border-radius:var(--radius)}
+.quick-add-title{font-size:12px;font-weight:600;color:var(--text-secondary);margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.quick-add-grid{display:flex;flex-wrap:wrap;gap:8px}
+.quick-add-chip{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:20px;font-size:12px;cursor:pointer;border:1px solid var(--border);background:var(--bg-primary);transition:var(--transition);white-space:nowrap}
+.quick-add-chip:hover{border-color:var(--accent);background:rgba(99,102,241,0.08)}
+.quick-add-chip.installed{border-color:var(--success);background:rgba(34,197,94,0.08);cursor:default}
+.quick-add-chip.installed .chip-status{color:var(--success)}
+.quick-add-chip .chip-icon{font-size:16px}
+.quick-add-chip .chip-status{font-size:10px;color:var(--text-tertiary)}
+.quick-add-all-btn{display:inline-flex;align-items:center;gap:6px;padding:8px 18px;border-radius:20px;font-size:13px;font-weight:600;cursor:pointer;border:none;background:linear-gradient(135deg,var(--accent),#8b5cf6);color:#fff;transition:var(--transition);margin-top:8px}
+.quick-add-all-btn:hover{transform:translateY(-1px);box-shadow:0 4px 16px rgba(99,102,241,0.35)}
+.quick-add-all-btn:disabled{opacity:0.5;cursor:not-allowed;transform:none}
+.quick-add-all-btn .btn-spinner{display:none;width:14px;height:14px;border:2px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite}
+.quick-add-all-btn.loading .btn-spinner{display:inline-block}
+.quick-add-all-btn.loading .btn-text{display:none}
+.quick-add-provider-badge{font-size:10px;padding:1px 6px;border-radius:10px;margin-left:2px}
+.badge-creatok{background:rgba(139,92,246,0.15);color:#a78bfa}
+.badge-clipcat{background:rgba(59,130,246,0.15);color:#60a5fa}
+.badge-nano{background:rgba(180,76,255,0.15);color:#c084fc}
+.quick-add-toast{position:fixed;top:80px;right:24px;z-index:9999;padding:12px 20px;border-radius:var(--radius);font-size:13px;font-weight:500;animation:slideInRight .3s ease;box-shadow:0 8px 32px rgba(0,0,0,0.3)}
+.quick-add-toast.success{background:#065f46;color:#6ee7b7;border:1px solid #059669}
+.quick-add-toast.info{background:#1e3a5f;color:#93c5fd;border:1px solid #2563eb}
+@keyframes slideInRight{from{transform:translateX(100%);opacity:0}to{transform:translateX(0);opacity:1}}
 
 </style>
+<style>
+/* i18n styles */
+/* AI NAILS Desktop v4.0 — Language Selector Styles */
+.lang-selector {
+  position: relative;
+  -webkit-app-region: no-drag;
+  z-index: 100;
+}
+.lang-current {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--text-secondary);
+  transition: var(--transition);
+  white-space: nowrap;
+}
+.lang-current:hover {
+  border-color: var(--accent);
+  color: var(--text-primary);
+}
+.lang-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 4px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  max-height: 320px;
+  overflow-y: auto;
+  min-width: 180px;
+  z-index: 200;
+}
+.lang-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--text-secondary);
+  transition: var(--transition);
+}
+.lang-option:hover {
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+}
+.lang-option span:first-child {
+  font-size: 16px;
+}
+
+/* RTL support */
+html[dir="rtl"] .sidebar-collapse-btn span,
+html[dir="rtl"] .sidebar-nav-item,
+html[dir="rtl"] .sidebar-section-title {
+  text-align: right;
+}
+html[dir="rtl"] #sidebar {
+  border-right: none;
+  border-left: 1px solid var(--border);
+}
+html[dir="rtl"] .lang-dropdown {
+  right: auto;
+  left: 0;
+}
+
+/* Nano Banana Pro — 生图结果 */
+.result-item img{width:100%;height:100%;object-fit:cover;border-radius:var(--radius-sm)}
+.result-item .loading-spinner{display:flex;align-items:center;justify-content:center;height:100%;font-size:24px;color:var(--accent)}
+.result-item .error-msg{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:var(--danger);font-size:12px;text-align:center;padding:8px}
+.result-item .download-overlay{position:absolute;top:6px;right:6px;background:rgba(0,0,0,0.6);border-radius:4px;padding:2px 6px;font-size:10px;color:var(--accent);cursor:pointer;opacity:0;transition:opacity 0.2s}
+.result-item:hover .download-overlay{opacity:1}
+.nanobanana-res-btn.selected,.nanobanana-ratio-btn.selected{background:rgba(0,240,255,0.15)!important;border-color:var(--accent)!important;color:var(--accent)!important}
+
+</style>
+
 </head>
 <body>
 
 <!-- AUTH OVERLAY -->
 <div id="auth-overlay">
 <div class="auth-container">
-<div class="auth-logo"><h1>AI NAILS</h1><p>智能美甲创作平台 · 登录以开始创作</p></div>
+<div class="auth-logo"><h1>AI NAILS</h1><p data-i18n="auth.subtitle">智能美甲创作平台 · 登录以开始创作</p></div>
 <div class="auth-tabs">
-<div class="auth-tab active" onclick="switchAuthTab('login')">登录</div>
-<div class="auth-tab" onclick="switchAuthTab('register')">注册</div>
+<div class="auth-tab active" onclick="switchAuthTab('login')" data-i18n="auth.login">登录</div>
+<div class="auth-tab" onclick="switchAuthTab('register')" data-i18n="auth.register">注册</div>
 </div>
 <div id="auth-login-card">
 <div class="auth-mode-tabs">
@@ -288,6 +405,8 @@ html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFo
 <span class="titlebar-logo">🦞 AI NAILS</span>
 <span class="titlebar-divider"></span>
 <span id="titlebar-page-name">创作舱 · TALK TO CREATE</span>
+<span style="flex:1"></span>
+<div id="lang-selector-container"></div>
 </div>
 <div id="main-content">
 <div id="sidebar">
@@ -295,28 +414,28 @@ html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFo
 <div class="user-avatar">👤</div>
 <div class="sidebar-user-info"><div id="sidebar-username">未登录</div><div class="sidebar-role">创作者</div></div>
 </div>
-<div class="sidebar-section-title">导航</div>
+<div class="sidebar-section-title" data-i18n="nav.section_nav">导航</div>
 <nav class="sidebar-nav">
-<button class="sidebar-nav-item active" data-page="create" onclick="navigateTo('create')"><span class="nav-icon">🎨</span><span class="sidebar-label">创作舱</span><span class="sidebar-badge badge-hot">AI</span></button>
-<button class="sidebar-nav-item" data-page="device" onclick="navigateTo('device')"><span class="nav-icon">🦞</span><span class="sidebar-label">龙虾智控</span><span class="sidebar-badge badge-new">设备</span></button>
-<button class="sidebar-nav-item" data-page="community" onclick="navigateTo('community')"><span class="nav-icon">🌍</span><span class="sidebar-label">社区</span></button>
-<button class="sidebar-nav-item" data-page="payment" onclick="navigateTo('payment')"><span class="nav-icon">💳</span><span class="sidebar-label">支付中心</span></button>
-<div class="sidebar-section-title">AI 引擎</div>
-<button class="sidebar-nav-item" data-page="agents" onclick="navigateTo('agents')"><span class="nav-icon">🧠</span><span class="sidebar-label">智能体集群</span><span class="sidebar-badge badge-pro">Skill</span></button>
-<button class="sidebar-nav-item" data-page="providers" onclick="navigateTo('providers')"><span class="nav-icon">🔌</span><span class="sidebar-label">模型提供商</span></button>
-<button class="sidebar-nav-item" data-page="openclaw" onclick="navigateTo('openclaw')"><span class="nav-icon">🦞</span><span class="sidebar-label">OpenClaw</span></button>
-<div class="sidebar-section-title">管理</div>
-<button class="sidebar-nav-item" data-page="admin" onclick="navigateTo('admin')"><span class="nav-icon">⚙</span><span class="sidebar-label">管理后台</span></button>
-<button class="sidebar-nav-item" data-page="settings" onclick="navigateTo('settings')"><span class="nav-icon">🔧</span><span class="sidebar-label">设置</span></button>
+<button class="sidebar-nav-item active" data-page="create" onclick="navigateTo('create')"><span class="nav-icon">🎨</span><span class="sidebar-label" data-i18n="nav.create">创作舱</span><span class="sidebar-badge badge-hot" data-i18n="tag.ai">AI</span></button>
+<button class="sidebar-nav-item" data-page="device" onclick="navigateTo('device')"><span class="nav-icon">🦞</span><span class="sidebar-label" data-i18n="nav.device">龙虾智控</span><span class="sidebar-badge badge-new" data-i18n="tag.new">设备</span></button>
+<button class="sidebar-nav-item" data-page="community" onclick="navigateTo('community')"><span class="nav-icon">🌍</span><span class="sidebar-label" data-i18n="nav.community">社区</span></button>
+<button class="sidebar-nav-item" data-page="payment" onclick="navigateTo('payment')"><span class="nav-icon">💳</span><span class="sidebar-label" data-i18n="nav.payment">支付中心</span></button>
+<div class="sidebar-section-title" data-i18n="nav.section_ai">AI 引擎</div>
+<button class="sidebar-nav-item" data-page="agents" onclick="navigateTo('agents')"><span class="nav-icon">🧠</span><span class="sidebar-label" data-i18n="nav.agents">智能体集群</span><span class="sidebar-badge badge-pro" data-i18n="tag.pro">Skill</span></button>
+<button class="sidebar-nav-item" data-page="providers" onclick="navigateTo('providers')"><span class="nav-icon">🔌</span><span class="sidebar-label" data-i18n="nav.providers">模型提供商</span></button>
+<button class="sidebar-nav-item" data-page="openclaw" onclick="navigateTo('openclaw')"><span class="nav-icon">🦞</span><span class="sidebar-label" data-i18n="nav.openclaw">OpenClaw</span></button>
+<div class="sidebar-section-title" data-i18n="nav.section_admin">管理</div>
+<button class="sidebar-nav-item" data-page="admin" onclick="navigateTo('admin')"><span class="nav-icon">⚙</span><span class="sidebar-label" data-i18n="nav.admin">管理后台</span></button>
+<button class="sidebar-nav-item" data-page="settings" onclick="navigateTo('settings')"><span class="nav-icon">🔧</span><span class="sidebar-label" data-i18n="nav.settings">设置</span></button>
 </nav>
-<div class="sidebar-collapse-btn" onclick="toggleSidebar()"><span>◀ 收起菜单</span></div>
+<div class="sidebar-collapse-btn" onclick="toggleSidebar()"><span data-i18n="sidebar.collapse">◀ 收起菜单</span></div>
 </div>
 <div class="content-panel">
 <!-- PAGE: CREATE -->
 <div class="content-page active" id="page-create">
 <div class="create-layout">
 <div class="create-main">
-<div class="card"><div class="card-header"><div><div class="card-title">✨ AI 甲面创作</div><div class="card-subtitle">用自然语言描述你想要的甲面设计</div></div></div>
+<div class="card"><div class="card-header"><div><div class="card-title" data-i18n="create.title">✨ AI 甲面创作</div><div class="card-subtitle" data-i18n="create.subtitle">用自然语言描述你想要的甲面设计</div></div></div>
 <div class="create-prompt-area"><textarea id="create-prompt" placeholder="例如：赛博朋克风格，深蓝色微光渐变，蝴蝶翅膀纹理，金属质感……"></textarea></div>
 <div class="prompt-toolbar">
 <button class="btn btn-secondary btn-sm" onclick="showStylePicker()">🎭 风格库</button>
@@ -327,6 +446,17 @@ html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFo
 <div id="upload-preview" class="upload-preview" style="display:none"><img id="upload-preview-img" src="" alt="参考图"><button class="remove-btn" onclick="clearImageUpload()">✕</button></div>
 <input type="file" id="image-upload-input" accept="image/*" style="display:none" onchange="handleImageUpload(event)">
 <div id="prompt-preview-card" class="prompt-preview" style="display:none"><div class="prompt-preview-label">AI 优化提示词</div><div class="prompt-preview-text" id="optimized-prompt"></div><div style="margin-top:8px" id="prompt-tags"></div></div>
+<!-- 一键添加生图 Skill -->
+<div class="quick-add-section" id="quick-add-section">
+<div class="quick-add-title">⚡ 一键添加生图 Skill</div>
+<div class="quick-add-grid" id="quick-add-grid">
+<div class="quick-add-chip" data-skill-id="creatok-image" onclick="quickAddImageSkill('creatok-image')"><span class="chip-icon">🖼️</span>CreatOK 生图<span class="chip-status">未安装</span></div>
+<div class="quick-add-chip" data-skill-id="clipcat-image" onclick="quickAddImageSkill('clipcat-image')"><span class="chip-icon">🎨</span>Clipcat 生图<span class="chip-status">未安装</span></div>
+<div class="quick-add-chip" data-skill-id="nanobanana-pro" onclick="quickAddImageSkill('nanobanana-pro')"><span class="chip-icon">🍌</span>Nano Banana<span class="chip-status">未安装</span></div>
+<div class="quick-add-chip" data-skill-id="creatok-video" onclick="quickAddImageSkill('creatok-video')"><span class="chip-icon">🎥</span>CreatOK 生视频<span class="chip-status">未安装</span></div>
+</div>
+<button class="quick-add-all-btn" id="quick-add-all-btn" onclick="quickAddAllImageSkills()"><span class="btn-text">🚀 一键安装全部生图 Skill</span><span class="btn-spinner"></span></button>
+</div>
 </div>
 <div id="result-grid" class="result-grid" style="display:none">
 <div class="result-item">💅</div><div class="result-item">🌸</div><div class="result-item">🦋</div><div class="result-item">✨</div><div class="result-item">🌊</div><div class="result-item">🔥</div>
@@ -420,7 +550,7 @@ html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFo
 <!-- PAGE: PAYMENT -->
 <div class="content-page" id="page-payment">
 <div class="page-tabs"><button class="page-tab active" onclick="switchPayScene('recharge')">账户充值</button><button class="page-tab" onclick="switchPayScene('subscribe')">套餐订阅</button><button class="page-tab" onclick="switchPayScene('device')">设备购买</button></div>
-<h3 id="payment-title" style="margin-bottom:16px">账户充值</h3>
+<h3 id="payment-title" style="margin-bottom:16px" data-i18n="payment.recharge">账户充值</h3>
 <div id="pay-scene-recharge">
 <div class="amount-grid">
 <button class="amount-btn selected" onclick="selectAmount(1000,this)">¥1,000</button>
@@ -457,27 +587,38 @@ html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFo
 <div class="page-tabs"><button class="page-tab active" onclick="switchAgentTab('installed')">已安装</button><button class="page-tab" onclick="switchAgentTab('hub')">Hub 市场</button><button class="page-tab" onclick="switchAgentTab('custom')">自定义添加</button><button class="page-tab" onclick="switchAgentTab('chat')">对话创建</button></div>
 <div id="agent-installed">
 <div class="skill-grid" id="installed-skills-grid">
+<div class="skill-card anygen"><div class="skill-header"><span class="skill-icon">📊</span><div><div class="skill-name">AnyGen · PPT 生成</div><div class="skill-version">v2.0.0 · ANYGEN</div></div></div><div class="skill-desc">AI 驱动一键生成专业PPT/幻灯片，支持企业汇报、产品发布</div><div class="skill-tags"><span class="tag tag-gold">AnyGen</span><span class="tag tag-accent">PPT</span></div><div class="skill-actions"><button class="btn btn-xs btn-secondary" onclick="openAnyGenConfig()">⚙</button><button class="btn btn-xs btn-primary" onclick="openAnyGenUsePanel('slide')">▶ 使用</button><label class="toggle-switch"><input type="checkbox" checked onchange="handleSkillToggle('anygen-slide',this.checked)"><span class="toggle-slider"></span></label></div></div>
+<div class="skill-card anygen"><div class="skill-header"><span class="skill-icon">📄</span><div><div class="skill-name">AnyGen · 文档生成</div><div class="skill-version">v2.0.0 · ANYGEN</div></div></div><div class="skill-desc">AI 生成Word文档、PRD、白皮书、技术方案，支持多格式导出</div><div class="skill-tags"><span class="tag tag-gold">AnyGen</span><span class="tag tag-accent">文档</span></div><div class="skill-actions"><button class="btn btn-xs btn-secondary" onclick="openAnyGenConfig()">⚙</button><button class="btn btn-xs btn-primary" onclick="openAnyGenUsePanel('doc')">▶ 使用</button><label class="toggle-switch"><input type="checkbox" checked onchange="handleSkillToggle('anygen-doc',this.checked)"><span class="toggle-slider"></span></label></div></div>
+<div class="skill-card anygen"><div class="skill-header"><span class="skill-icon">📐</span><div><div class="skill-name">AnyGen · 图表生成</div><div class="skill-version">v2.0.0 · ANYGEN</div></div></div><div class="skill-desc">智能生成架构图、流程图、思维导图、ER图、UML图</div><div class="skill-tags"><span class="tag tag-gold">AnyGen</span><span class="tag tag-accent">图表</span></div><div class="skill-actions"><button class="btn btn-xs btn-secondary" onclick="openAnyGenConfig()">⚙</button><button class="btn btn-xs btn-primary" onclick="openAnyGenUsePanel('smart_draw')">▶ 使用</button><label class="toggle-switch"><input type="checkbox" checked onchange="handleSkillToggle('anygen-diagram',this.checked)"><span class="toggle-slider"></span></label></div></div>
+<div class="skill-card heygen"><div class="skill-header"><span class="skill-icon">🎬</span><div><div class="skill-name">HeyGen · 数字人视频</div><div class="skill-version">v2.0.0 · HEYGEN</div></div></div><div class="skill-desc">AI 数字人播报视频生成，适合产品介绍、营销推广、培训内容</div><div class="skill-tags"><span class="tag tag-success">HeyGen</span><span class="tag tag-accent">视频</span></div><div class="skill-actions"><button class="btn btn-xs btn-secondary" onclick="openHeyGenConfig()">⚙</button><button class="btn btn-xs btn-primary" onclick="openHeyGenUsePanel('video')">▶ 使用</button><label class="toggle-switch"><input type="checkbox" checked onchange="handleSkillToggle('heygen-video',this.checked)"><span class="toggle-slider"></span></label></div></div>
+<div class="skill-card heygen"><div class="skill-header"><span class="skill-icon">🧑‍💼</span><div><div class="skill-name">HeyGen · 定制数字人</div><div class="skill-version">v2.0.0 · HEYGEN</div></div></div><div class="skill-desc">创建品牌专属 AI 数字人形象，支持真人克隆和虚拟角色</div><div class="skill-tags"><span class="tag tag-success">HeyGen</span><span class="tag tag-accent2">数字人</span></div><div class="skill-actions"><button class="btn btn-xs btn-secondary" onclick="openHeyGenConfig()">⚙</button><button class="btn btn-xs btn-primary" onclick="openHeyGenUsePanel('avatar')">▶ 使用</button><label class="toggle-switch"><input type="checkbox" onchange="handleSkillToggle('heygen-avatar',this.checked)"><span class="toggle-slider"></span></label></div></div>
 <div class="skill-card"><div class="skill-header"><span class="skill-icon">🎨</span><div><div class="skill-name">Nano Banana Pro 逆向生图</div><div class="skill-version">v2.1.0 · 官方</div></div></div><div class="skill-desc">将参考图转换为JSON提示符，支持改主体/换背景/风格迁移</div><div class="skill-tags"><span class="tag tag-accent">图像</span><span class="tag tag-accent">Gemini</span></div><div class="skill-actions"><button class="btn btn-xs btn-secondary" onclick="showToast('Skill 配置已打开','info')">⚙</button><label class="toggle-switch"><input type="checkbox" checked><span class="toggle-slider"></span></label></div></div>
-<div class="skill-card"><div class="skill-header"><span class="skill-icon">🧠</span><div><div class="skill-name">AI 交叉审查</div><div class="skill-version">v1.3.0 · 官方</div></div></div><div class="skill-desc">使用 @steipete/oracle CLI 进行双模型审查，调试/重构/设计检查</div><div class="skill-tags"><span class="tag tag-success">代码</span><span class="tag tag-accent2">审查</span></div><div class="skill-actions"><button class="btn btn-xs btn-secondary" onclick="showToast('Skill 配置已打开','info')">⚙</button><label class="toggle-switch"><input type="checkbox" checked><span class="toggle-slider"></span></label></div></div>
-<div class="skill-card"><div class="skill-header"><span class="skill-icon">📊</span><div><div class="skill-name">Excel 文件处理</div><div class="skill-version">v1.0.0 · 官方</div></div></div><div class="skill-desc">创建、读取、分析、编辑Excel/电子表格文件，零格式损失</div><div class="skill-tags"><span class="tag tag-warning">表格</span><span class="tag tag-accent">数据处理</span></div><div class="skill-actions"><button class="btn btn-xs btn-secondary" onclick="showToast('Skill 配置已打开','info')">⚙</button><label class="toggle-switch"><input type="checkbox"><span class="toggle-slider"></span></label></div></div>
 </div>
 </div>
 <div id="agent-hub" class="hidden">
-<div class="skill-grid">
-<div class="skill-card"><div class="skill-header"><span class="skill-icon">🎭</span><div><div class="skill-name">AI 绘图 · Nano Banana</div><div class="skill-version">v3.0 · 官方</div></div></div><div class="skill-desc">Gemini 3 Pro Image 驱动，支持文生图+图生图，1K/2K/4K分辨率</div><div class="skill-tags"><span class="tag tag-gold">热门</span><span class="tag tag-accent">图像生成</span></div><div class="skill-actions"><button class="btn btn-xs btn-primary" onclick="installSkillFromHub('AI绘图 Nano Banana')">安装</button></div></div>
-<div class="skill-card"><div class="skill-header"><span class="skill-icon">🌸</span><div><div class="skill-name">中国风刺绣美甲</div><div class="skill-version">v1.0 · 社区</div></div></div><div class="skill-desc">一键生成传统刺绣纹样美甲设计，支持多种绣法风格</div><div class="skill-tags"><span class="tag tag-gold">新品</span><span class="tag tag-accent2">美甲</span></div><div class="skill-actions"><button class="btn btn-xs btn-primary" onclick="installSkillFromHub('中国风刺绣美甲')">安装</button></div></div>
-<div class="skill-card"><div class="skill-header"><span class="skill-icon">🔍</span><div><div class="skill-name">Deep Research</div><div class="skill-version">v2.0 · 官方</div></div></div><div class="skill-desc">结构化深度研究工作流，支持学术/基准/技术选型/市场分析</div><div class="skill-tags"><span class="tag tag-accent">研究</span><span class="tag tag-success">WebSearch</span></div><div class="skill-actions"><button class="btn btn-xs btn-primary" onclick="installSkillFromHub('Deep Research')">安装</button></div></div>
-<div class="skill-card"><div class="skill-header"><span class="skill-icon">🦞</span><div><div class="skill-name">4CHAD 交易</div><div class="skill-version">v1.2 · 社区</div></div></div><div class="skill-desc">在 4chad.xyz 上启动Meme代币、交易Solana资产、领取创作者费用</div><div class="skill-tags"><span class="tag tag-warning">Solana</span><span class="tag tag-gold">DeFi</span></div><div class="skill-actions"><button class="btn btn-xs btn-primary" onclick="installSkillFromHub('4CHAD 交易')">安装</button></div></div>
+<div class="skill-grid" id="skill-hub-grid">
+<div class="skill-card anygen"><div class="skill-header"><span class="skill-icon">📊</span><div><div class="skill-name">AnyGen · PPT 生成</div><div class="skill-version">v2.0.0 · <span class="tag tag-gold" style="font-size:10px">ANYGEN</span></div></div></div><div class="skill-desc">AI 驱动一键生成专业PPT/幻灯片，支持企业汇报、产品发布、教学课件</div><div class="skill-tags"><span class="tag tag-gold">AnyGen</span><span class="tag tag-accent">PPT</span><span class="tag tag-accent">内容生成</span></div><div class="skill-actions"><button class="btn btn-xs btn-danger" onclick="togglePresetSkill('anygen-slide',false);renderSkillHub();renderInstalledSkills();showToast('已卸载','info')">卸载</button></div></div>
+<div class="skill-card anygen"><div class="skill-header"><span class="skill-icon">📄</span><div><div class="skill-name">AnyGen · 文档生成</div><div class="skill-version">v2.0.0 · <span class="tag tag-gold" style="font-size:10px">ANYGEN</span></div></div></div><div class="skill-desc">AI 生成Word文档、PRD、白皮书、技术方案，支持多格式导出</div><div class="skill-tags"><span class="tag tag-gold">AnyGen</span><span class="tag tag-accent">文档</span></div><div class="skill-actions"><button class="btn btn-xs btn-danger" onclick="togglePresetSkill('anygen-doc',false);renderSkillHub();renderInstalledSkills();showToast('已卸载','info')">卸载</button></div></div>
+<div class="skill-card anygen"><div class="skill-header"><span class="skill-icon">📐</span><div><div class="skill-name">AnyGen · 图表生成</div><div class="skill-version">v2.0.0 · <span class="tag tag-gold" style="font-size:10px">ANYGEN</span></div></div></div><div class="skill-desc">智能生成架构图、流程图、思维导图、ER图、UML图，专业/手绘风格</div><div class="skill-tags"><span class="tag tag-gold">AnyGen</span><span class="tag tag-accent">图表</span><span class="tag tag-accent">架构</span></div><div class="skill-actions"><button class="btn btn-xs btn-danger" onclick="togglePresetSkill('anygen-diagram',false);renderSkillHub();renderInstalledSkills();showToast('已卸载','info')">卸载</button></div></div>
+<div class="skill-card anygen"><div class="skill-header"><span class="skill-icon">🌐</span><div><div class="skill-name">AnyGen · 网站生成</div><div class="skill-version">v2.0.0 · <span class="tag tag-gold" style="font-size:10px">ANYGEN</span></div></div></div><div class="skill-desc">AI 快速生成落地页、官网、产品展示页，支持响应式设计</div><div class="skill-tags"><span class="tag tag-gold">AnyGen</span><span class="tag tag-accent">网站</span></div><div class="skill-actions"><button class="btn btn-xs btn-primary" onclick="togglePresetSkill('anygen-website',true);renderSkillHub();renderInstalledSkills();showToast('已安装','success')">安装</button></div></div>
+<div class="skill-card anygen"><div class="skill-header"><span class="skill-icon">🔬</span><div><div class="skill-name">AnyGen · 深度研究</div><div class="skill-version">v2.0.0 · <span class="tag tag-gold" style="font-size:10px">ANYGEN</span></div></div></div><div class="skill-desc">AI 驱动的市场调研、竞品分析、行业报告生成</div><div class="skill-tags"><span class="tag tag-gold">AnyGen</span><span class="tag tag-accent">研究</span></div><div class="skill-actions"><button class="btn btn-xs btn-primary" onclick="togglePresetSkill('anygen-research',true);renderSkillHub();renderInstalledSkills();showToast('已安装','success')">安装</button></div></div>
+<div class="skill-card anygen"><div class="skill-header"><span class="skill-icon">💰</span><div><div class="skill-name">AnyGen · 金融分析</div><div class="skill-version">v2.0.0 · <span class="tag tag-gold" style="font-size:10px">ANYGEN</span></div></div></div><div class="skill-desc">AI 财报分析、估值模型、金融研究报告生成</div><div class="skill-tags"><span class="tag tag-gold">AnyGen</span><span class="tag tag-accent">金融</span></div><div class="skill-actions"><button class="btn btn-xs btn-primary" onclick="togglePresetSkill('anygen-finance',true);renderSkillHub();renderInstalledSkills();showToast('已安装','success')">安装</button></div></div>
+<div class="skill-card anygen"><div class="skill-header"><span class="skill-icon">📈</span><div><div class="skill-name">AnyGen · 数据分析</div><div class="skill-version">v2.0.0 · <span class="tag tag-gold" style="font-size:10px">ANYGEN</span></div></div></div><div class="skill-desc">AI 数据分析与可视化，CSV/Excel数据自动生成图表和洞察</div><div class="skill-tags"><span class="tag tag-gold">AnyGen</span><span class="tag tag-accent">数据</span></div><div class="skill-actions"><button class="btn btn-xs btn-primary" onclick="togglePresetSkill('anygen-data',true);renderSkillHub();renderInstalledSkills();showToast('已安装','success')">安装</button></div></div>
+<div class="skill-card anygen"><div class="skill-header"><span class="skill-icon">🎨</span><div><div class="skill-name">AnyGen · AI 设计</div><div class="skill-version">v2.0.0 · <span class="tag tag-gold" style="font-size:10px">ANYGEN</span></div></div></div><div class="skill-desc">AI 图像设计、海报生成、Banner制作、社交媒体素材</div><div class="skill-tags"><span class="tag tag-gold">AnyGen</span><span class="tag tag-accent">设计</span></div><div class="skill-actions"><button class="btn btn-xs btn-primary" onclick="togglePresetSkill('anygen-designer',true);renderSkillHub();renderInstalledSkills();showToast('已安装','success')">安装</button></div></div>
+<div class="skill-card heygen"><div class="skill-header"><span class="skill-icon">🎬</span><div><div class="skill-name">HeyGen · 数字人视频</div><div class="skill-version">v2.0.0 · <span class="tag tag-success" style="font-size:10px">HEYGEN</span></div></div></div><div class="skill-desc">AI 数字人播报视频生成，适合产品介绍、营销推广、培训内容</div><div class="skill-tags"><span class="tag tag-success">HeyGen</span><span class="tag tag-accent">视频</span></div><div class="skill-actions"><button class="btn btn-xs btn-danger" onclick="togglePresetSkill('heygen-video',false);renderSkillHub();renderInstalledSkills();showToast('已卸载','info')">卸载</button></div></div>
+<div class="skill-card heygen"><div class="skill-header"><span class="skill-icon">🧑‍💼</span><div><div class="skill-name">HeyGen · 定制数字人</div><div class="skill-version">v2.0.0 · <span class="tag tag-success" style="font-size:10px">HEYGEN</span></div></div></div><div class="skill-desc">创建品牌专属 AI 数字人形象，支持真人克隆和虚拟角色</div><div class="skill-tags"><span class="tag tag-success">HeyGen</span><span class="tag tag-accent2">数字人</span></div><div class="skill-actions"><button class="btn btn-xs btn-primary" onclick="togglePresetSkill('heygen-avatar',true);renderSkillHub();renderInstalledSkills();showToast('已安装','success')">安装</button></div></div>
+<div class="skill-card heygen"><div class="skill-header"><span class="skill-icon">🌍</span><div><div class="skill-name">HeyGen · 视频翻译</div><div class="skill-version">v2.0.0 · <span class="tag tag-success" style="font-size:10px">HEYGEN</span></div></div></div><div class="skill-desc">视频多语言配音与字幕生成，助力全球市场推广</div><div class="skill-tags"><span class="tag tag-success">HeyGen</span><span class="tag tag-accent">翻译</span></div><div class="skill-actions"><button class="btn btn-xs btn-primary" onclick="togglePresetSkill('heygen-translate',true);renderSkillHub();renderInstalledSkills();showToast('已安装','success')">安装</button></div></div>
+<div class="skill-card heygen"><div class="skill-header"><span class="skill-icon">🔴</span><div><div class="skill-name">HeyGen · 流式数字人</div><div class="skill-version">v2.0.0 · <span class="tag tag-success" style="font-size:10px">HEYGEN</span></div></div></div><div class="skill-desc">实时交互式 AI 数字人，适用于在线客服、直播带货场景</div><div class="skill-tags"><span class="tag tag-success">HeyGen</span><span class="tag tag-accent">直播</span></div><div class="skill-actions"><button class="btn btn-xs btn-primary" onclick="togglePresetSkill('heygen-streaming',true);renderSkillHub();renderInstalledSkills();showToast('已安装','success')">安装</button></div></div>
 </div>
 </div>
 <div id="agent-custom" class="hidden">
-<div class="card"><div class="card-title">添加自定义 Skill</div><div class="card-subtitle">手动配置 Skill 参数，支持从 clawskill.hub 导入</div>
+<div class="card"><div class="card-title">添加自定义 Skill</div><div class="card-subtitle">手动配置 Skill 参数，支持 AnyGen/HeyGen/自定义服务商</div>
 <div class="form-row"><div class="form-group"><label>Skill 名称 *</label><input class="form-input" id="custom-skill-name" placeholder="例如：我的美甲风格助手"></div><div class="form-group"><label>版本号</label><input class="form-input" id="custom-skill-version" placeholder="v1.0.0"></div></div>
 <div class="form-group"><label>描述 *</label><input class="form-input" id="custom-skill-desc" placeholder="简要描述这个 Skill 的功能"></div>
-<div class="form-group"><label>标签</label><input class="form-input" id="custom-skill-tags" placeholder="美甲, AI, 设计（逗号分隔）"></div>
+<div class="form-row"><div class="form-group"><label>标签</label><input class="form-input" id="custom-skill-tags" placeholder="美甲, AI, 设计（逗号分隔）"></div><div class="form-group"><label>服务商</label><select class="form-input" id="custom-skill-provider"><option value="custom">自定义</option><option value="anygen">AnyGen</option><option value="heygen">HeyGen</option><option value="creatok">CreatOK</option><option value="clipcat">Clipcat</option><option value="revor">Revor</option><option value="nanobanana">NanoBanana</option></select></div></div>
 <div class="form-group"><label>System Prompt</label><textarea class="form-input" id="custom-skill-prompt" rows="3" placeholder="输入 Skill 的系统提示词..."></textarea></div>
 <div class="form-group"><label>触发词</label><input class="form-input" id="custom-skill-triggers" placeholder="触发此 Skill 的关键词（逗号分隔）"></div>
-<button class="btn btn-primary btn-sm" onclick="addCustomSkill()">添加 Skill</button>
+<button class="btn btn-primary btn-sm" onclick="addCustomSkillV2()">添加 Skill</button>
 </div>
 </div>
 <div id="agent-chat" class="hidden">
@@ -509,22 +650,42 @@ html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFo
 <div class="provider-card" id="provider-google" onclick="setDefaultProvider('google')">
 <div class="provider-header"><span class="provider-icon">🌐</span><div><div class="provider-name">Google Gemini</div><div class="provider-model">Gemini 2.0 Flash · Gemini 2.0 Pro</div></div></div>
 <div class="provider-desc">多模态能力强，原生支持图像/视频/音频理解，超快推理速度</div>
-<div class="provider-status"><span class="status-dot status-online"></span>已连接 · API Key: AIza••••••••kL7m</div>
+<div class="provider-status"><span class="status-dot status-online"></span>已连接 · API Key: ********</div>
 </div>
 <div class="provider-card" id="provider-deepseek" onclick="setDefaultProvider('deepseek')">
 <div class="provider-header"><span class="provider-icon">🔍</span><div><div class="provider-name">DeepSeek</div><div class="provider-model">DeepSeek-V3 · DeepSeek-R1</div></div></div>
 <div class="provider-desc">国产开源大模型，性价比极高，R1推理模型能力出色</div>
-<div class="provider-status"><span class="status-dot status-online"></span>已连接 · API Key: sk-ds-••••••••pQ4w</div>
+<div class="provider-status"><span class="status-dot status-online"></span>已连接 · API Key: ********</div>
 </div>
 <div class="provider-card" id="provider-qwen" onclick="setDefaultProvider('qwen')">
 <div class="provider-header"><span class="provider-icon">☁</span><div><div class="provider-name">通义千问</div><div class="provider-model">Qwen-Max · Qwen2.5-72B</div></div></div>
 <div class="provider-desc">阿里云通义大模型，中文理解能力强，支持多轮对话和代码生成</div>
 <div class="provider-status"><span class="status-dot status-online"></span>已连接 · API Key: sk-qw-••••••••rT6n</div>
 </div>
+<div class="provider-card" id="provider-ollama" onclick="setDefaultProvider('ollama')" style="border:1px solid rgba(52,211,153,0.3);background:linear-gradient(135deg,rgba(52,211,153,0.06),rgba(16,185,129,0.06))">
+<div class="provider-badge badge-hot" style="background:#10b981">本地</div>
+<div class="provider-header"><span class="provider-icon">🦙</span><div><div class="provider-name">Ollama 本地模型</div><div class="provider-model">GPT-OSS 20B · Qwen3-Coder 480B</div></div></div>
+<div class="provider-desc">本地大模型，用于提示词优化和设计意图理解。运行在 http://localhost:11434</div>
+<div class="provider-status"><span id="ollama-status" class="status-dot status-idle"></span><span id="ollama-status-text">检测中...</span></div>
+<div class="provider-actions" style="margin-top:8px;display:flex;gap:6px">
+<button class="btn btn-xs btn-accent" onclick="event.stopPropagation();testOllamaConnection()" style="background:#10b981;border-color:#10b981">🔌 检测连接</button>
+<button class="btn btn-xs btn-secondary" onclick="event.stopPropagation();refreshOllamaModels()">📋 刷新模型</button>
+</div>
+</div>
 <div class="provider-card" id="provider-custom" onclick="setDefaultProvider('custom')">
 <div class="provider-header"><span class="provider-icon">⚡</span><div><div class="provider-name">自定义端点</div><div class="provider-model">OpenAI 兼容 API · 自部署模型</div></div></div>
 <div class="provider-desc">连接任何兼容 OpenAI API 格式的自部署模型或第三方服务</div>
 <div class="provider-status"><span class="status-dot status-idle"></span>未配置 · 点击配置自定义端点</div>
+</div>
+<div class="provider-card" id="provider-nanobanana" onclick="setDefaultProvider('nanobanana')" style="border:1px solid rgba(0,240,255,0.3);background:linear-gradient(135deg,rgba(0,240,255,0.06),rgba(180,76,255,0.06))">
+<div class="provider-badge badge-hot" style="background:var(--accent3)">生图</div>
+<div class="provider-header"><span class="provider-icon">🍌</span><div><div class="provider-name">Nano Banana Pro</div><div class="provider-model">Gemini 3 Pro Image · 真实AI生图引擎</div></div></div>
+<div class="provider-desc">开源免费AI图像生成，支持文生图/图生图/风格迁移，1K/2K/4K分辨率</div>
+<div class="provider-status"><span id="nanobanana-status" class="status-dot status-idle"></span><span id="nanobanana-status-text">未配置API Key · 点击设置</span></div>
+<div class="provider-actions" style="margin-top:8px;display:flex;gap:6px">
+<button class="btn btn-xs btn-accent" onclick="event.stopPropagation();openNanoBananaSettings()">🔑 设置API Key</button>
+<button class="btn btn-xs btn-secondary" onclick="event.stopPropagation();testNanoBananaConnection()">🔌 测试连接</button>
+</div>
 </div>
 </div>
 </div>
@@ -586,16 +747,26 @@ html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFo
 </div>
 <div id="statusbar">
 <div class="status-left">
-<span class="status-item"><span style="color:var(--success)">●</span> 系统正常</span>
-<span class="status-item">🦞 OpenClaw 已连接</span>
+<span class="status-item"><span style="color:var(--success)">●</span> <span data-i18n="status.normal">系统正常</span></span>
+<span class="status-item">🦞 <span data-i18n="status.openclaw">OpenClaw 已连接</span></span>
 <span class="status-item">AI 模型: <span id="status-provider" style="color:var(--accent)">GPT-4o</span></span>
 </div>
 <div class="status-right">
-<span class="status-item">⌘K 命令面板</span>
+<span class="status-item" data-i18n="status.cmd_palette">⌘K 命令面板</span>
 <span class="status-item" id="status-time">21:24</span>
 </div>
 </div>
 </div>
+
+<!-- NANO BANANA API KEY MODAL -->
+<div class="modal-overlay hidden" id="nanobanana-modal"><div class="modal" style="width:480px">
+<h3>🍌 Nano Banana Pro API 配置</h3>
+<p style="font-size:12px;color:var(--text-secondary);margin-bottom:16px">使用 Gemini 3 Pro Image 模型进行真实AI图像生成。免费获取 API Key: <a href="https://aistudio.google.com/apikey" target="_blank" style="color:var(--accent)">Google AI Studio</a></p>
+<div class="form-group"><label>API Key</label><div class="input-row"><input class="form-input" id="nanobanana-api-key" type="password" placeholder="输入你的 Gemini API Key..."><button class="btn btn-secondary btn-sm" onclick="togglePassword('nanobanana-api-key')" style="white-space:nowrap">👁</button></div></div>
+<div class="form-group"><label>默认分辨率</label><div style="display:flex;gap:8px"><button class="btn btn-xs btn-secondary nanobanana-res-btn selected" onclick="selectNanoBananaRes('2K',this)">2K</button><button class="btn btn-xs btn-secondary nanobanana-res-btn" onclick="selectNanoBananaRes('1K',this)">1K</button><button class="btn btn-xs btn-secondary nanobanana-res-btn" onclick="selectNanoBananaRes('4K',this)">4K</button></div></div>
+<div class="form-group"><label>默认宽高比</label><div style="display:flex;gap:6px;flex-wrap:wrap"><button class="btn btn-xs btn-secondary nanobanana-ratio-btn selected" onclick="selectNanoBananaRatio('1:1',this)">1:1</button><button class="btn btn-xs btn-secondary nanobanana-ratio-btn" onclick="selectNanoBananaRatio('3:4',this)">3:4</button><button class="btn btn-xs btn-secondary nanobanana-ratio-btn" onclick="selectNanoBananaRatio('9:16',this)">9:16</button><button class="btn btn-xs btn-secondary nanobanana-ratio-btn" onclick="selectNanoBananaRatio('16:9',this)">16:9</button></div></div>
+<div class="modal-actions"><button class="btn btn-secondary btn-sm" onclick="closeNanoBananaSettings()">取消</button><button class="btn btn-primary btn-sm" onclick="saveNanoBananaSettings()">💾 保存配置</button></div>
+</div></div>
 
 <!-- FORGOT PASSWORD MODAL -->
 <div class="modal-overlay hidden" id="forgot-modal"><div class="modal"><h3>找回密码</h3><p>请输入您的注册邮箱，我们将发送重置链接。</p><div class="form-group"><input class="form-input" id="forgot-email" type="email" placeholder="your@email.com"></div><div class="modal-actions"><button class="btn btn-secondary btn-sm" onclick="closeForgotModal()">取消</button><button class="btn btn-primary btn-sm" onclick="handleForgotPassword()">发送重置链接</button></div></div></div>
@@ -639,6 +810,11 @@ let payScene = 'recharge', selectedAmount = 1000, selectedCurrency = 'CNY';
 let selectedPayment = 'wechat', selectedSubTier = 'pro', cmdSelectedIdx = 0;
 let defaultProvider = 'openai';
 
+// 预置 API Keys（从环境变量注入）
+window.__ANYGEN_API_KEY__ = 'sk-ag-4bKlpcgdrZ1ScIKQ3_YvhyCMsP9j23KsxbwMJgeTNYUg6JjrBnovgXsWroPPqbS2yCBTfIJ5zLEA-7EdZupnUw';
+window.__HEYGEN_API_KEY__ = 'sk_V2_hgu_kv96HGuWU6i_6MTJwWuKVHuRaGfSRUTSPtsqcQwl1aAc';
+window.__CLIPCAT_API_KEY__ = 'sk-Ycd5iEn_F3ZJ9vyW3msbmYqWQD6XckfV';
+
 // AUTH
 function switchAuthTab(tab){authMode=tab;document.getElementById('auth-login-card').classList.toggle('hidden',tab!=='login');document.getElementById('auth-register-card').classList.toggle('hidden',tab!=='register')}
 function switchAuthLoginMode(mode){authLoginMode=mode;document.querySelectorAll('#auth-login-card .auth-tab').forEach(el=>{el.classList.toggle('active',(mode==='email'&&el.textContent.includes('邮箱'))||(mode==='phone'&&el.textContent.includes('手机')))});document.getElementById('auth-login-email').classList.toggle('hidden',mode!=='email');document.getElementById('auth-login-phone').classList.toggle('hidden',mode!=='phone')}
@@ -649,7 +825,7 @@ function checkAuthPasswordStrength(){const p=document.getElementById('auth-reg-p
 function handleAppLogin(){
   if(authLoginMode==='email'){const e=document.getElementById('auth-login-email-input').value,p=document.getElementById('auth-login-password').value;if(!e||!p){showToast('请填写完整信息','error');return}if(!e.includes('@')){showToast('请输入有效的邮箱地址','error');return}}
   else{const p=document.getElementById('auth-login-phone-input').value,c=document.getElementById('auth-login-code').value;if(!p||!c){showToast('请填写完整信息','error');return}if(c.length!==6){showToast('请输入6位验证码','error');return}}
-  showToast('登录成功！欢迎回来 👋','success');enterDesktop();
+  showToast(i18n.t('toast.login_success'),'success');enterDesktop();
 }
 function socialAppLogin(pr){const n={wechat:'微信',apple:'Apple ID',google:'Google'};showToast(`正在跳转${n[pr]}授权...`,'info');setTimeout(()=>{showToast(`${n[pr]}登录成功！`,'success');enterDesktop()},1500)}
 function biometricAppLogin(){showToast('正在验证生物识别...','info');setTimeout(()=>{showToast('面容识别成功！👋','success');enterDesktop()},1200)}
@@ -657,13 +833,13 @@ function handleAppRegister(){
   if(!document.getElementById('auth-reg-agree').checked){showToast('请先同意服务条款和隐私政策','error');return}
   if(authRegMode==='email'){const u=document.getElementById('auth-reg-username').value,em=document.getElementById('auth-reg-email').value,pw=document.getElementById('auth-reg-password').value;if(!u||!em||!pw){showToast('请填写完整信息','error');return}if(pw.length<8){showToast('密码至少8个字符','error');return}document.getElementById('sidebar-username').textContent=u}
   else{const ph=document.getElementById('auth-reg-phone-input').value,co=document.getElementById('auth-reg-code').value,pw=document.getElementById('auth-reg-phone-password').value;if(!ph||!co||!pw){showToast('请填写完整信息','error');return}document.getElementById('sidebar-username').textContent='用户 '+ph.slice(-4)}
-  const inv=document.getElementById('auth-reg-invite').value;showToast('注册成功！'+(inv?' 邀请码已确认！':''),'success');setTimeout(()=>enterDesktop(),1000)
+  const inv=document.getElementById('auth-reg-invite').value;showToast(i18n.t('toast.register_success')+(inv?' 邀请码已确认！':''),'success');setTimeout(()=>enterDesktop(),1000)
 }
 function sendAuthLoginCode(){const b=document.getElementById('auth-login-code-btn');if(b.disabled)return;showToast('验证码已发送','success');startCountdown(b)}
 function sendAuthRegCode(){const b=document.getElementById('auth-reg-code-btn');if(b.disabled)return;showToast('验证码已发送','success');startCountdown(b)}
 function startCountdown(btn){let s=60;btn.disabled=true;btn.textContent=`${s}s后重试`;const t=setInterval(()=>{s--;btn.textContent=`${s}s后重试`;if(s<=0){clearInterval(t);btn.disabled=false;btn.textContent='获取验证码'}},1000)}
 function enterDesktop(){isLoggedIn=true;document.getElementById('auth-overlay').classList.add('hidden');document.getElementById('desktop-shell').classList.add('visible');updateStatusTime();setInterval(updateStatusTime,30000)}
-function handleLogout(){isLoggedIn=false;document.getElementById('desktop-shell').classList.remove('visible');document.getElementById('auth-overlay').classList.remove('hidden');switchAuthTab('login');navigateTo('create');showToast('已安全退出','info')}
+function handleLogout(){isLoggedIn=false;document.getElementById('desktop-shell').classList.remove('visible');document.getElementById('auth-overlay').classList.remove('hidden');switchAuthTab('login');navigateTo('create');showToast(i18n.t('toast.logout'),'info')}
 
 // NAVIGATION
 function navigateTo(page){
@@ -671,8 +847,7 @@ function navigateTo(page){
   document.querySelectorAll('.sidebar-nav-item').forEach(el=>el.classList.toggle('active',el.dataset.page===page));
   document.querySelectorAll('.content-page').forEach(el=>el.classList.remove('active'));
   const t=document.getElementById('page-'+page);if(t)t.classList.add('active');
-  const names={create:'创作舱 · TALK TO CREATE',device:'龙虾智控 · 设备仪表盘',community:'全球创作者社区',payment:'支付中心',agents:'智能体集群 · Skill 管理',providers:'AI 大模型提供商',openclaw:'OpenClaw 控制台',admin:'管理后台',settings:'设置'};
-  document.getElementById('titlebar-page-name').textContent=names[page]||page;
+  document.getElementById('titlebar-page-name').textContent=i18n.t('page.'+page)||page;
 }
 function toggleSidebar(){sidebarCollapsed=!sidebarCollapsed;document.getElementById('sidebar').classList.toggle('collapsed',sidebarCollapsed);document.querySelector('.sidebar-collapse-btn').textContent=sidebarCollapsed?'▶':'◀ 收起菜单'}
 
@@ -689,14 +864,14 @@ function updatePaymentSummary(){const sym={CNY:'¥',USD:'$',EUR:'€',USDT:'₮'
 function customAmount(){const a=prompt('输入自定义金额 (¥):','200');if(a&&!isNaN(a)&&Number(a)>0){selectedAmount=Number(a);document.querySelectorAll('#pay-scene-recharge .amount-btn').forEach(el=>el.classList.remove('selected'));updatePaymentSummary()}}
 function handlePay(){const p=document.getElementById('processing-modal');p.classList.remove('hidden');setTimeout(()=>{p.classList.add('hidden');if(selectedPayment==='wechat'||selectedPayment==='alipay'){document.getElementById('qr-method-name').textContent=selectedPayment==='wechat'?'微信':'支付宝';const s={CNY:'¥',USD:'$',EUR:'€'}[selectedCurrency]||'¥';document.getElementById('qr-amount').textContent=s+selectedAmount.toLocaleString();document.getElementById('qr-modal').classList.remove('hidden');setTimeout(()=>{document.getElementById('qr-modal').classList.add('hidden');showPaymentSuccess()},3000)}else if(selectedPayment==='crypto'){showToast('钱包地址: 0xAI_Nails_7F3a...9B2c（已复制）','info');setTimeout(()=>showPaymentSuccess(),2000)}else if(selectedPayment==='bank'){showToast('银行信息已复制','info');setTimeout(()=>showPaymentSuccess(),2000)}else setTimeout(()=>showPaymentSuccess(),1500)},2000)}
 function showPaymentSuccess(){const s={CNY:'¥',USD:'$',EUR:'€'}[selectedCurrency]||'¥';document.getElementById('success-msg').textContent='已成功支付 '+s+selectedAmount.toLocaleString();document.getElementById('success-modal').classList.remove('hidden')}
-function closeSuccessModal(){document.getElementById('success-modal').classList.add('hidden');showToast('支付完成！','success')}
+function closeSuccessModal(){document.getElementById('success-modal').classList.add('hidden');showToast(i18n.t('toast.payment_success'),'success')}
 function closeQrModal(){document.getElementById('qr-modal').classList.add('hidden');showToast('支付已取消','error')}
 
 // COMMUNITY
 function switchCommunityTab(tab){document.querySelectorAll('#page-community .page-tab').forEach((el,i)=>{el.classList.toggle('active',['feed','market','leaderboard'][i]===tab)});document.getElementById('comm-feed').classList.toggle('hidden',tab!=='feed');document.getElementById('comm-market').classList.toggle('hidden',tab!=='market');document.getElementById('comm-leaderboard').classList.toggle('hidden',tab!=='leaderboard')}
 
 // AGENTS
-function switchAgentTab(tab){document.querySelectorAll('#page-agents .page-tab').forEach((el,i)=>{el.classList.toggle('active',['installed','hub','custom','chat'][i]===tab)});document.getElementById('agent-installed').classList.toggle('hidden',tab!=='installed');document.getElementById('agent-hub').classList.toggle('hidden',tab!=='hub');document.getElementById('agent-custom').classList.toggle('hidden',tab!=='custom');document.getElementById('agent-chat').classList.toggle('hidden',tab!=='chat')}
+function switchAgentTab(tab){document.querySelectorAll('#page-agents .page-tab').forEach((el,i)=>{el.classList.toggle('active',['installed','hub','custom','chat'][i]===tab)});document.getElementById('agent-installed').classList.toggle('hidden',tab!=='installed');document.getElementById('agent-hub').classList.toggle('hidden',tab!=='hub');document.getElementById('agent-custom').classList.toggle('hidden',tab!=='custom');document.getElementById('agent-chat').classList.toggle('hidden',tab!=='chat');if(tab==='hub'&&typeof renderSkillHub==='function')renderSkillHub();if(tab==='installed'&&typeof renderInstalledSkills==='function')renderInstalledSkills()}
 
 function installSkillFromHub(name){
   showToast(`正在从 ClawSkill Hub 安装 "${name}"...`,'info');
@@ -711,6 +886,8 @@ function installSkillFromHub(name){
 }
 
 function addCustomSkill(){
+  // 代理到新版本
+  if(typeof addCustomSkillV2 === 'function'){ addCustomSkillV2(); return; }
   const name=document.getElementById('custom-skill-name').value;
   const version=document.getElementById('custom-skill-version').value||'v1.0.0';
   const desc=document.getElementById('custom-skill-desc').value;
@@ -743,13 +920,91 @@ function sendSkillChat(){
 // AI PROVIDERS
 function setDefaultProvider(provider){
   defaultProvider=provider;
-  const names={openai:'OpenAI',anthropic:'Anthropic',google:'Google Gemini',deepseek:'DeepSeek',qwen:'通义千问',custom:'自定义端点'};
+  const names={openai:'OpenAI',anthropic:'Anthropic',google:'Google Gemini',deepseek:'DeepSeek',qwen:'通义千问',custom:'自定义端点',nanobanana:'Nano Banana Pro'};
   document.getElementById('default-provider-name').textContent=names[provider]||provider;
-  document.getElementById('status-provider').textContent=provider==='openai'?'GPT-4o':provider==='anthropic'?'Claude':provider==='google'?'Gemini':provider==='deepseek'?'DeepSeek':provider==='qwen'?'Qwen':'Custom';
+  document.getElementById('status-provider').textContent=provider==='openai'?'GPT-4o':provider==='anthropic'?'Claude':provider==='google'?'Gemini':provider==='deepseek'?'DeepSeek':provider==='qwen'?'Qwen':provider==='nanobanana'?'Nano Banana':'Custom';
   document.querySelectorAll('.provider-card').forEach(c=>c.classList.remove('active-provider'));
   const card=document.getElementById('provider-'+provider);
   if(card)card.classList.add('active-provider');
+  
+  // 如果切换到 nanobanana 且未配置，自动弹出设置
+  if(provider==='nanobanana' && !NanoBananaService.isConfigured()){
+    setTimeout(()=>openNanoBananaSettings(),500);
+  }
+  
   showToast(`默认提供商已切换至 ${names[provider]}`,'success');
+}
+
+// Nano Banana Pro 配置管理
+function openNanoBananaSettings(){
+  document.getElementById('nanobanana-modal').classList.remove('hidden');
+  const key = NanoBananaService.getApiKey();
+  if(key) document.getElementById('nanobanana-api-key').value = key;
+  updateNanoBananaUI();
+}
+
+function closeNanoBananaSettings(){
+  document.getElementById('nanobanana-modal').classList.add('hidden');
+}
+
+function saveNanoBananaSettings(){
+  const key = document.getElementById('nanobanana-api-key').value.trim();
+  if(!key){showToast('请输入 API Key','error');return}
+  NanoBananaService.setApiKey(key);
+  localStorage.setItem('nanobanana_resolution', nanobananaResolution);
+  localStorage.setItem('nanobanana_ratio', nanobananaRatio);
+  closeNanoBananaSettings();
+  updateNanoBananaUI();
+  showToast('✅ Nano Banana Pro 配置已保存！','success');
+}
+
+function selectNanoBananaRes(res, btn){
+  nanobananaResolution = res;
+  document.querySelectorAll('.nanobanana-res-btn').forEach(b=>b.classList.remove('selected'));
+  if(btn) btn.classList.add('selected');
+}
+
+function selectNanoBananaRatio(ratio, btn){
+  nanobananaRatio = ratio;
+  document.querySelectorAll('.nanobanana-ratio-btn').forEach(b=>b.classList.remove('selected'));
+  if(btn) btn.classList.add('selected');
+}
+
+function updateNanoBananaUI(){
+  const status = document.getElementById('nanobanana-status');
+  const statusText = document.getElementById('nanobanana-status-text');
+  if(NanoBananaService.isConfigured()){
+    status.className = 'status-dot status-online';
+    statusText.textContent = '已配置 · Gemini 3 Pro Image';
+  } else {
+    status.className = 'status-dot status-idle';
+    statusText.textContent = '未配置API Key · 点击设置';
+  }
+}
+
+async function testNanoBananaConnection(){
+  if(!NanoBananaService.isConfigured()){
+    showToast('⚠️ 请先配置 API Key','error');
+    openNanoBananaSettings();
+    return;
+  }
+  showToast('🔌 正在测试 Nano Banana Pro 连接...','info');
+  try {
+    const images = await NanoBananaService.generateImage('A simple test image: a tiny cute pink heart icon on white background, minimal', {
+      aspectRatio: '1:1',
+      imageSize: '1K'
+    });
+    if(images.length > 0){
+      showToast('✅ Nano Banana Pro 连接成功！API 正常响应','success');
+      updateNanoBananaUI();
+    }
+  } catch(err){
+    console.error('[NanoBanana] 测试失败:', err);
+    let msg = '连接失败';
+    if(err.message==='API_KEY_INVALID') msg = 'API Key 无效';
+    else if(err.message==='API_RATE_LIMIT') msg = 'API 频率限制';
+    showToast('❌ '+msg,'error');
+  }
 }
 
 // OpenClaw
@@ -762,16 +1017,84 @@ function openOpenClawSession(session){
   showToast(`正在打开 ${session} 会话...`,'info');
 }
 
-// CREATE - AI generation
-function generateNailArt(){
+// CREATE - AI generation (真实 Nano Banana Pro API)
+let nanobananaResolution = localStorage.getItem('nanobanana_resolution') || '2K';
+let nanobananaRatio = localStorage.getItem('nanobanana_ratio') || '1:1';
+
+async function generateNailArt(){
   const prompt=document.getElementById('create-prompt').value;
   if(!prompt){showToast('请先描述你想要的甲面设计','error');return}
-  showToast('✨ AI 正在生成... OpenClaw 解析意图 → nanobanana 3.0 图案重构 → 甲型自适应形变 → 1200 DPI 渲染','info');
+  
+  const resultGrid=document.getElementById('result-grid');
+  resultGrid.style.display='grid';
+  
+  // 显示加载状态
+  const loadingHTML = '<div class="result-item"><div class="loading-spinner"><div class="spinner"></div></div></div>';
+  resultGrid.innerHTML = loadingHTML.repeat(4);
+  
   const preview=document.getElementById('prompt-preview-card');
   preview.style.display='block';
-  document.getElementById('optimized-prompt').textContent=`"${prompt}" — 经过 ${defaultProvider==='openai'?'GPT-4o':defaultProvider==='anthropic'?'Claude 3.5':defaultProvider==='google'?'Gemini 2.0':defaultProvider} 优化，分辨率 1200 DPI，甲型自适应拓扑形变`;
-  document.getElementById('prompt-tags').innerHTML='<span class="tag tag-accent">🎯 AI优化</span><span class="tag" style="background:rgba(180,76,255,0.12);color:var(--accent2)">94% 置信度</span><span class="tag tag-success">0.8s</span>';
-  document.getElementById('result-grid').style.display='grid';
+  
+  // 根据当前 provider 决定行为
+  if(defaultProvider==='nanobanana'){
+    // 使用 Nano Banana Pro 真实生图
+    if(!NanoBananaService.isConfigured()){
+      showToast('⚠️ 请先配置 Nano Banana Pro API Key（点击提供商页面的设置按钮）','error');
+      resultGrid.innerHTML='<div class="result-item">💅</div><div class="result-item">🌸</div><div class="result-item">🦋</div><div class="result-item">✨</div><div class="result-item">🌊</div><div class="result-item">🔥</div>';
+      return;
+    }
+    
+    showToast('🍌 Nano Banana Pro 正在生成... Gemini 3 Pro Image 引擎 · '+nanobananaResolution+'分辨率','info');
+    document.getElementById('optimized-prompt').textContent=`"${prompt}" — Nano Banana Pro (Gemini 3 Pro Image) · ${nanobananaResolution} · ${nanobananaRatio}`;
+    document.getElementById('prompt-tags').innerHTML='<span class="tag tag-accent">🍌 Nano Banana Pro</span><span class="tag" style="background:rgba(180,76,255,0.12);color:var(--accent2)">Gemini 3 Pro Image</span><span class="tag tag-success">真实生图</span>';
+    
+    try {
+      const images = await NanoBananaService.generateVariants(prompt, 4, {
+        aspectRatio: nanobananaRatio,
+        imageSize: nanobananaResolution
+      });
+      
+      // 渲染真实图片
+      resultGrid.innerHTML = images.map((img, i) => `
+        <div class="result-item" style="position:relative">
+          <img src="data:${img.mimeType};base64,${img.base64}" alt="AI Nail Design ${i+1}" loading="lazy">
+          <div class="download-overlay" onclick="downloadNailImage('${img.base64}','${img.mimeType}','nail-design-${i+1}')">⬇ 下载</div>
+        </div>
+      `).join('');
+      
+      showToast(`✅ 成功生成 ${images.length} 张美甲设计！`,'success');
+      document.getElementById('prompt-tags').innerHTML='<span class="tag tag-accent">🍌 Nano Banana Pro</span><span class="tag tag-success">真实AI生图</span><span class="tag tag-accent2">'+images.length+'张</span>';
+    } catch(err) {
+      console.error('[NanoBanana] 生图失败:', err);
+      let errMsg = '生图失败';
+      if(err.message==='API_KEY_MISSING') errMsg='请先配置 API Key';
+      else if(err.message==='API_KEY_INVALID') errMsg='API Key 无效，请检查';
+      else if(err.message==='API_RATE_LIMIT') errMsg='API 调用频率限制，请稍后重试';
+      else if(err.message.startsWith('NO_IMAGE')) errMsg='提示词可能被安全过滤，请修改描述';
+      
+      resultGrid.innerHTML=`
+        <div class="result-item"><div class="error-msg">❌<br>${errMsg}</div></div>
+        <div class="result-item">💅</div><div class="result-item">🌸</div><div class="result-item">🦋</div>
+      `;
+      showToast('❌ '+errMsg,'error');
+      document.getElementById('prompt-tags').innerHTML='<span class="tag tag-accent">🍌 Nano Banana Pro</span><span class="tag tag-danger">生图失败</span>';
+    }
+  } else {
+    // 其他 provider — 模拟生成
+    showToast('✨ AI 正在生成... OpenClaw 解析意图 → 图案重构 → 甲型自适应形变 → 1200 DPI 渲染','info');
+    document.getElementById('optimized-prompt').textContent=`"${prompt}" — 经过 ${defaultProvider==='openai'?'GPT-4o':defaultProvider==='anthropic'?'Claude 3.5':defaultProvider==='google'?'Gemini 2.0':defaultProvider} 优化，分辨率 1200 DPI，甲型自适应拓扑形变`;
+    document.getElementById('prompt-tags').innerHTML='<span class="tag tag-accent">🎯 AI优化</span><span class="tag" style="background:rgba(180,76,255,0.12);color:var(--accent2)">94% 置信度</span><span class="tag tag-success">0.8s</span>';
+    resultGrid.innerHTML='<div class="result-item">💅</div><div class="result-item">🌸</div><div class="result-item">🦋</div><div class="result-item">✨</div><div class="result-item">🌊</div><div class="result-item">🔥</div>';
+  }
+}
+
+function downloadNailImage(base64, mimeType, filename) {
+  const ext = mimeType.split('/')[1] || 'png';
+  const link = document.createElement('a');
+  link.href = `data:${mimeType};base64,${base64}`;
+  link.download = `${filename}.${ext}`;
+  link.click();
+  showToast('📥 图片已下载','success');
 }
 
 function startVoiceInput(){showToast('🎤 语音输入已激活，请说话...','info');setTimeout(()=>{document.getElementById('create-prompt').value='赛博朋克风格，深蓝色微光渐变，蝴蝶翅膀纹理，金属质感';showToast('语音识别完成！','success')},2000)}
@@ -845,5 +1168,955 @@ if(window.electronAPI){
 }
 
 </script>
+<script>
+/* Nano Banana Pro Service — 内嵌 */
+/**
+ * AI NAILS Desktop v4.0 — Nano Banana Pro 生图服务
+ * 
+ * 使用 Google Gemini 原生 API 生成图像:
+ * - Endpoint: https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent
+ * - 认证方式: X-goog-api-key header
+ * - 支持 AIza 和 AQ. 前缀的 API Key
+ * - 获取 Key: https://aistudio.google.com/apikey
+ */
+
+const NanoBananaService = {
+  // 配置
+  apiKey: '',  // 请在此处填入你的 Google API Key: https://aistudio.google.com/apikey
+  
+  // Google Gemini 图片生成 API
+  googleBaseUrl: 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image:generateContent',
+  
+  // 美甲风格预设提示词增强
+  nailStyleEnhancers: {
+    '赛博朋克': 'cyberpunk style, neon lights, holographic effect, metallic texture, dark background with vibrant glowing colors, futuristic nail art design',
+    '中国风': 'traditional Chinese style, elegant ink wash painting, red and gold accents, delicate floral patterns, jade-inspired textures, classic oriental nail art',
+    '极简': 'minimalist style, clean lines, matte finish, subtle geometric patterns, monochrome palette, sophisticated simple nail design',
+    '花卉': 'floral botanical style, watercolor flowers, soft pastel petals, romantic garden theme, delicate botanical nail art',
+    '渐变': 'smooth gradient ombre effect, seamless color transition, glossy finish, dreamy color blend nail art',
+    '哥特': 'gothic dark romantic style, deep burgundy and black, ornate baroque patterns, dramatic mysterious nail design',
+    '波普': 'pop art style, bold colors, comic book halftone dots, vibrant Warhol-inspired nail art, graphic design elements',
+    '水彩': 'watercolor painting effect, soft bleeding colors, artistic brush strokes, dreamy translucent layers, ethereal nail art',
+    '星空': 'galaxy cosmic style, deep space nebula, scattered stars, shimmering glitter, celestial nail art design',
+    '大理石': 'luxurious marble stone texture, elegant veins, polished glossy finish, natural stone nail art',
+    '琉璃': 'stained glass effect, translucent jewel tones, mosaic patterns, luminous colorful nail design',
+    '金属': 'liquid metal chrome effect, mirror finish, silver and gold metallic, futuristic reflective nail art',
+  },
+
+  // 支持的宽高比
+  aspectRatios: ['1:1', '2:3', '3:2', '3:4', '4:3', '4:5', '5:4', '9:16', '16:9', '21:9'],
+
+  // 支持的分辨率
+  imageSizes: ['1K', '2K', '4K'],
+
+  /**
+   * 判断 API Key 类型
+   * @returns {'google'|'geminigen'|'unknown'}
+   */
+  _detectKeyType() {
+    const key = this.getApiKey();
+    // AIza 和 AQ. 前缀都可以直接调用 Google Gemini 原生 API
+    if (key.startsWith('AIza') || key.startsWith('AQ.')) return 'google';
+    return 'unknown';
+  },
+
+  /**
+   * 设置 API Key
+   */
+  setApiKey(key) {
+    this.apiKey = key;
+    localStorage.setItem('nanobanana_api_key', key);
+  },
+
+  /**
+   * 获取已保存的 API Key
+   */
+  getApiKey() {
+    if (!this.apiKey) {
+      this.apiKey = localStorage.getItem('nanobanana_api_key') || '';
+    }
+    return this.apiKey;
+  },
+
+  /**
+   * 检查是否已配置 API Key
+   */
+  isConfigured() {
+    return this.getApiKey().length > 0;
+  },
+
+  /**
+   * 获取当前使用的 API 提供商名称
+   */
+  getProviderName() {
+    return 'Google Gemini (Nano Banana Pro)';
+  },
+
+  /**
+   * 增强美甲提示词 - 加入专业术语
+   */
+  enhanceNailPrompt(userPrompt, style) {
+    let prompt = userPrompt;
+    
+    // 检测已知风格并添加英文增强
+    for (const [styleName, enhancer] of Object.entries(this.nailStyleEnhancers)) {
+      if (userPrompt.includes(styleName)) {
+        prompt = `${userPrompt}. ${enhancer}`;
+        break;
+      }
+    }
+
+    // 添加美甲专业提示词
+    const nailPrefix = 'Professional nail art design, high quality, detailed nail surface, ' +
+      'perfectly shaped nails, beauty salon photography, macro close-up, clean background, ' +
+      'studio lighting, 1200 DPI rendering quality: ';
+    
+    // 如果用户已经描述了完整内容，不加前缀
+    if (prompt.length < 30) {
+      prompt = nailPrefix + prompt;
+    } else if (!prompt.toLowerCase().includes('nail')) {
+      prompt = prompt + '. Professional nail art design, high detail.';
+    }
+
+    return prompt;
+  },
+
+  /**
+   * 调用 Google Gemini 原生 API 生成图像
+   */
+  async _generateGoogle(prompt, options) {
+    const apiKey = this.getApiKey();
+    const { aspectRatio = '1:1', imageSize = '2K', referenceImage = null } = options;
+
+    const parts = [{ text: prompt }];
+
+    // 如果有参考图，添加到请求中
+    if (referenceImage) {
+      let base64Data;
+      let mimeType = 'image/png';
+
+      if (referenceImage instanceof File) {
+        base64Data = await this._fileToBase64(referenceImage);
+        mimeType = referenceImage.type || 'image/png';
+      } else if (typeof referenceImage === 'string' && referenceImage.startsWith('data:')) {
+        const match = referenceImage.match(/^data:([^;]+);base64,(.+)$/);
+        if (match) {
+          mimeType = match[1];
+          base64Data = match[2];
+        } else {
+          base64Data = referenceImage;
+        }
+      }
+
+      if (base64Data) {
+        parts.push({
+          inlineData: { mimeType: mimeType, data: base64Data }
+        });
+      }
+    }
+
+    const requestBody = {
+      contents: [{ parts: parts }],
+      generationConfig: {
+        responseModalities: ['IMAGE'],
+        responseFormat: {
+          image: { aspectRatio: aspectRatio, imageSize: imageSize }
+        }
+      }
+    };
+
+    const url = this.googleBaseUrl;
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-goog-api-key': apiKey
+      },
+      body: JSON.stringify(requestBody)
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      const errorMsg = errorData.error?.message || `HTTP ${response.status}`;
+      
+      if (response.status === 400) {
+        throw new Error('API_BAD_REQUEST: ' + errorMsg);
+      } else if (response.status === 401 || response.status === 403) {
+        throw new Error('API_KEY_INVALID');
+      } else if (response.status === 429) {
+        throw new Error('API_RATE_LIMIT: 图片生成配额已用完，请稍后再试或更换 API Key。文本对话功能不受影响。');
+      } else {
+        throw new Error('API_ERROR: ' + errorMsg);
+      }
+    }
+
+    const result = await response.json();
+    return this._parseGoogleResponse(result);
+  },
+
+  /**
+   * 解析 Google Gemini 原生 API 响应
+   */
+  _parseGoogleResponse(result) {
+    const images = [];
+    if (result.candidates) {
+      for (const candidate of result.candidates) {
+        if (candidate.content && candidate.content.parts) {
+          for (const part of candidate.content.parts) {
+            if (part.inlineData) {
+              images.push({
+                base64: part.inlineData.data,
+                mimeType: part.inlineData.mimeType || 'image/png'
+              });
+            }
+          }
+        }
+      }
+    }
+
+    if (images.length === 0) {
+      let textResponse = '';
+      if (result.candidates) {
+        for (const candidate of result.candidates) {
+          if (candidate.content && candidate.content.parts) {
+            for (const part of candidate.content.parts) {
+              if (part.text) textResponse += part.text;
+            }
+          }
+        }
+      }
+      if (textResponse) {
+        throw new Error('NO_IMAGE: ' + textResponse.substring(0, 100));
+      }
+      throw new Error('NO_IMAGE_GENERATED');
+    }
+
+    return images;
+  },
+
+  /**
+   * 主入口: 调用 API 生成图像
+   */
+  async generateImage(prompt, options = {}) {
+    const apiKey = this.getApiKey();
+    if (!apiKey) {
+      throw new Error('API_KEY_MISSING');
+    }
+
+    const { aspectRatio = '1:1', imageSize = '2K', style = '', referenceImage = null } = options;
+
+    // 增强提示词
+    const enhancedPrompt = this.enhanceNailPrompt(prompt, style);
+
+    console.log(`[NanoBanana] 提示词: "${enhancedPrompt.substring(0, 80)}..."`);
+
+    const images = await this._generateGoogle(enhancedPrompt, options);
+
+    // 返回 base64 格式的图片
+    return images;
+  },
+
+  /**
+   * 批量生成多张设计变体
+   */
+  async generateVariants(prompt, count = 4, options = {}) {
+    const results = [];
+    
+    const variations = [
+      '',
+      ' slight variation, different color accent',
+      ' alternative angle, different lighting',
+      ' creative interpretation, unique twist',
+      ' different background texture',
+      ' mirror effect variation'
+    ];
+
+    for (let i = 0; i < count; i++) {
+      const variantPrompt = prompt + (variations[i] || '');
+      try {
+        const images = await this.generateImage(variantPrompt, options);
+        results.push(...images);
+      } catch (err) {
+        console.warn(`[NanoBanana] Variant ${i + 1} failed:`, err.message);
+        if (i === 0) throw err;
+      }
+      
+      if (i < count - 1) {
+        await this._delay(800);
+      }
+    }
+
+    return results;
+  },
+
+  /**
+   * 下载远程图片为 Blob
+   */
+  async _downloadImage(url) {
+    const response = await fetch(url);
+    if (!response.ok) throw new Error(`Download failed: ${response.status}`);
+    return response.blob();
+  },
+
+  /**
+   * Blob 转 base64
+   */
+  _blobToBase64(blob) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const dataUrl = reader.result;
+        const base64 = dataUrl.split(',')[1];
+        resolve(base64);
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+  },
+
+  /**
+   * File 转 base64
+   */
+  _fileToBase64(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const dataUrl = reader.result;
+        const base64 = dataUrl.split(',')[1];
+        resolve(base64);
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  },
+
+  /**
+   * 延迟
+   */
+  _delay(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+};
+
+// 导出到全局
+window.NanoBananaService = NanoBananaService;
+
+</script>
+<script>
+/* Ollama Local Service — 内嵌 */
+/**
+ * AI NAILS Desktop v4.0 — Ollama 本地大模型服务
+ * 
+ * 使用本地 Ollama 进行美甲提示词优化:
+ * - 将用户的中文描述转为高质量英文生图提示词
+ * - 分析参考图并生成风格描述
+ * - 生成多种设计变体提示词
+ * 
+ * Endpoint: http://localhost:11434/api/generate
+ * 默认模型: qwen3-coder:480b-cloud (可配置)
+ */
+
+const OllamaService = {
+  // 配置
+  baseUrl: 'http://localhost:11434',
+  model: 'qwen3-coder:480b-cloud',  // qwen3 效果最好，gpt-oss 常返回空
+  fallbackModel: 'deepseek-v3.1:671b-cloud',
+  
+  // 美甲风格关键词库
+  nailStyleKeywords: {
+    '赛博朋克': ['cyberpunk', 'neon lights', 'holographic', 'metallic', 'dark background', 'futuristic'],
+    '中国风': ['traditional Chinese', 'ink wash', 'red gold', 'floral patterns', 'jade texture', 'oriental'],
+    '极简': ['minimalist', 'clean lines', 'matte finish', 'geometric', 'monochrome', 'sophisticated'],
+    '花卉': ['floral', 'watercolor', 'pastel petals', 'romantic garden', 'botanical'],
+    '渐变': ['gradient', 'ombre', 'seamless color transition', 'glossy', 'dreamy blend'],
+    '哥特': ['gothic', 'dark romantic', 'burgundy black', 'baroque', 'dramatic'],
+    '波普': ['pop art', 'bold colors', 'halftone dots', 'Warhol-inspired', 'graphic'],
+    '水彩': ['watercolor', 'bleeding colors', 'artistic brush', 'translucent layers', 'ethereal'],
+    '星空': ['galaxy', 'cosmic', 'nebula', 'stars', 'shimmering glitter', 'celestial'],
+    '大理石': ['marble', 'stone texture', 'elegant veins', 'polished', 'luxurious'],
+    '琉璃': ['stained glass', 'jewel tones', 'mosaic', 'translucent', 'luminous'],
+    '金属': ['liquid metal', 'chrome', 'mirror finish', 'silver gold', 'reflective'],
+  },
+
+  /**
+   * 检测 Ollama 服务是否可用
+   */
+  async checkAvailability() {
+    try {
+      const resp = await fetch(`${this.baseUrl}/api/tags`, { signal: AbortSignal.timeout(3000) });
+      return resp.ok;
+    } catch (e) {
+      return false;
+    }
+  },
+
+  /**
+   * 获取可用模型列表
+   */
+  async listModels() {
+    try {
+      const resp = await fetch(`${this.baseUrl}/api/tags`);
+      const data = await resp.json();
+      return data.models || [];
+    } catch (e) {
+      return [];
+    }
+  },
+
+  /**
+   * 核心: 优化美甲提示词
+   * 将用户输入转为高质量英文生图提示词
+   */
+  async enhancePrompt(userInput, style = '') {
+    // 先用本地增强把中文关键词转为英文
+    const localEnhanced = this.localEnhance(userInput);
+    
+    // 提取纯英文部分传给 Ollama（中文会干扰模型）
+    const englishOnly = localEnhanced.replace(/[\u4e00-\u9fff]+/g, '').replace(/[，。！？、；：""（）【】《》]+/g, '').replace(/\s+/g, ' ').trim();
+    const promptText = englishOnly || localEnhanced;
+    
+    const userMessage = `Generate a detailed English prompt for AI image generation of nail art: ${promptText}. Output only the prompt.`;
+
+    const response = await this._callOllama('', userMessage);
+    return response.trim() || promptText;
+  },
+
+  /**
+   * 生成多个设计变体提示词
+   */
+  async generateVariantPrompts(basePrompt, count = 4) {
+    const variants = [];
+    
+    // 先用 Ollama 优化基础提示词
+    const enhancedBase = await this.enhancePrompt(basePrompt);
+    variants.push(enhancedBase);
+
+    // 生成变体 — 通过修改后缀实现
+    const variationSuffixes = [
+      ', different color palette',
+      ', alternative nail shape and length',
+      ', different background and lighting',
+      ', more minimalist and elegant version',
+      ', more ornate and detailed version',
+      ', warm golden hour lighting mood'
+    ];
+
+    for (let i = 1; i < count && i <= variationSuffixes.length; i++) {
+      try {
+        const variantPrompt = `Generate a detailed English prompt for AI image generation of nail art: ${this.localEnhance(basePrompt)}${variationSuffixes[i-1]}. Output only the prompt.`;
+        const variant = await this._callOllama('', variantPrompt);
+        if (variant.trim()) {
+          variants.push(variant.trim());
+        } else {
+          variants.push(`${enhancedBase}${variationSuffixes[i-1]}`);
+        }
+      } catch (e) {
+        variants.push(`${enhancedBase}${variationSuffixes[i-1]}`);
+      }
+    }
+
+    return variants;
+  },
+
+  /**
+   * 分析参考图片并生成风格描述
+   */
+  async analyzeReferenceImage(imageBase64, mimeType = 'image/png') {
+    const systemPrompt = `You are a nail art expert. Analyze this nail art reference image and describe it in detail in English. Focus on: colors, patterns, textures, nail shape, finish, and overall style. Output a concise paragraph (under 100 words).`;
+
+    try {
+      const resp = await fetch(`${this.baseUrl}/api/generate`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: this.model,
+          system: systemPrompt,
+          prompt: 'Describe this nail art image in detail:',
+          images: [imageBase64],
+          stream: false
+        })
+      });
+
+      if (!resp.ok) {
+        // 如果视觉模型不支持，回退到文本描述
+        return 'Professional nail art design with elegant details';
+      }
+
+      const data = await resp.json();
+      return data.response?.trim() || 'Elegant nail art design';
+    } catch (e) {
+      console.warn('[Ollama] Image analysis failed, using text-only mode');
+      return 'Beautiful nail art design';
+    }
+  },
+
+  /**
+   * 调用 Ollama API (核心方法)
+   */
+  async _callOllama(systemPrompt, userMessage) {
+    const body = {
+      model: this.model,
+      prompt: userMessage,
+      stream: false,
+      options: {
+        temperature: 0.7,
+        top_p: 0.9,
+        num_predict: 300
+      }
+    };
+    if (systemPrompt) body.system = systemPrompt;
+
+    try {
+      const resp = await fetch(`${this.baseUrl}/api/generate`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+        signal: AbortSignal.timeout(60000)
+      });
+
+      if (!resp.ok) {
+        throw new Error(`HTTP ${resp.status}`);
+      }
+
+      const data = await resp.json();
+      return data.response || '';
+    } catch (e) {
+      console.warn(`[Ollama] ${this.model} failed:`, e.message);
+      // 尝试回退模型
+      if (this.model !== this.fallbackModel) {
+        console.log(`[Ollama] Trying fallback model: ${this.fallbackModel}`);
+        body.model = this.fallbackModel;
+        const fallbackResp = await fetch(`${this.baseUrl}/api/generate`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body),
+          signal: AbortSignal.timeout(60000)
+        });
+        if (fallbackResp.ok) {
+          const data = await fallbackResp.json();
+          return data.response || '';
+        }
+      }
+      throw e;
+    }
+  },
+
+  /**
+   * 快速本地提示词增强 (不依赖 API，纯本地处理)
+   * 当 Ollama 不可用时的回退方案
+   */
+  localEnhance(userInput) {
+    let enhanced = userInput;
+    
+    // 检测中文风格关键词并替换为英文
+    for (const [cn, enKeywords] of Object.entries(this.nailStyleKeywords)) {
+      if (userInput.includes(cn)) {
+        enhanced = `${userInput}. ${enKeywords.join(', ')}, nail art design`;
+        break;
+      }
+    }
+
+    // 如果没有匹配到任何风格，添加通用美甲关键词
+    if (enhanced === userInput) {
+      enhanced = `${userInput}, professional nail art design, high quality, studio lighting, macro close-up, 1200 DPI`;
+    }
+
+    return enhanced;
+  }
+};
+
+</script>
+
+<script>
+/* Ollama Local Service — 内嵌 */
+/**
+ * AI NAILS Desktop v4.0 — Ollama 本地大模型服务
+ * 
+ * 使用本地 Ollama 进行美甲提示词优化:
+ * - 将用户的中文描述转为高质量英文生图提示词
+ * - 分析参考图并生成风格描述
+ * - 生成多种设计变体提示词
+ * 
+ * Endpoint: http://localhost:11434/api/generate
+ * 默认模型: qwen3-coder:480b-cloud (可配置)
+ */
+
+const OllamaService = {
+  // 配置
+  baseUrl: 'http://localhost:11434',
+  model: 'qwen3-coder:480b-cloud',
+  fallbackModel: 'deepseek-v3.1:671b-cloud',
+  
+  // 美甲风格关键词库
+  nailStyleKeywords: {
+    '赛博朋克': ['cyberpunk', 'neon lights', 'holographic', 'metallic', 'dark background', 'futuristic'],
+    '中国风': ['traditional Chinese', 'ink wash', 'red gold', 'floral patterns', 'jade texture', 'oriental'],
+    '极简': ['minimalist', 'clean lines', 'matte finish', 'geometric', 'monochrome', 'sophisticated'],
+    '花卉': ['floral', 'watercolor', 'pastel petals', 'romantic garden', 'botanical'],
+    '渐变': ['gradient', 'ombre', 'seamless color transition', 'glossy', 'dreamy blend'],
+    '哥特': ['gothic', 'dark romantic', 'burgundy black', 'baroque', 'dramatic'],
+    '波普': ['pop art', 'bold colors', 'halftone dots', 'Warhol-inspired', 'graphic'],
+    '水彩': ['watercolor', 'bleeding colors', 'artistic brush', 'translucent layers', 'ethereal'],
+    '星空': ['galaxy', 'cosmic', 'nebula', 'stars', 'shimmering glitter', 'celestial'],
+    '大理石': ['marble', 'stone texture', 'elegant veins', 'polished', 'luxurious'],
+    '琉璃': ['stained glass', 'jewel tones', 'mosaic', 'translucent', 'luminous'],
+    '金属': ['liquid metal', 'chrome', 'mirror finish', 'silver gold', 'reflective'],
+  },
+
+  /**
+   * 检测 Ollama 服务是否可用
+   */
+  async checkAvailability() {
+    try {
+      const resp = await fetch(`${this.baseUrl}/api/tags`, { signal: AbortSignal.timeout(3000) });
+      return resp.ok;
+    } catch (e) {
+      return false;
+    }
+  },
+
+  /**
+   * 获取可用模型列表
+   */
+  async listModels() {
+    try {
+      const resp = await fetch(`${this.baseUrl}/api/tags`);
+      const data = await resp.json();
+      return data.models || [];
+    } catch (e) {
+      return [];
+    }
+  },
+
+  /**
+   * 核心: 优化美甲提示词
+   * 将用户输入转为高质量英文生图提示词
+   */
+  async enhancePrompt(userInput, style = '') {
+    const styleHint = style ? `Style preference: ${style}. ` : '';
+    const systemPrompt = 'You are a nail art prompt engineer. Reply ONLY with the detailed English image generation prompt. No explanations, no Chinese, no prefixes.';
+    const userMessage = `Nail design: ${userInput}`;
+
+    const response = await this._callOllama(systemPrompt, userMessage);
+    return response.trim();
+  },
+
+  /**
+   * 生成多个设计变体提示词
+   */
+  async generateVariantPrompts(basePrompt, count = 4) {
+    const variants = [];
+    
+    // 先用 Ollama 优化基础提示词
+    const enhancedBase = await this.enhancePrompt(basePrompt);
+    variants.push(enhancedBase);
+
+    // 生成变体
+    const variationDirections = [
+      'different color palette',
+      'alternative nail shape',
+      'different background style',
+      'more minimalist version',
+      'more ornate version',
+      'different lighting mood'
+    ];
+
+    for (let i = 1; i < count; i++) {
+      const direction = variationDirections[i - 1] || variationDirections[0];
+      
+      try {
+        const sysPrompt = 'Reply ONLY with the modified prompt. No explanations.';
+        const variant = await this._callOllama(sysPrompt, 
+          `Create a ${direction} variation: "${enhancedBase}"`);
+        variants.push(variant.trim());
+      } catch (e) {
+        variants.push(`${enhancedBase}, ${direction}`);
+      }
+    }
+
+    return variants;
+  },
+
+  /**
+   * 分析参考图片并生成风格描述
+   */
+  async analyzeReferenceImage(imageBase64, mimeType = 'image/png') {
+    const systemPrompt = `You are a nail art expert. Analyze this nail art reference image and describe it in detail in English. Focus on: colors, patterns, textures, nail shape, finish, and overall style. Output a concise paragraph (under 100 words).`;
+
+    try {
+      const resp = await fetch(`${this.baseUrl}/api/generate`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: this.model,
+          system: systemPrompt,
+          prompt: 'Describe this nail art image in detail:',
+          images: [imageBase64],
+          stream: false
+        })
+      });
+
+      if (!resp.ok) {
+        // 如果视觉模型不支持，回退到文本描述
+        return 'Professional nail art design with elegant details';
+      }
+
+      const data = await resp.json();
+      return data.response?.trim() || 'Elegant nail art design';
+    } catch (e) {
+      console.warn('[Ollama] Image analysis failed, using text-only mode');
+      return 'Beautiful nail art design';
+    }
+  },
+
+  /**
+   * 调用 Ollama API (核心方法)
+   */
+  async _callOllama(systemPrompt, userMessage) {
+    const body = {
+      model: this.model,
+      prompt: userMessage,
+      stream: false,
+      options: {
+        temperature: 0.7,
+        top_p: 0.9,
+        num_predict: 300
+      }
+    };
+    if (systemPrompt) body.system = systemPrompt;
+
+    try {
+      const resp = await fetch(`${this.baseUrl}/api/generate`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+        signal: AbortSignal.timeout(60000)
+      });
+
+      if (!resp.ok) {
+        throw new Error(`HTTP ${resp.status}`);
+      }
+
+      const data = await resp.json();
+      return data.response || '';
+    } catch (e) {
+      console.warn(`[Ollama] ${this.model} failed:`, e.message);
+      // 尝试回退模型
+      if (this.model !== this.fallbackModel) {
+        console.log(`[Ollama] Trying fallback model: ${this.fallbackModel}`);
+        body.model = this.fallbackModel;
+        const fallbackResp = await fetch(`${this.baseUrl}/api/generate`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body),
+          signal: AbortSignal.timeout(60000)
+        });
+        if (fallbackResp.ok) {
+          const data = await fallbackResp.json();
+          return data.response || '';
+        }
+      }
+      throw e;
+    }
+  },
+
+  /**
+   * 快速本地提示词增强 (不依赖 API，纯本地处理)
+   * 当 Ollama 不可用时的回退方案
+   */
+  localEnhance(userInput) {
+    let enhanced = userInput;
+    
+    // 检测中文风格关键词并替换为英文
+    for (const [cn, enKeywords] of Object.entries(this.nailStyleKeywords)) {
+      if (userInput.includes(cn)) {
+        enhanced = `${userInput}. ${enKeywords.join(', ')}, nail art design`;
+        break;
+      }
+    }
+
+    // 如果没有匹配到任何风格，添加通用美甲关键词
+    if (enhanced === userInput) {
+      enhanced = `${userInput}, professional nail art design, high quality, studio lighting, macro close-up, 1200 DPI`;
+    }
+
+    return enhanced;
+  }
+};
+
+
+// ============ AnyGen 使用面板 ============
+</script>
+
+<!-- AnyGen 使用面板 -->
+<div class="skill-use-panel hidden" id="anygen-use-panel">
+<div class="skill-use-card">
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+<h3 id="anygen-panel-title">📊 PPT 生成</h3>
+<button class="btn btn-xs btn-secondary" onclick="closeAnyGenPanel()">✕</button>
+</div>
+<p id="anygen-panel-desc" style="color:var(--text-tertiary);font-size:12px;margin-bottom:16px">AI 驱动一键生成专业PPT</p>
+<div class="form-group"><label>生成描述 *</label><textarea class="form-input" id="anygen-prompt" rows="4" placeholder="描述你想要生成的内容，例如：一份关于2025年AI美甲市场趋势的10页PPT汇报"></textarea></div>
+<div style="display:flex;gap:8px;margin-bottom:16px">
+<button class="btn btn-primary btn-sm" onclick="executeAnyGen()">🚀 开始生成</button>
+<button class="btn btn-secondary btn-sm" onclick="openAnyGenConfig()">⚙ API 配置</button>
+</div>
+<div id="anygen-result"></div>
+</div>
+</div>
+
+<!-- HeyGen 使用面板 -->
+<div class="skill-use-panel hidden" id="heygen-use-panel">
+<div class="skill-use-card">
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+<h3 id="heygen-panel-title">🎬 数字人视频</h3>
+<button class="btn btn-xs btn-secondary" onclick="closeHeyGenPanel()">✕</button>
+</div>
+<p id="heygen-panel-desc" style="color:var(--text-tertiary);font-size:12px;margin-bottom:16px">AI 数字人播报视频生成</p>
+<div class="form-group"><label>视频脚本 *</label><textarea class="form-input" id="heygen-script" rows="6" placeholder="输入数字人播报的脚本内容，例如：欢迎来到AI Nails美甲工作室，我们提供最前沿的AI美甲设计服务..."></textarea></div>
+<div style="display:flex;gap:8px;margin-bottom:16px">
+<button class="btn btn-primary btn-sm" onclick="executeHeyGen()">🎬 生成视频</button>
+<button class="btn btn-secondary btn-sm" onclick="openHeyGenConfig()">⚙ API 配置</button>
+</div>
+<div id="heygen-result"></div>
+</div>
+</div>
+
+<!-- AnyGen 配置弹窗 -->
+<div class="skill-config-modal hidden" id="anygen-config-modal">
+<div class="skill-config-card">
+<h3>⚙ AnyGen API 配置</h3>
+<p class="api-status">状态: <span id="anygen-config-status" style="color:var(--danger)">未配置</span></p>
+<div class="form-group"><label>API Key</label><input class="form-input" id="anygen-config-key" placeholder="sk-ag-..." type="password"></div>
+<p style="font-size:11px;color:var(--text-tertiary);margin-bottom:12px">获取 Key: <a href="https://www.anygen.io/home" target="_blank" style="color:var(--accent)">anygen.io</a></p>
+<div style="display:flex;gap:8px">
+<button class="btn btn-primary btn-sm" onclick="saveAnyGenConfig()">💾 保存</button>
+<button class="btn btn-secondary btn-sm" onclick="closeAnyGenConfig()">取消</button>
+</div>
+</div>
+</div>
+
+<!-- HeyGen 配置弹窗 -->
+<div class="skill-config-modal hidden" id="heygen-config-modal">
+<div class="skill-config-card">
+<h3>⚙ HeyGen API 配置</h3>
+<p class="api-status">状态: <span id="heygen-config-status" style="color:var(--danger)">未配置</span></p>
+<div class="form-group"><label>API Key</label><input class="form-input" id="heygen-config-key" placeholder="sk_V2_..." type="password"></div>
+<p style="font-size:11px;color:var(--text-tertiary);margin-bottom:12px">获取 Key: <a href="https://www.heygen.com" target="_blank" style="color:var(--accent)">heygen.com</a></p>
+<div style="display:flex;gap:8px">
+<button class="btn btn-primary btn-sm" onclick="saveHeyGenConfig()">💾 保存</button>
+<button class="btn btn-secondary btn-sm" onclick="closeHeyGenConfig()">取消</button>
+</div>
+</div>
+</div>
+
+<!-- CreatOK 使用面板 -->
+<div class="skill-use-panel hidden" id="creatok-use-panel">
+<div class="skill-use-card">
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+<h3 id="creatok-panel-title">🖼️ AI 生图</h3>
+<button class="btn btn-xs btn-secondary" onclick="closeCreatOKPanel()">✕</button>
+</div>
+<p id="creatok-panel-desc" style="color:var(--text-tertiary);font-size:12px;margin-bottom:16px">通过文字描述生成高质量AI图片</p>
+<div class="form-group"><label>内容描述 *</label><textarea class="form-input" id="creatok-prompt" rows="4" placeholder="描述你想要生成的图片/视频内容..."></textarea></div>
+<div style="display:flex;gap:8px;margin-bottom:16px">
+<button class="btn btn-primary btn-sm" onclick="executeCreatOK()">🚀 开始生成</button>
+<button class="btn btn-secondary btn-sm" onclick="openCreatOKConfig()">⚙ API 配置</button>
+</div>
+<div id="creatok-result"></div>
+</div>
+</div>
+
+<!-- Clipcat 使用面板 -->
+<div class="skill-use-panel hidden" id="clipcat-use-panel">
+<div class="skill-use-card">
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+<h3 id="clipcat-panel-title">🔎 视频搜索</h3>
+<button class="btn btn-xs btn-secondary" onclick="closeClipcatPanel()">✕</button>
+</div>
+<p id="clipcat-panel-desc" style="color:var(--text-tertiary);font-size:12px;margin-bottom:16px">搜索 TikTok 热门带货视频</p>
+<div class="form-group"><label>搜索内容 *</label><textarea class="form-input" id="clipcat-prompt" rows="3" placeholder="输入搜索关键词或视频URL..."></textarea></div>
+<div style="display:flex;gap:8px;margin-bottom:16px">
+<button class="btn btn-primary btn-sm" onclick="executeClipcat()">🚀 执行</button>
+<button class="btn btn-secondary btn-sm" onclick="openClipcatConfig()">⚙ API 配置</button>
+</div>
+<div id="clipcat-result"></div>
+</div>
+</div>
+
+<!-- Revor 使用面板 -->
+<div class="skill-use-panel hidden" id="revor-use-panel">
+<div class="skill-use-card">
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+<h3>📨 Revor 智能外展</h3>
+<button class="btn btn-xs btn-secondary" onclick="closeRevorPanel()">✕</button>
+</div>
+<p style="color:var(--text-tertiary);font-size:12px;margin-bottom:16px">通过 LinkedIn/Email/WhatsApp 自动化外展</p>
+<div class="form-group"><label>目标渠道</label>
+<select class="form-input" id="revor-channel">
+<option value="linkedin">LinkedIn</option>
+<option value="email">Email</option>
+<option value="whatsapp">WhatsApp</option>
+</select></div>
+<div class="form-group"><label>目标联系人 *</label><input class="form-input" id="revor-recipient" placeholder="联系人的 LinkedIn URL 或邮箱"></div>
+<div class="form-group"><label>消息内容 *</label><textarea class="form-input" id="revor-message" rows="4" placeholder="输入外展消息内容..."></textarea></div>
+<div style="display:flex;gap:8px;margin-bottom:16px">
+<button class="btn btn-primary btn-sm" onclick="executeRevor()">📨 发送</button>
+<button class="btn btn-secondary btn-sm" onclick="openRevorConfig()">⚙ API 配置</button>
+</div>
+<div id="revor-result"></div>
+</div>
+</div>
+
+<!-- CreatOK 配置弹窗 -->
+<div class="skill-config-modal hidden" id="creatok-config-modal">
+<div class="skill-config-card">
+<h3>⚙ CreatOK API 配置</h3>
+<p class="api-status">状态: <span id="creatok-config-status" style="color:var(--danger)">未配置</span></p>
+<div class="form-group"><label>API Key</label><input class="form-input" id="creatok-config-key" placeholder="输入 CreatOK API Key..." type="password"></div>
+<p style="font-size:11px;color:var(--text-tertiary);margin-bottom:12px">获取 Key: <a href="https://github.com/EchoSell/creatok-skills" target="_blank" style="color:var(--accent)">CreatOK GitHub</a></p>
+<div style="display:flex;gap:8px">
+<button class="btn btn-primary btn-sm" onclick="saveCreatOKConfig()">💾 保存</button>
+<button class="btn btn-secondary btn-sm" onclick="closeCreatOKConfig()">取消</button>
+</div>
+</div>
+</div>
+
+<!-- Clipcat 配置弹窗 -->
+<div class="skill-config-modal hidden" id="clipcat-config-modal">
+<div class="skill-config-card">
+<h3>⚙ Clipcat API 配置</h3>
+<p class="api-status">状态: <span id="clipcat-config-status" style="color:var(--danger)">未配置</span></p>
+<div class="form-group"><label>API Key</label><input class="form-input" id="clipcat-config-key" placeholder="sk-..." type="password"></div>
+<p style="font-size:11px;color:var(--text-tertiary);margin-bottom:12px">获取 Key: <a href="https://clipcat.ai/workspace?modal=settings&tab=apikeys" target="_blank" style="color:var(--accent)">clipcat.ai</a></p>
+<div style="display:flex;gap:8px">
+<button class="btn btn-primary btn-sm" onclick="saveClipcatConfig()">💾 保存</button>
+<button class="btn btn-secondary btn-sm" onclick="closeClipcatConfig()">取消</button>
+</div>
+</div>
+</div>
+
+<!-- Revor 配置弹窗 -->
+<div class="skill-config-modal hidden" id="revor-config-modal">
+<div class="skill-config-card">
+<h3>⚙ Revor API 配置</h3>
+<p class="api-status">状态: <span id="revor-config-status" style="color:var(--danger)">未配置</span></p>
+<div class="form-group"><label>API Key</label><input class="form-input" id="revor-config-key" placeholder="输入 Revor API Key..." type="password"></div>
+<p style="font-size:11px;color:var(--text-tertiary);margin-bottom:12px">获取 Key: <a href="https://revor.ai" target="_blank" style="color:var(--accent)">revor.ai</a></p>
+<div style="display:flex;gap:8px">
+<button class="btn btn-primary btn-sm" onclick="saveRevorConfig()">💾 保存</button>
+<button class="btn btn-secondary btn-sm" onclick="closeRevorConfig()">取消</button>
+</div>
+</div>
+</div>
+
+<!-- 加载外部 Skill 服务脚本 -->
+<script src="anygen_service.js"></script>
+<script src="heygen_service.js"></script>
+<script src="creatok_service.js"></script>
+<script src="clipcat_service.js"></script>
+<script src="revor_service.js"></script>
+<script src="skill_integration.js"></script>
+
 </body>
 </html>

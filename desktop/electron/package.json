@@ -23,11 +23,17 @@
       "target": [
         {
           "target": "dmg",
-          "arch": ["x64", "arm64"]
+          "arch": [
+            "x64",
+            "arm64"
+          ]
         },
         {
           "target": "zip",
-          "arch": ["x64", "arm64"]
+          "arch": [
+            "x64",
+            "arm64"
+          ]
         }
       ],
       "hardenedRuntime": true,
@@ -40,11 +46,22 @@
       "title": "AI NAILS Installer",
       "icon": "assets/icon.icns",
       "contents": [
-        { "x": 130, "y": 220 },
-        { "x": 410, "y": 220, "type": "link", "path": "/Applications" }
+        {
+          "x": 130,
+          "y": 220
+        },
+        {
+          "x": 410,
+          "y": 220,
+          "type": "link",
+          "path": "/Applications"
+        }
       ],
       "background": "assets/dmg-background.png",
-      "window": { "width": 540, "height": 380 }
+      "window": {
+        "width": 540,
+        "height": 380
+      }
     },
     "directories": {
       "output": "../../release/electron"
@@ -59,7 +76,7 @@
     "extraResources": []
   },
   "devDependencies": {
-    "electron": "^28.0.0",
-    "electron-builder": "^24.9.0"
+    "electron": "28.0.0",
+    "electron-builder": "^24.13.3"
   }
 }
