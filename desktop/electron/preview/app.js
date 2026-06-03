@@ -842,7 +842,136 @@ function downloadNailImage(base64, mimeType, filename) {
   showToast('📥 图片已下载','success');
 }
 
-function startVoiceInput(){showToast('🎤 语音输入已激活，请说话...','info');setTimeout(()=>{document.getElementById('create-prompt').value='赛博朋克风格，深蓝色微光渐变，蝴蝶翅膀纹理，金属质感';showToast('语音识别完成！','success')},2000)}
+// ====== 语音输入 (Web Speech API + ElevenLabs) ======
+let voiceRecognition = null;
+let isVoiceListening = false;
+
+function startVoiceInput() {
+  const btn = document.querySelector('[onclick="startVoiceInput()"]');
+  
+  if (isVoiceListening) {
+    stopVoiceInput();
+    return;
+  }
+  
+  // 检查 Web Speech API 支持
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (SpeechRecognition) {
+    voiceRecognition = new SpeechRecognition();
+    voiceRecognition.lang = 'zh-CN';
+    voiceRecognition.interimResults = true;
+    voiceRecognition.continuous = false;
+    voiceRecognition.maxAlternatives = 1;
+    
+    voiceRecognition.onstart = () => {
+      isVoiceListening = true;
+      if (btn) { btn.textContent = '🔴 录音中...'; btn.style.background = 'rgba(255,82,82,0.2)'; btn.style.color = 'var(--danger)'; }
+      showToast('🎤 正在聆听...请说话','info');
+    };
+    
+    voiceRecognition.onresult = (event) => {
+      const transcript = event.results[0][0].transcript;
+      const promptEl = document.getElementById('create-prompt');
+      promptEl.value = transcript;
+      // 实时更新
+      const interim = Array.from(event.results).map(r => r[0].transcript).join('');
+      if (event.results[0].isFinal) {
+        promptEl.value = interim;
+      }
+    };
+    
+    voiceRecognition.onerror = (event) => {
+      console.warn('[Voice] 语音识别错误:', event.error);
+      stopVoiceInput();
+      if (event.error === 'not-allowed') {
+        showToast('⚠️ 请允许麦克风权限后重试','error');
+      } else if (event.error === 'no-speech') {
+        showToast('⚠️ 未检测到语音，请重试','warning');
+      } else {
+        showToast('⚠️ 语音识别失败: ' + event.error,'error');
+      }
+    };
+    
+    voiceRecognition.onend = () => {
+      const promptEl = document.getElementById('create-prompt');
+      if (promptEl.value) {
+        showToast('✅ 语音识别完成！已填入输入框','success');
+        // 自动发送到AI对话框
+        setTimeout(() => {
+          const chatInput = document.getElementById('create-chat-input');
+          if (chatInput) {
+            chatInput.value = promptEl.value;
+            sendCreateChat();
+          }
+        }, 500);
+      }
+      resetVoiceButton();
+    };
+    
+    voiceRecognition.start();
+  } else {
+    // 降级：使用模拟演示
+    showToast('🎤 浏览器不支持语音识别，使用模拟模式...','info');
+    setTimeout(() => {
+      document.getElementById('create-prompt').value = '赛博朋克风格，深蓝色微光渐变，蝴蝶翅膀纹理，金属质感';
+      showToast('✅ 语音识别完成（模拟）！','success');
+      resetVoiceButton();
+    }, 2000);
+  }
+}
+
+function stopVoiceInput() {
+  if (voiceRecognition) {
+    try { voiceRecognition.stop(); } catch(e) {}
+    voiceRecognition = null;
+  }
+  isVoiceListening = false;
+  resetVoiceButton();
+}
+
+function resetVoiceButton() {
+  isVoiceListening = false;
+  voiceRecognition = null;
+  const btn = document.querySelector('[onclick="startVoiceInput()"]');
+  if (btn) { btn.textContent = '🎤 语音输入'; btn.style.background = ''; btn.style.color = ''; }
+}
+
+// ElevenLabs TTS（文本转语音朗读）
+async function speakWithElevenLabs(text, voiceId) {
+  const apiKey = localStorage.getItem('elevenlabs_api_key') || '7536957d31333c76024911ef47932af9382188547101ffcabf1e33a106e21525';
+  if (!apiKey) {
+    showToast('⚠️ 请先配置 ElevenLabs API Key','warning');
+    return;
+  }
+  
+  try {
+    const resp = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId || '21m00Tcm4TlvDq8ikWAM'}`, {
+      method: 'POST',
+      headers: {
+        'Accept': 'audio/mpeg',
+        'Content-Type': 'application/json',
+        'xi-api-key': apiKey
+      },
+      body: JSON.stringify({
+        text: text,
+        model_id: 'eleven_multilingual_v2',
+        voice_settings: { stability: 0.5, similarity_boost: 0.75 }
+      })
+    });
+    
+    if (!resp.ok) throw new Error('TTS API error: ' + resp.status);
+    
+    const blob = await resp.blob();
+    const url = URL.createObjectURL(blob);
+    const audio = new Audio(url);
+    audio.play();
+    showToast('🔊 正在朗读...','info');
+  } catch(e) {
+    console.warn('[ElevenLabs TTS] 失败:', e.message);
+    showToast('⚠️ ElevenLabs 朗读失败: ' + e.message,'error');
+  }
+}
+
 function triggerImageUpload(){document.getElementById('image-upload-input').click()}
 function handleImageUpload(e){const file=e.target.files[0];if(file){const reader=new FileReader();reader.onload=function(ev){document.getElementById('upload-preview-img').src=ev.target.result;document.getElementById('upload-preview').style.display='block'};reader.readAsDataURL(file);showToast('图片已上传，AI 将以此作为参考','success')}}
 function clearImageUpload(){document.getElementById('upload-preview').style.display='none';document.getElementById('image-upload-input').value=''}
@@ -851,16 +980,89 @@ function showStylePicker(){document.getElementById('style-modal').classList.remo
 function closeStyleModal(){document.getElementById('style-modal').classList.add('hidden')}
 function selectStyle(style){document.getElementById('create-prompt').value=style+'风格美甲设计';closeStyleModal();showToast(`已选择风格: ${style}`,'success')}
 
+// ====== 提示词模板 ======
+const promptTemplates = [
+  { name: '赛博朋克', prompt: '赛博朋克风格，深蓝色微光渐变，霓虹灯效，蝴蝶翅膀纹理，金属质感，全息投影效果' },
+  { name: '花卉春意', prompt: '春日花卉风格，粉色樱花花瓣，柔和渐变底色，金箔点缀，3D立体花朵，浪漫温柔' },
+  { name: '极简几何', prompt: '极简几何风格，黑白对比色，线条感设计，哑光质感，现代简约，法式优雅' },
+  { name: '星空银河', prompt: '星空银河风格，深紫到蓝渐变，星空闪粉，月亮星星点缀，珠光质感，梦幻璀璨' },
+  { name: '海洋之心', prompt: '海洋主题，蓝绿渐变，贝壳纹理，珍珠镶嵌，波光粼粼效果，人鱼姬光泽' },
+  { name: '暗黑哥特', prompt: '暗黑哥特风格，黑色为主调，暗红点缀，蕾丝纹理，银色金属装饰，神秘高贵' },
+  { name: '糖果马卡龙', prompt: '糖果马卡龙风格，粉嫩多彩配色，磨砂质感，可爱圆点，果冻透明感，甜美少女' },
+  { name: '大理石纹', prompt: '大理石纹理风格，白色底配金色纹理，高级感，哑光封层，天然石材质感' },
+  { name: '新年喜庆', prompt: '新年喜庆风格，中国红为主，金色福字，烟花图案，亮片闪粉，节日氛围' },
+  { name: '樱花和风', prompt: '和风樱花风格，淡粉底色，金箔樱花图案，日式庭院元素，珠光质感，典雅温婉' },
+  { name: '渐变落日', prompt: '落日渐变风格，橙红到紫渐变，夕阳余晖色调，金色微光，温暖浪漫' },
+  { name: '水晶钻石', prompt: '水晶钻石风格，透明底加钻石切面效果，闪耀光泽，3D水钻镶嵌，奢华高级' }
+];
+
+function showPromptTemplates() {
+  const modal = document.getElementById('prompt-template-modal');
+  if (modal) modal.classList.remove('hidden');
+  renderPromptTemplates();
+}
+
+function closePromptTemplates() {
+  const modal = document.getElementById('prompt-template-modal');
+  if (modal) modal.classList.add('hidden');
+}
+
+function renderPromptTemplates() {
+  const grid = document.getElementById('prompt-template-grid');
+  if (!grid) return;
+  grid.innerHTML = promptTemplates.map(t => `
+    <div class="prompt-tmpl-card" onclick="usePromptTemplate('${escHtml(t.prompt)}')" title="${escHtml(t.name)}">
+      <div class="prompt-tmpl-name">${escHtml(t.name)}</div>
+      <div class="prompt-tmpl-preview">${escHtml(t.prompt.substring(0, 40))}...</div>
+    </div>
+  `).join('');
+}
+
+function usePromptTemplate(prompt) {
+  document.getElementById('create-prompt').value = prompt;
+  closePromptTemplates();
+  showToast('✅ 已应用提示词模板','success');
+  // 自动发送到AI对话框
+  const chatInput = document.getElementById('create-chat-input');
+  if (chatInput) {
+    chatInput.value = prompt;
+    sendCreateChat();
+  }
+}
+
 function sendCreateChat(){
   const input=document.getElementById('create-chat-input');
   const msg=input.value.trim();
   if(!msg)return;
   const msgs=document.getElementById('create-chat-msgs');
-  msgs.innerHTML+=`<div class="chat-msg user"><div class="msg-avatar user-av">👤</div><div class="msg-bubble">${msg}</div></div>`;
+  msgs.innerHTML+=`<div class="chat-msg user"><div class="msg-avatar user-av">👤</div><div class="msg-bubble">${escHtml(msg)}</div></div>`;
   input.value='';msgs.scrollTop=msgs.scrollHeight;
+  
+  // 智能风格识别
+  let detectedStyle = '自定义';
+  const styleChecks = [
+    { keys: ['赛博','cyber','霓虹','金属'], style: '赛博朋克' },
+    { keys: ['花','樱花','floral','bloom'], style: '花卉' },
+    { keys: ['简约','极简','几何','法式'], style: '极简' },
+    { keys: ['星空','银河','star','space'], style: '星空银河' },
+    { keys: ['海洋','海','ocean','sea'], style: '海洋' },
+    { keys: ['暗黑','哥特','黑色','goth'], style: '暗黑哥特' },
+    { keys: ['糖果','马卡龙','粉色','可爱'], style: '糖果马卡龙' },
+    { keys: ['大理石','marble','stone'], style: '大理石纹' },
+    { keys: ['新年','春节','红色','福'], style: '新年喜庆' },
+    { keys: ['渐变','落日','黄昏','日落'], style: '渐变落日' },
+    { keys: ['水晶','钻石','diamond','水钻'], style: '水晶钻石' },
+  ];
+  for (const sc of styleChecks) {
+    if (sc.keys.some(k => msg.includes(k))) { detectedStyle = sc.style; break; }
+  }
+  
   setTimeout(()=>{
     document.getElementById('create-prompt').value=msg;
-    msgs.innerHTML+=`<div class="chat-msg agent"><div class="msg-avatar agent-av">🤖</div><div class="msg-bubble">已理解！为你优化提示词并准备生成...<br>风格识别: ${msg.includes('赛博')?'赛博朋克':msg.includes('花')?'花卉':msg.includes('简约')?'极简':'自定义'} · 甲型: 通用适配<br><button class="btn btn-xs btn-primary" style="margin-top:8px" onclick="generateNailArt()">✨ 立即生成</button></div></div>`;
+    msgs.innerHTML+=`<div class="chat-msg agent"><div class="msg-avatar agent-av">🤖</div><div class="msg-bubble">已理解！为你优化提示词并准备生成...<br>风格识别: ${detectedStyle} · 甲型: 通用适配<br>
+    <button class="btn btn-xs btn-primary" style="margin-top:8px;margin-right:4px" onclick="generateNailArt()">✨ 立即生成</button>
+    <button class="btn btn-xs btn-accent" style="margin-top:8px" onclick="speakWithElevenLabs('${escHtml(msg.replace(/'/g,"\\'"))}')">🔊 朗读</button>
+    </div></div>`;
     msgs.scrollTop=msgs.scrollHeight;
   },800)
 }
@@ -973,7 +1175,7 @@ function saveAllGeneratedToLibrary(images, prompt, provider) {
 // 渲染媒体库
 function renderMediaLibrary() {
   const grid = document.getElementById('ml-grid');
-  const empty = document.getElementById('ml-empty');
+  if (!grid) return;
   
   // 筛选
   let filtered = mediaLibrary;
@@ -996,26 +1198,27 @@ function renderMediaLibrary() {
   updateMediaCounts();
   
   if (filtered.length === 0) {
-    grid.innerHTML = '';
-    grid.appendChild(empty);
-    empty.style.display = 'block';
+    grid.innerHTML = `
+      <div class="ml-empty" style="display:block;grid-column:1/-1">
+        <div class="ml-empty-icon">📭</div>
+        <p>资源库为空</p>
+        <p style="font-size:11px">AI生成的图片/视频将自动保存到这里<br>也可以上传本地文件或识别在线链接</p>
+      </div>`;
   } else {
-    empty.style.display = 'none';
-    grid.innerHTML = filtered.map((m, idx) => {
-      const typeIcon = m.type === 'video' ? '🎬' : '';
-      const sourceBadge = m.source === 'ai-generated' ? '🤖 AI' : m.source === 'uploaded' ? '📤 本地' : m.source === 'cloud' ? '☁️ 云端' : '🔗 链接';
+    grid.innerHTML = filtered.map((m) => {
+      const idx = mediaLibrary.indexOf(m);
       const thumb = m.thumbnailUrl || m.url;
       const isVideo = m.type === 'video';
       return `
-        <div class="ml-item" onclick="openMediaPreview(${mediaLibrary.indexOf(m)})" title="${escHtml(m.name)}">
+        <div class="ml-item" onclick="openMediaPreview(${idx})" title="${escHtml(m.name)}">
           ${isVideo 
             ? `<video src="${m.url}" muted preload="metadata"></video><div class="ml-type-badge">🎬</div>`
-            : `<img src="${thumb}" alt="${escHtml(m.name)}" loading="lazy" onerror="this.parentElement.querySelector('.ml-placeholder').style.display='block';this.style.display='none'">
-               <div class="ml-placeholder" style="display:none;position:absolute;inset:0">🖼️</div>`
+            : `<img src="${thumb}" alt="${escHtml(m.name)}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+               <div class="ml-placeholder" style="display:none;position:absolute;inset:0;align-items:center;justify-content:center">🖼️</div>`
           }
           ${m.source === 'ai-generated' ? '<div class="ml-save-badge">AI</div>' : ''}
           <div class="ml-item-info">${escHtml(m.name.substring(0, 20))}</div>
-          <button class="ml-item-menu" onclick="event.stopPropagation();showMediaContextMenu(event,'${m.id}')" title="更多">⋯</button>
+          <button class="ml-item-menu" onclick="event.stopPropagation();showMediaContextMenu(event,'${m.id}')">⋯</button>
         </div>`;
     }).join('');
   }
@@ -1262,13 +1465,14 @@ function confirmMediaUpload() {
     }
   }
   
+  const uploadedCount = mediaUploadQueue.length;
   mediaUploadQueue.forEach(item => {
     addToMediaLibrary(item);
   });
   
   mediaUploadQueue = [];
   closeMediaUpload();
-  showToast(`✅ 已上传 ${mediaUploadQueue.length || '所有'} 资源到媒体库`,'success');
+  showToast(`✅ 已上传 ${uploadedCount || '所有'} 资源到媒体库`,'success');
 }
 
 function updateUploadConfirmBtn() {
@@ -1600,7 +1804,6 @@ let mlSearchQueryStandalone = '';
 
 function renderMediaLibraryStandalone() {
   const grid = document.getElementById('ml-grid-standalone');
-  const empty = document.getElementById('ml-empty-standalone');
   if (!grid) return;
   
   let filtered = mediaLibrary;
@@ -1622,11 +1825,13 @@ function renderMediaLibraryStandalone() {
   updateMediaCountsStandalone();
   
   if (filtered.length === 0) {
-    grid.innerHTML = '';
-    grid.appendChild(empty);
-    empty.style.display = 'block';
+    grid.innerHTML = `
+      <div class="ml-empty" style="display:block;grid-column:1/-1">
+        <div class="ml-empty-icon">📭</div>
+        <p>资源库为空</p>
+        <p style="font-size:11px">AI生成的图片/视频将自动保存到这里<br>也可以上传本地文件或识别在线链接</p>
+      </div>`;
   } else {
-    empty.style.display = 'none';
     grid.innerHTML = filtered.map((m) => {
       const idx = mediaLibrary.indexOf(m);
       const isVideo = m.type === 'video';

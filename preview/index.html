@@ -397,6 +397,15 @@ html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFo
 .toast.warning{background:#78350f;color:#fcd34d;border:1px solid #d97706}
 /* 响应式 */
 @media(max-width:1024px){.ml-grid{grid-template-columns:repeat(auto-fill,minmax(100px,1fr));max-height:300px}}
+/* 提示词模板 */
+.prompt-tmpl-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;max-height:360px;overflow-y:auto;padding:4px 0}
+.prompt-tmpl-card{padding:12px;background:var(--bg-tertiary);border:1px solid var(--border);border-radius:var(--radius);cursor:pointer;transition:var(--transition)}
+.prompt-tmpl-card:hover{border-color:var(--accent);background:var(--bg-elevated);transform:translateY(-2px);box-shadow:0 4px 12px rgba(0,0,0,0.2)}
+.prompt-tmpl-name{font-size:13px;font-weight:600;color:var(--text-primary);margin-bottom:6px}
+.prompt-tmpl-preview{font-size:11px;color:var(--text-tertiary);line-height:1.4}
+/* 语音按钮状态 */
+#voice-input-btn.listening{background:rgba(255,82,82,0.2);color:var(--danger);animation:pulse 1.5s infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(255,82,82,0.4)}50%{box-shadow:0 0 0 6px rgba(255,82,82,0)}}
 </style>
 <style>
 /* i18n styles */
@@ -619,9 +628,10 @@ html[dir="rtl"] .lang-dropdown {
 <div class="card"><div class="card-header"><div><div class="card-title" data-i18n="create.title">✨ AI 甲面创作</div><div class="card-subtitle" data-i18n="create.subtitle">用自然语言描述你想要的甲面设计</div></div></div>
 <div class="create-prompt-area"><textarea id="create-prompt" placeholder="例如：赛博朋克风格，深蓝色微光渐变，蝴蝶翅膀纹理，金属质感……"></textarea></div>
 <div class="prompt-toolbar">
+<button class="btn btn-secondary btn-sm" onclick="showPromptTemplates()">📋 提示词模板</button>
 <button class="btn btn-secondary btn-sm" onclick="showStylePicker()">🎭 风格库</button>
 <button class="btn btn-secondary btn-sm" onclick="triggerImageUpload()">📷 参考图</button>
-<button class="btn btn-secondary btn-sm" onclick="startVoiceInput()">🎤 语音输入</button>
+<button class="btn btn-secondary btn-sm" onclick="startVoiceInput()" id="voice-input-btn">🎤 语音输入</button>
 <button class="btn btn-primary btn-sm" onclick="generateNailArt()">✨ 生成设计</button>
 </div>
 <div id="upload-preview" class="upload-preview" style="display:none"><img id="upload-preview-img" src="" alt="参考图"><button class="remove-btn" onclick="clearImageUpload()">✕</button></div>
@@ -1184,6 +1194,11 @@ html[dir="rtl"] .lang-dropdown {
 <div class="style-item" onclick="selectStyle('波普')"><div>🎯</div><div class="style-label">波普</div></div>
 <div class="style-item" onclick="selectStyle('水彩')"><div>🎨</div><div class="style-label">水彩</div></div>
 </div><div class="modal-actions"><button class="btn btn-secondary btn-sm" onclick="closeStyleModal()">关闭</button></div></div></div>
+
+<!-- PROMPT TEMPLATE MODAL -->
+<div class="modal-overlay hidden" id="prompt-template-modal"><div class="modal" style="width:560px"><h3>📋 提示词模板</h3><p style="font-size:12px;color:var(--text-secondary);margin-bottom:12px">选择模板自动填充生图提示词，AI会据此生成美甲设计</p>
+<div class="prompt-tmpl-grid" id="prompt-template-grid"></div>
+<div class="modal-actions"><button class="btn btn-secondary btn-sm" onclick="closePromptTemplates()">关闭</button></div></div></div>
 
 <!-- COMMAND PALETTE -->
 <div class="hidden" id="command-palette"><div class="cmd-box">
