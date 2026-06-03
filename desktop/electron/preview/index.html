@@ -1,0 +1,2526 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI NAILS Desktop v4.0</title>
+<style>
+
+:root{
+  --bg-primary:#08080f;--bg-secondary:#0e0e18;--bg-tertiary:#141420;--bg-elevated:#1a1a2e;
+  --border:#1f1f35;--border-light:#2a2a40;
+  --text-primary:#e8e8f0;--text-secondary:#9090a8;--text-tertiary:#606078;
+  --accent:#00f0ff;--accent2:#b44cff;--accent3:#ff6b9d;
+  --success:#00e676;--warning:#ffab00;--danger:#ff5252;--info:#448aff;
+  --sidebar-width:240px;--sidebar-collapsed-width:60px;
+  --titlebar-height:44px;--statusbar-height:28px;
+  --radius:10px;--radius-sm:6px;--radius-lg:16px;
+  --shadow:0 4px 24px rgba(0,0,0,0.4);--shadow-sm:0 2px 8px rgba(0,0,0,0.3);
+  --transition:0.2s cubic-bezier(0.4,0,0.2,1);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;background:var(--bg-primary);color:var(--text-primary);-webkit-font-smoothing:antialiased;user-select:none}
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--border-light);border-radius:3px}::-webkit-scrollbar-thumb:hover{background:var(--text-tertiary)}
+.hidden{display:none!important}
+/* LOADING */
+.spinner{width:36px;height:36px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin 0.8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+/* AUTH OVERLAY */
+#auth-overlay{position:fixed;inset:0;z-index:1000;background:var(--bg-primary);display:flex;align-items:center;justify-content:center;transition:opacity 0.4s,visibility 0.4s}
+#auth-overlay.hidden{opacity:0;visibility:hidden}
+.auth-container{width:420px;max-height:90vh;overflow-y:auto;padding:32px 28px}
+.auth-logo{text-align:center;margin-bottom:28px}
+.auth-logo h1{font-size:28px;font-weight:800;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.auth-logo p{color:var(--text-secondary);font-size:13px;margin-top:4px}
+.auth-tabs{display:flex;background:var(--bg-tertiary);border-radius:var(--radius);padding:3px;margin-bottom:20px}
+.auth-tab{flex:1;text-align:center;padding:10px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;color:var(--text-secondary);transition:var(--transition)}
+.auth-tab.active{background:var(--bg-elevated);color:var(--text-primary)}
+.auth-tab:hover:not(.active){color:var(--text-primary)}
+.auth-mode-tabs{display:flex;gap:8px;margin-bottom:16px}
+.auth-mode-tabs .auth-tab{font-size:12px;padding:6px 14px}
+.form-group{margin-bottom:14px}
+.form-group label{display:block;font-size:12px;color:var(--text-secondary);margin-bottom:5px;font-weight:500}
+.form-input{width:100%;padding:10px 12px;background:var(--bg-tertiary);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text-primary);font-size:13px;outline:none;transition:var(--transition)}
+.form-input:focus{border-color:var(--accent);box-shadow:0 0 0 2px rgba(0,240,255,0.1)}
+.form-input::placeholder{color:var(--text-tertiary)}
+.input-row{display:flex;gap:8px}.input-row .form-input{flex:1}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:8px 16px;border:none;border-radius:var(--radius-sm);font-size:13px;font-weight:600;cursor:pointer;transition:var(--transition);white-space:nowrap}
+.btn-primary{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;width:100%;padding:12px}
+.btn-primary:hover{opacity:0.9;transform:translateY(-1px);box-shadow:0 4px 16px rgba(0,240,255,0.3)}
+.btn-secondary{background:var(--bg-tertiary);color:var(--text-primary);border:1px solid var(--border)}
+.btn-secondary:hover{background:var(--bg-elevated);border-color:var(--accent)}
+.btn-xs{padding:4px 10px;font-size:11px}.btn-sm{padding:6px 12px;font-size:12px}
+.btn-danger{background:rgba(255,82,82,0.15);color:var(--danger)}.btn-danger:hover{background:rgba(255,82,82,0.25)}
+.btn-accent{background:rgba(180,76,255,0.15);color:var(--accent2)}.btn-accent:hover{background:rgba(180,76,255,0.25)}
+.btn-success{background:rgba(0,230,118,0.15);color:var(--success)}.btn-success:hover{background:rgba(0,230,118,0.25)}
+.btn-icon{width:36px;height:36px;padding:0;border-radius:50%;font-size:16px}
+.social-login{display:flex;gap:10px;margin-top:16px}.social-btn{flex:1;padding:10px;background:var(--bg-tertiary);border:1px solid var(--border);border-radius:var(--radius-sm);text-align:center;cursor:pointer;font-size:20px;transition:var(--transition)}.social-btn:hover{background:var(--bg-elevated);border-color:var(--accent)}
+.auth-link{color:var(--accent);cursor:pointer;font-size:12px;text-decoration:none}.auth-link:hover{text-decoration:underline}
+.auth-footer{text-align:center;margin-top:16px;font-size:12px;color:var(--text-secondary)}
+.checkbox-row{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text-secondary);margin:12px 0}.checkbox-row input{accent-color:var(--accent)}
+.strength-bar{height:4px;background:var(--bg-tertiary);border-radius:2px;margin-top:4px;overflow:hidden}.strength-bar-fill{height:100%;border-radius:2px;transition:width 0.3s}.strength-weak{background:var(--danger)}.strength-fair{background:var(--warning)}.strength-good{background:var(--accent)}.strength-strong{background:var(--success)}
+.password-reqs{margin-top:6px;font-size:11px;color:var(--text-tertiary)}.password-reqs span{display:block}.password-reqs .met{color:var(--success)}
+/* DESKTOP SHELL */
+#desktop-shell{position:fixed;inset:0;display:flex;flex-direction:column;opacity:0;visibility:hidden;transition:opacity 0.4s}
+#desktop-shell.visible{opacity:1;visibility:visible}
+#titlebar{height:var(--titlebar-height);background:var(--bg-secondary);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 80px 0 12px;-webkit-app-region:drag;z-index:10;gap:12px}
+.titlebar-logo{font-size:14px;font-weight:700;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.titlebar-divider{width:1px;height:18px;background:var(--border)}
+#titlebar-page-name{font-size:12px;color:var(--text-secondary)}
+#main-content{display:flex;flex:1;overflow:hidden}
+/* SIDEBAR */
+#sidebar{width:var(--sidebar-width);background:var(--bg-secondary);border-right:1px solid var(--border);display:flex;flex-direction:column;transition:width var(--transition);overflow:hidden;z-index:5}
+#sidebar.collapsed{width:var(--sidebar-collapsed-width)}
+#sidebar.collapsed .sidebar-label,#sidebar.collapsed .sidebar-badge,#sidebar.collapsed .sidebar-section-title,#sidebar.collapsed .sidebar-user-info,#sidebar.collapsed .sidebar-collapse-btn span{display:none}
+#sidebar.collapsed .sidebar-nav-item{justify-content:center;padding:12px 0}
+#sidebar.collapsed .sidebar-nav-item .nav-icon{margin-right:0}
+#sidebar.collapsed .sidebar-user-area{justify-content:center}
+#sidebar.collapsed .sidebar-collapse-btn{justify-content:center}
+.sidebar-user-area{display:flex;align-items:center;gap:10px;padding:16px 16px 12px;border-bottom:1px solid var(--border)}
+.user-avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.sidebar-user-info{overflow:hidden}
+#sidebar-username{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sidebar-role{font-size:10px;color:var(--text-tertiary)}
+.sidebar-section-title{font-size:10px;font-weight:700;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:1px;padding:14px 16px 6px}
+.sidebar-nav{display:flex;flex-direction:column;gap:2px;padding:0 8px;flex:1;overflow-y:auto}
+.sidebar-nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:var(--radius-sm);cursor:pointer;transition:var(--transition);font-size:13px;color:var(--text-secondary);border:none;background:none;width:100%;text-align:left}
+.sidebar-nav-item:hover{background:var(--bg-tertiary);color:var(--text-primary)}
+.sidebar-nav-item.active{background:rgba(0,240,255,0.08);color:var(--accent)}
+.nav-icon{font-size:16px;width:20px;text-align:center;flex-shrink:0}
+.sidebar-badge{font-size:10px;padding:2px 6px;border-radius:10px;margin-left:auto}
+.badge-new{background:var(--accent);color:#000}.badge-hot{background:var(--accent3);color:#fff}.badge-pro{background:var(--accent2);color:#fff}
+.sidebar-collapse-btn{display:flex;align-items:center;gap:6px;padding:10px 16px;border-top:1px solid var(--border);color:var(--text-tertiary);cursor:pointer;font-size:11px;transition:var(--transition)}.sidebar-collapse-btn:hover{color:var(--text-secondary)}
+/* CONTENT */
+.content-panel{flex:1;overflow-y:auto;overflow-x:hidden;padding:24px 28px;background:var(--bg-primary)}
+.content-page{display:none}.content-page.active{display:block;animation:fadeIn 0.3s}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+/* CARDS */
+.card{background:var(--bg-secondary);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:16px;transition:var(--transition)}
+.card:hover{border-color:var(--border-light)}
+.card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.card-title{font-size:15px;font-weight:700}
+.card-subtitle{font-size:12px;color:var(--text-secondary);margin-top:2px}
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px}
+.stat-card{background:var(--bg-secondary);border:1px solid var(--border);border-radius:var(--radius);padding:16px}
+.stat-label{font-size:11px;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:0.5px}
+.stat-value{font-size:22px;font-weight:800;margin-top:4px;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.stat-change{font-size:11px;margin-top:2px}.stat-change.up{color:var(--success)}.stat-change.down{color:var(--danger)}
+/* TAGS */
+.tag{display:inline-block;font-size:10px;padding:2px 8px;border-radius:10px;font-weight:600;margin-right:4px}
+.tag-accent{background:rgba(0,240,255,0.12);color:var(--accent)}
+.tag-success{background:rgba(0,230,118,0.12);color:var(--success)}
+.tag-warning{background:rgba(255,171,0,0.12);color:var(--warning)}
+.tag-danger{background:rgba(255,82,82,0.12);color:var(--danger)}
+.tag-gold{background:rgba(255,215,0,0.15);color:#ffd700}
+.tag-accent3{background:rgba(255,107,157,0.12);color:var(--accent3)}
+.tag-info{background:rgba(68,138,255,0.12);color:var(--info)}
+/* PAGE TABS */
+.page-tabs{display:flex;gap:4px;background:var(--bg-tertiary);border-radius:var(--radius);padding:3px;margin-bottom:20px;width:fit-content}
+.page-tab{padding:7px 16px;border-radius:8px;cursor:pointer;font-size:12px;font-weight:600;color:var(--text-secondary);transition:var(--transition);border:none;background:none}
+.page-tab.active{background:var(--bg-elevated);color:var(--text-primary)}
+.page-tab:hover:not(.active){color:var(--text-primary)}
+/* CREATE PAGE */
+.create-layout{display:grid;grid-template-columns:1fr 340px;gap:20px}
+.create-main{display:flex;flex-direction:column;gap:16px}
+.create-prompt-area{position:relative}
+.create-prompt-area textarea{width:100%;min-height:120px;padding:14px;background:var(--bg-tertiary);border:1px solid var(--border);border-radius:var(--radius);color:var(--text-primary);font-size:14px;resize:vertical;outline:none;font-family:inherit;transition:var(--transition)}
+.create-prompt-area textarea:focus{border-color:var(--accent);box-shadow:0 0 0 2px rgba(0,240,255,0.1)}
+.prompt-toolbar{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}
+.prompt-preview{background:var(--bg-secondary);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-top:12px}
+.prompt-preview-label{font-size:11px;color:var(--text-tertiary);margin-bottom:6px}
+.prompt-preview-text{font-size:13px;color:var(--text-secondary);line-height:1.5}
+.result-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.result-item{aspect-ratio:1;background:var(--bg-tertiary);border:1px solid var(--border);border-radius:var(--radius);display:flex;align-items:center;justify-content:center;font-size:36px;cursor:pointer;transition:var(--transition)}.result-item:hover{border-color:var(--accent);transform:scale(1.03)}
+/* CHAT PANEL */
+.chat-panel{background:var(--bg-secondary);border:1px solid var(--border);border-radius:var(--radius);display:flex;flex-direction:column;height:400px}
+.chat-msgs{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:10px}
+.chat-msg{display:flex;gap:8px}.chat-msg.user{flex-direction:row-reverse}
+.msg-avatar{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0}
+.user-av{background:var(--accent2)}.agent-av{background:var(--accent)}
+.msg-bubble{max-width:80%;padding:10px 14px;border-radius:14px;font-size:12px;line-height:1.5;word-break:break-word}
+.chat-msg.user .msg-bubble{background:var(--accent2);color:#fff;border-bottom-right-radius:4px}
+.chat-msg.agent .msg-bubble{background:var(--bg-tertiary);border:1px solid var(--border);border-bottom-left-radius:4px}
+.chat-input-row{display:flex;gap:8px;padding:12px;border-top:1px solid var(--border)}
+.chat-input-row input{flex:1;padding:10px 12px;background:var(--bg-tertiary);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text-primary);font-size:12px;outline:none}
+.chat-input-row input:focus{border-color:var(--accent)}
+/* DEVICE PAGE */
+.device-dashboard{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}
+.device-card{background:var(--bg-secondary);border:1px solid var(--border);border-radius:var(--radius);padding:20px}
+.device-card .device-name{font-size:15px;font-weight:700;display:flex;align-items:center;gap:8px}
+.status-dot{width:8px;height:8px;border-radius:50%}.status-online{background:var(--success)}.status-offline{background:var(--danger)}.status-idle{background:var(--warning)}
+.ink-bars{display:flex;gap:4px;margin-top:10px}.ink-bar{flex:1;height:6px;border-radius:3px}.ink-c{background:var(--accent)}.ink-m{background:var(--accent3)}.ink-y{background:var(--warning)}.ink-k{background:var(--text-secondary)}
+.progress-bar{height:6px;background:var(--bg-tertiary);border-radius:3px;margin-top:8px;overflow:hidden}.progress-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--accent),var(--accent2))}
+/* DEVICE ACTIONS */
+.device-actions{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+/* CONNECTION PANEL */
+.connection-panel{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px}
+.conn-card{background:var(--bg-secondary);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px;transition:var(--transition)}
+.conn-card:hover{border-color:var(--border-light)}
+.conn-card.bt-card{border-left:3px solid #0082fc}
+.conn-card.wifi-card{border-left:3px solid var(--accent)}
+.conn-card-header{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.conn-card-icon{width:42px;height:42px;border-radius:var(--radius);display:flex;align-items:center;justify-content:center;font-size:20px}
+.bt-icon{background:rgba(0,130,252,0.12);color:#0082fc}
+.wifi-icon{background:rgba(0,240,255,0.1);color:var(--accent)}
+.conn-card-title{font-size:14px;font-weight:700}
+.conn-card-status{font-size:11px;color:var(--text-tertiary)}
+.conn-card-status.connected{color:var(--success)}
+.conn-card-status.scanning{color:var(--accent);animation:pulse-text 1.5s infinite}
+@keyframes pulse-text{0%,100%{opacity:1}50%{opacity:0.5}}
+.conn-scan-area{max-height:160px;overflow-y:auto;margin:10px 0}
+.conn-device-item{display:flex;align-items:center;justify-content:space-between;padding:8px 10px;background:var(--bg-tertiary);border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:6px;transition:var(--transition);cursor:pointer}
+.conn-device-item:hover{border-color:var(--accent);background:rgba(0,240,255,0.04)}
+.conn-device-info{display:flex;flex-direction:column;gap:2px}
+.conn-device-name{font-size:13px;font-weight:600}
+.conn-device-id{font-size:10px;color:var(--text-tertiary)}
+.conn-device-signal{display:flex;gap:2px;align-items:flex-end}
+.signal-bar{width:3px;background:var(--text-tertiary);border-radius:1px;transition:var(--transition)}
+.signal-bar.active{background:var(--accent)}
+.signal-bar:nth-child(1){height:6px}.signal-bar:nth-child(2){height:10px}.signal-bar:nth-child(3){height:14px}.signal-bar:nth-child(4){height:18px}
+.conn-connected-info{background:var(--bg-tertiary);border:1px solid var(--success);border-radius:var(--radius-sm);padding:10px 12px;margin:8px 0;display:flex;align-items:center;gap:10px}
+.conn-connected-info .dev-icon{font-size:22px}
+.conn-connected-info .dev-detail{flex:1}
+.conn-connected-info .dev-detail .dev-name{font-size:13px;font-weight:600}
+.conn-connected-info .dev-detail .dev-meta{font-size:10px;color:var(--text-tertiary)}
+.conn-btn-row{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
+/* WIFI CONFIG MODAL */
+.wifi-config-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:1000;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
+.wifi-config-overlay.hidden{display:none}
+.wifi-config-card{background:var(--bg-primary);border:1px solid var(--border);border-radius:var(--radius-lg);padding:24px;width:90%;max-width:420px;box-shadow:var(--shadow)}
+.wifi-config-card h3{font-size:16px;font-weight:700;margin-bottom:4px}
+.wifi-config-card .wifi-sub{font-size:12px;color:var(--text-secondary);margin-bottom:16px}
+.wifi-networks{max-height:200px;overflow-y:auto;margin-bottom:12px}
+.wifi-network-item{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:var(--bg-tertiary);border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:6px;cursor:pointer;transition:var(--transition)}
+.wifi-network-item:hover{border-color:var(--accent)}
+.wifi-network-item.selected{border-color:var(--accent);background:rgba(0,240,255,0.06)}
+.wifi-network-item .wifi-ssid{font-size:13px;font-weight:600;display:flex;align-items:center;gap:6px}
+.wifi-network-item .wifi-secure{font-size:10px;color:var(--text-tertiary)}
+.wifi-pass-input{display:none;margin-top:12px}
+.wifi-pass-input.visible{display:block}
+.wifi-pass-row{display:flex;gap:8px}
+.wifi-pass-row input{flex:1}
+/* PAYMENT PAGE */
+.amount-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:8px;margin-bottom:16px}
+.amount-btn{padding:12px;background:var(--bg-tertiary);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text-primary);font-size:14px;font-weight:700;cursor:pointer;transition:var(--transition);text-align:center}
+.amount-btn:hover{border-color:var(--accent)}
+.amount-btn.selected{background:rgba(0,240,255,0.1);border-color:var(--accent);color:var(--accent)}
+.currency-select{display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap}
+.currency-chip{padding:6px 12px;background:var(--bg-tertiary);border:1px solid var(--border);border-radius:16px;font-size:12px;cursor:pointer;transition:var(--transition)}.currency-chip:hover{border-color:var(--accent)}.currency-chip.selected{background:var(--accent);color:#000;border-color:var(--accent);font-weight:700}
+.payment-methods{display:flex;flex-direction:column;gap:8px;margin-bottom:16px}
+.payment-method{display:flex;align-items:center;gap:10px;padding:12px;background:var(--bg-tertiary);border:1px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;transition:var(--transition)}.payment-method:hover{border-color:var(--accent)}.payment-method.selected{border-color:var(--accent);background:rgba(0,240,255,0.05)}.payment-method .pm-icon{font-size:20px}
+.subscription-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;margin-bottom:16px}
+.sub-card{padding:16px;background:var(--bg-tertiary);border:1px solid var(--border);border-radius:var(--radius);cursor:pointer;transition:var(--transition);text-align:center}.sub-card:hover{border-color:var(--accent)}.sub-card.selected{border-color:var(--accent);background:rgba(0,240,255,0.05)}.sub-card .sub-name{font-size:15px;font-weight:700}.sub-card .sub-price{font-size:24px;font-weight:800;margin:8px 0;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}.sub-card .sub-features{font-size:11px;color:var(--text-secondary);line-height:1.6}
+.payment-summary{background:var(--bg-secondary);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:16px}
+.summary-row{display:flex;justify-content:space-between;padding:6px 0;font-size:13px;color:var(--text-secondary)}.summary-row.total{border-top:1px solid var(--border);margin-top:6px;padding-top:10px;font-weight:700;font-size:15px;color:var(--text-primary)}
+/* COMMUNITY */
+.feed-item{display:flex;gap:14px;padding:16px;background:var(--bg-secondary);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:10px;transition:var(--transition)}.feed-item:hover{border-color:var(--border-light)}
+.feed-avatar{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.feed-content{flex:1}.feed-user{font-weight:600;font-size:13px}.feed-time{font-size:11px;color:var(--text-tertiary)}.feed-text{font-size:13px;margin:6px 0;line-height:1.5}.feed-actions{display:flex;gap:16px;font-size:12px;color:var(--text-tertiary)}.feed-actions span{cursor:pointer;transition:var(--transition)}.feed-actions span:hover{color:var(--accent)}
+.market-item{display:flex;align-items:center;gap:12px;padding:12px 16px;background:var(--bg-secondary);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:8px}.market-item .market-preview{width:48px;height:48px;background:var(--bg-tertiary);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0}.market-item .market-info{flex:1}.market-item .market-name{font-weight:600;font-size:13px}.market-item .market-author{font-size:11px;color:var(--text-secondary)}.market-item .market-price{font-weight:700;color:var(--accent)}
+.leaderboard-table{width:100%;border-collapse:collapse;font-size:13px}.leaderboard-table th{text-align:left;padding:10px 14px;color:var(--text-tertiary);font-size:11px;text-transform:uppercase;border-bottom:1px solid var(--border)}.leaderboard-table td{padding:12px 14px;border-bottom:1px solid var(--border)}.leaderboard-table tr:hover{background:var(--bg-tertiary)}.rank-badge{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;font-size:11px;font-weight:700}.rank-1{background:#ffd700;color:#000}.rank-2{background:#c0c0c0;color:#000}.rank-3{background:#cd7f32;color:#fff}
+/* PROVIDER PAGE */
+.provider-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}
+.provider-card{background:var(--bg-secondary);border:1px solid var(--border);border-radius:var(--radius);padding:20px;cursor:pointer;transition:var(--transition);position:relative}.provider-card:hover{border-color:var(--border-light);transform:translateY(-2px)}.provider-card.active-provider{border-color:var(--accent);box-shadow:0 0 0 2px rgba(0,240,255,0.15)}.provider-card .provider-header{display:flex;align-items:center;gap:12px;margin-bottom:12px}.provider-card .provider-icon{font-size:32px}.provider-card .provider-name{font-size:16px;font-weight:700}.provider-card .provider-model{font-size:11px;color:var(--text-secondary)}.provider-card .provider-desc{font-size:12px;color:var(--text-secondary);line-height:1.5;margin-bottom:12px}.provider-card .provider-status{display:flex;align-items:center;gap:6px;font-size:11px}.provider-card .provider-badge{position:absolute;top:12px;right:12px;padding:3px 8px;border-radius:10px;font-size:10px;font-weight:700}.badge-default{background:rgba(0,240,255,0.15);color:var(--accent)}.badge-recommend{background:rgba(0,230,118,0.15);color:var(--success)}
+/* SKILL CARDS */
+.skill-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}
+.skill-card{background:var(--bg-secondary);border:1px solid var(--border);border-radius:var(--radius);padding:16px;transition:var(--transition)}.skill-card:hover{border-color:var(--border-light)}
+.skill-card.anygen{border-color:rgba(255,215,0,0.2);background:linear-gradient(135deg,rgba(255,215,0,0.04),var(--bg-secondary))}.skill-card.anygen:hover{border-color:rgba(255,215,0,0.4)}
+.skill-card.heygen{border-color:rgba(0,230,118,0.2);background:linear-gradient(135deg,rgba(0,230,118,0.04),var(--bg-secondary))}.skill-card.heygen:hover{border-color:rgba(0,230,118,0.4)}
+.skill-use-panel{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);display:flex;align-items:center;justify-content:center;z-index:1000;backdrop-filter:blur(4px)}.skill-use-panel.hidden{display:none}
+.skill-use-card{background:var(--bg-primary);border:1px solid var(--border);border-radius:var(--radius-lg);padding:24px;width:90%;max-width:600px;max-height:80vh;overflow-y:auto;box-shadow:var(--shadow)}
+.skill-use-card h3{margin:0 0 4px;font-size:18px}.skill-use-card .subtitle{color:var(--text-tertiary);font-size:12px;margin-bottom:16px}
+.skill-config-modal{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);display:flex;align-items:center;justify-content:center;z-index:1001;backdrop-filter:blur(4px)}.skill-config-modal.hidden{display:none}
+.skill-config-card{background:var(--bg-primary);border:1px solid var(--border);border-radius:var(--radius-lg);padding:24px;width:90%;max-width:460px;box-shadow:var(--shadow)}
+.skill-config-card h3{margin:0 0 8px}.skill-config-card .api-status{font-size:12px;margin-bottom:12px}
+.skill-header{display:flex;align-items:center;gap:10px;margin-bottom:10px}.skill-icon{font-size:28px}.skill-name{font-weight:700;font-size:14px}.skill-version{font-size:11px;color:var(--text-tertiary)}.skill-desc{font-size:12px;color:var(--text-secondary);margin-bottom:10px;line-height:1.5}.skill-tags{margin-bottom:10px;display:flex;flex-wrap:wrap;gap:4px}.skill-actions{display:flex;align-items:center;justify-content:space-between}
+/* TOGGLE SWITCH */
+.toggle-switch{position:relative;display:inline-block;width:40px;height:22px}.toggle-switch input{opacity:0;width:0;height:0}.toggle-slider{position:absolute;cursor:pointer;inset:0;background:var(--bg-tertiary);border-radius:22px;transition:var(--transition)}.toggle-slider:before{content:'';position:absolute;height:16px;width:16px;left:3px;bottom:3px;background:#fff;border-radius:50%;transition:var(--transition)}.toggle-switch input:checked+.toggle-slider{background:var(--accent)}.toggle-switch input:checked+.toggle-slider:before{transform:translateX(18px)}
+/* CUSTOM SKILL FORM */
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+.form-row .form-group{margin-bottom:0}
+/* OPENCLAW PAGE */
+.openclaw-hero{text-align:center;padding:40px 20px;background:var(--bg-secondary);border:1px solid var(--border);border-radius:var(--radius-lg);margin-bottom:20px}
+.openclaw-hero .oc-icon{font-size:64px;margin-bottom:16px}
+.openclaw-hero h2{font-size:24px;font-weight:800;margin-bottom:8px;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.openclaw-hero p{color:var(--text-secondary);font-size:13px;margin-bottom:20px}
+.openclaw-sessions{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px}
+.openclaw-session-card{padding:16px;background:var(--bg-secondary);border:1px solid var(--border);border-radius:var(--radius);cursor:pointer;transition:var(--transition);text-align:center}.openclaw-session-card:hover{border-color:var(--accent);transform:translateY(-2px)}.openclaw-session-card .session-icon{font-size:28px;margin-bottom:8px}.openclaw-session-card .session-name{font-weight:600;font-size:13px}.openclaw-session-card .session-desc{font-size:11px;color:var(--text-secondary);margin-top:4px}
+/* ADMIN PAGE */
+.admin-table{width:100%;border-collapse:collapse;font-size:13px}.admin-table th{text-align:left;padding:10px 14px;color:var(--text-tertiary);font-size:11px;text-transform:uppercase;border-bottom:1px solid var(--border)}.admin-table td{padding:10px 14px;border-bottom:1px solid var(--border)}.admin-table tr:hover{background:var(--bg-tertiary)}
+/* SETTINGS PAGE */
+.settings-section{margin-bottom:24px}.settings-section h3{font-size:14px;font-weight:700;margin-bottom:12px;color:var(--text-primary)}.setting-row{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--border)}.setting-row .setting-label{font-size:13px}.setting-row .setting-desc{font-size:11px;color:var(--text-tertiary);margin-top:2px}
+/* MODALS */
+.modal-overlay{position:fixed;inset:0;z-index:2000;background:rgba(0,0,0,0.7);display:flex;align-items:center;justify-content:center;animation:fadeIn 0.2s}
+.modal{background:var(--bg-secondary);border:1px solid var(--border);border-radius:var(--radius-lg);padding:28px;width:400px;max-height:80vh;overflow-y:auto;box-shadow:var(--shadow)}
+.modal h3{font-size:16px;font-weight:700;margin-bottom:16px}.modal p{font-size:13px;color:var(--text-secondary);margin-bottom:12px;line-height:1.5}.modal-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:16px}
+.qr-container{text-align:center;padding:20px}.qr-container .qr-code{width:160px;height:160px;background:var(--bg-tertiary);border:1px solid var(--border);border-radius:var(--radius);display:flex;align-items:center;justify-content:center;font-size:80px;margin:0 auto 16px}.qr-container .qr-hint{font-size:12px;color:var(--text-secondary)}
+.success-icon{font-size:48px;text-align:center;margin-bottom:12px}
+/* COMMAND PALETTE */
+#command-palette{position:fixed;inset:0;z-index:3000;background:rgba(0,0,0,0.6);display:flex;justify-content:center;padding-top:15vh}
+.cmd-box{width:520px;background:var(--bg-secondary);border:1px solid var(--border);border-radius:var(--radius-lg);box-shadow:var(--shadow);overflow:hidden}
+.cmd-input-wrap{padding:14px 16px;border-bottom:1px solid var(--border)}
+.cmd-input-wrap input{width:100%;background:transparent;border:none;color:var(--text-primary);font-size:15px;outline:none}.cmd-input-wrap input::placeholder{color:var(--text-tertiary)}
+.cmd-list{max-height:300px;overflow-y:auto;padding:6px}
+.cmd-section{padding:8px 14px 4px;font-size:10px;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:1px}
+.cmd-item{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border-radius:var(--radius-sm);cursor:pointer;font-size:13px;transition:var(--transition)}.cmd-item:hover,.cmd-item.selected{background:var(--bg-tertiary)}.cmd-shortcut{font-size:11px;color:var(--text-tertiary);background:var(--bg-tertiary);padding:2px 6px;border-radius:4px}
+/* TOAST */
+#toast-container{position:fixed;top:60px;right:20px;z-index:5000;display:flex;flex-direction:column;gap:8px}
+.toast{padding:10px 16px;border-radius:var(--radius-sm);font-size:13px;font-weight:500;animation:slideIn 0.3s;box-shadow:var(--shadow-sm);max-width:360px}
+.toast-info{background:var(--bg-elevated);border:1px solid var(--border);color:var(--text-primary)}
+.toast-success{background:rgba(0,230,118,0.12);border:1px solid var(--success);color:var(--success)}
+.toast-error{background:rgba(255,82,82,0.12);border:1px solid var(--danger);color:var(--danger)}
+@keyframes slideIn{from{transform:translateX(100%);opacity:0}to{transform:translateX(0);opacity:1}}
+/* STATUS BAR */
+#statusbar{height:var(--statusbar-height);background:var(--bg-secondary);border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 14px;font-size:11px;color:var(--text-tertiary)}
+.status-left,.status-right{display:flex;align-items:center;gap:16px}
+.status-item{display:flex;align-items:center;gap:4px}
+/* STYLE PICKER */
+.style-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px}
+.style-item{padding:14px;background:var(--bg-tertiary);border:1px solid var(--border);border-radius:var(--radius);cursor:pointer;text-align:center;transition:var(--transition);font-size:24px}.style-item:hover{border-color:var(--accent);transform:scale(1.05)}.style-item .style-label{font-size:11px;color:var(--text-secondary);margin-top:6px}
+/* UPLOAD PREVIEW */
+.upload-preview{position:relative;display:inline-block;margin-top:8px}.upload-preview img{max-width:200px;max-height:200px;border-radius:var(--radius);border:1px solid var(--border)}.upload-preview .remove-btn{position:absolute;top:-8px;right:-8px;width:22px;height:22px;border-radius:50%;background:var(--danger);color:#fff;border:none;cursor:pointer;font-size:12px;display:flex;align-items:center;justify-content:center}
+/* PROCESSING */
+.processing-animation{text-align:center;padding:30px}.processing-animation .spinner{margin:0 auto 16px}
+/* RESPONSIVE */
+@media(max-width:1024px){.create-layout{grid-template-columns:1fr}.stat-grid{grid-template-columns:repeat(2,1fr)}.provider-grid{grid-template-columns:1fr}}
+/* QUICK ADD SKILLS */
+.quick-add-section{margin-top:12px;padding:12px 14px;background:var(--bg-tertiary);border:1px solid var(--border);border-radius:var(--radius)}
+.quick-add-title{font-size:12px;font-weight:600;color:var(--text-secondary);margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.quick-add-grid{display:flex;flex-wrap:wrap;gap:8px}
+.quick-add-chip{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:20px;font-size:12px;cursor:pointer;border:1px solid var(--border);background:var(--bg-primary);transition:var(--transition);white-space:nowrap}
+.quick-add-chip:hover{border-color:var(--accent);background:rgba(99,102,241,0.08)}
+.quick-add-chip.installed{border-color:var(--success);background:rgba(34,197,94,0.08);cursor:default}
+.quick-add-chip.installed .chip-status{color:var(--success)}
+.quick-add-chip .chip-icon{font-size:16px}
+.quick-add-chip .chip-status{font-size:10px;color:var(--text-tertiary)}
+.quick-add-all-btn{display:inline-flex;align-items:center;gap:6px;padding:8px 18px;border-radius:20px;font-size:13px;font-weight:600;cursor:pointer;border:none;background:linear-gradient(135deg,var(--accent),#8b5cf6);color:#fff;transition:var(--transition);margin-top:8px}
+.quick-add-all-btn:hover{transform:translateY(-1px);box-shadow:0 4px 16px rgba(99,102,241,0.35)}
+.quick-add-all-btn:disabled{opacity:0.5;cursor:not-allowed;transform:none}
+.quick-add-all-btn .btn-spinner{display:none;width:14px;height:14px;border:2px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite}
+.quick-add-all-btn.loading .btn-spinner{display:inline-block}
+.quick-add-all-btn.loading .btn-text{display:none}
+.quick-add-provider-badge{font-size:10px;padding:1px 6px;border-radius:10px;margin-left:2px}
+.badge-creatok{background:rgba(139,92,246,0.15);color:#a78bfa}
+.badge-clipcat{background:rgba(59,130,246,0.15);color:#60a5fa}
+.badge-nano{background:rgba(180,76,255,0.15);color:#c084fc}
+.quick-add-toast{position:fixed;top:80px;right:24px;z-index:9999;padding:12px 20px;border-radius:var(--radius);font-size:13px;font-weight:500;animation:slideInRight .3s ease;box-shadow:0 8px 32px rgba(0,0,0,0.3)}
+.quick-add-toast.success{background:#065f46;color:#6ee7b7;border:1px solid #059669}
+.quick-add-toast.info{background:#1e3a5f;color:#93c5fd;border:1px solid #2563eb}
+@keyframes slideInRight{from{transform:translateX(100%);opacity:0}to{transform:translateX(0);opacity:1}}
+/* ========== 媒体资源库 ========== */
+.media-library{margin-top:16px;background:var(--bg-secondary);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+.ml-header{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--border);flex-wrap:wrap;gap:10px}
+.ml-title-area{display:flex;align-items:center;gap:8px}
+.ml-icon{font-size:20px}
+.ml-title{font-size:14px;font-weight:700;color:var(--text-primary)}
+.ml-count{font-size:11px;color:var(--text-tertiary);background:var(--bg-tertiary);padding:2px 8px;border-radius:10px}
+.ml-actions{display:flex;gap:6px;flex-wrap:wrap}
+.ml-tabs{display:flex;gap:0;padding:0 16px;border-bottom:1px solid var(--border)}
+.ml-tab{padding:8px 16px;font-size:12px;cursor:pointer;color:var(--text-tertiary);border-bottom:2px solid transparent;transition:var(--transition);background:none;border-top:none;border-left:none;border-right:none;font-family:inherit}
+.ml-tab:hover{color:var(--text-primary)}
+.ml-tab.active{color:var(--accent);border-bottom-color:var(--accent);font-weight:600}
+.ml-tab .tab-count{font-size:10px;margin-left:4px;opacity:0.7}
+.ml-toolbar{display:flex;align-items:center;gap:8px;padding:10px 16px;flex-wrap:wrap}
+.ml-search{flex:1;min-width:160px;padding:7px 12px;background:var(--bg-tertiary);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text-primary);font-size:12px;outline:none;font-family:inherit}
+.ml-search:focus{border-color:var(--accent)}
+.ml-tag-filters{display:flex;gap:6px;flex-wrap:wrap}
+.ml-filter-tag{padding:4px 10px;font-size:11px;border-radius:12px;cursor:pointer;border:1px solid var(--border);background:var(--bg-tertiary);color:var(--text-secondary);transition:var(--transition);white-space:nowrap}
+.ml-filter-tag:hover{border-color:var(--accent)}
+.ml-filter-tag.active{background:rgba(0,240,255,0.12);border-color:var(--accent);color:var(--accent)}
+.ml-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px;padding:12px 16px;max-height:400px;overflow-y:auto}
+.ml-item{position:relative;aspect-ratio:1;background:var(--bg-tertiary);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;cursor:pointer;transition:var(--transition);display:flex;align-items:center;justify-content:center}
+.ml-item:hover{border-color:var(--accent);transform:scale(1.03);box-shadow:0 4px 16px rgba(0,0,0,0.3)}
+.ml-item img,.ml-item video{width:100%;height:100%;object-fit:cover}
+.ml-item .ml-placeholder{font-size:28px;opacity:0.5}
+.ml-item .ml-type-badge{position:absolute;top:4px;left:4px;font-size:9px;padding:1px 5px;border-radius:8px;background:rgba(0,0,0,0.7);color:#fff}
+.ml-item .ml-save-badge{position:absolute;top:4px;right:4px;font-size:9px;padding:1px 5px;border-radius:8px;background:var(--accent);color:#000;font-weight:600}
+.ml-item .ml-item-menu{position:absolute;bottom:4px;right:4px;width:24px;height:24px;border-radius:50%;background:rgba(0,0,0,0.7);border:none;color:#fff;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .2s}
+.ml-item:hover .ml-item-menu{opacity:1}
+.ml-item .ml-item-info{position:absolute;bottom:0;left:0;right:0;padding:4px 8px;background:linear-gradient(transparent,rgba(0,0,0,0.7));font-size:10px;color:#fff;opacity:0;transition:opacity .2s;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ml-item:hover .ml-item-info{opacity:1}
+.ml-empty{padding:40px 16px;text-align:center;color:var(--text-tertiary);font-size:13px}
+.ml-empty .ml-empty-icon{font-size:40px;margin-bottom:10px;opacity:0.6}
+.ml-empty p{margin:4px 0}
+.ml-drop-zone{border:2px dashed var(--border);border-radius:var(--radius);padding:30px;text-align:center;color:var(--text-tertiary);font-size:13px;cursor:pointer;transition:var(--transition);margin:0 16px 12px}
+.ml-drop-zone:hover,.ml-drop-zone.drag-over{border-color:var(--accent);background:rgba(0,240,255,0.04);color:var(--text-primary)}
+.ml-drop-zone .drop-icon{font-size:36px;margin-bottom:8px}
+/* 上传弹窗 */
+.ml-upload-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:999;display:flex;align-items:center;justify-content:center}
+.ml-upload-overlay.hidden{display:none}
+.ml-upload-card{background:var(--bg-secondary);border:1px solid var(--border);border-radius:var(--radius);padding:24px;width:460px;max-width:90vw;max-height:80vh;overflow-y:auto}
+.ml-upload-card h3{font-size:16px;margin:0 0 16px;color:var(--text-primary);display:flex;align-items:center;gap:8px}
+.ml-upload-tabs{display:flex;gap:0;margin-bottom:16px;border-bottom:1px solid var(--border)}
+.ml-upload-tab{flex:1;padding:8px;text-align:center;font-size:12px;cursor:pointer;color:var(--text-tertiary);border-bottom:2px solid transparent;background:none;border-top:none;border-left:none;border-right:none;font-family:inherit;transition:var(--transition)}
+.ml-upload-tab.active{color:var(--accent);border-bottom-color:var(--accent);font-weight:600}
+.ml-upload-drop{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px;border:2px dashed var(--border);border-radius:var(--radius);cursor:pointer;transition:var(--transition);margin-bottom:12px}
+.ml-upload-drop:hover,.ml-upload-drop.drag-over{border-color:var(--accent);background:rgba(0,240,255,0.04)}
+.ml-upload-drop .upload-icon{font-size:48px;margin-bottom:10px}
+.ml-upload-drop .upload-text{font-size:13px;color:var(--text-secondary);margin-bottom:4px}
+.ml-upload-drop .upload-hint{font-size:11px;color:var(--text-tertiary)}
+.ml-url-input-area{display:flex;flex-direction:column;gap:8px}
+.ml-url-input{width:100%;padding:10px 12px;background:var(--bg-tertiary);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text-primary);font-size:13px;outline:none;font-family:monospace}
+.ml-url-input:focus{border-color:var(--accent)}
+.ml-url-preview{display:flex;align-items:center;gap:8px;padding:8px;background:var(--bg-tertiary);border-radius:var(--radius-sm);font-size:11px;color:var(--text-secondary)}
+.ml-url-preview img{width:48px;height:48px;object-fit:cover;border-radius:4px}
+.ml-upload-preview-list{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.ml-upload-preview-item{position:relative;width:72px;height:72px;border-radius:var(--radius-sm);overflow:hidden;border:1px solid var(--border)}
+.ml-upload-preview-item img{width:100%;height:100%;object-fit:cover}
+.ml-upload-preview-item .remove-btn{position:absolute;top:-4px;right:-4px;width:18px;height:18px;border-radius:50%;background:var(--danger);color:#fff;border:none;cursor:pointer;font-size:10px;display:flex;align-items:center;justify-content:center}
+.ml-upload-footer{display:flex;justify-content:flex-end;gap:8px;margin-top:16px}
+/* 预览弹窗 */
+.ml-preview-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:1000;display:flex;align-items:center;justify-content:center;flex-direction:column}
+.ml-preview-overlay.hidden{display:none}
+.ml-preview-content{max-width:85vw;max-height:75vh;display:flex;align-items:center;justify-content:center}
+.ml-preview-content img,.ml-preview-content video{max-width:100%;max-height:75vh;border-radius:var(--radius);box-shadow:0 8px 40px rgba(0,0,0,0.5)}
+.ml-preview-info{display:flex;align-items:center;gap:12px;margin-top:16px;color:var(--text-secondary);font-size:12px;flex-wrap:wrap;justify-content:center}
+.ml-preview-info .tag{font-size:11px}
+.ml-preview-actions{display:flex;gap:8px;margin-top:12px}
+.ml-preview-close{position:absolute;top:16px;right:24px;width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,0.1);border:none;color:#fff;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:var(--transition)}
+.ml-preview-close:hover{background:rgba(255,255,255,0.2)}
+.ml-preview-nav{position:absolute;top:50%;transform:translateY(-50%);width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,0.1);border:none;color:#fff;font-size:20px;cursor:pointer;transition:var(--transition);display:flex;align-items:center;justify-content:center}
+.ml-preview-nav:hover{background:rgba(255,255,255,0.25)}
+.ml-preview-prev{left:16px}
+.ml-preview-next{right:16px}
+/* 知识库超链接识别 */
+.ml-link-scanner{display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--bg-tertiary);border-radius:var(--radius-sm);margin:8px 16px;font-size:11px;color:var(--text-secondary)}
+.ml-link-scanner input{flex:1;padding:6px 10px;background:var(--bg-primary);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text-primary);font-size:11px;outline:none;font-family:monospace}
+.ml-link-scanner input:focus{border-color:var(--accent)}
+.ml-link-scanner .scan-status{font-size:11px;white-space:nowrap}
+.ml-link-scanner .scan-status.success{color:var(--success)}
+.ml-link-scanner .scan-status.error{color:var(--danger)}
+.ml-link-scanner .scan-status.scanning{color:var(--accent)}
+/* Toast */
+.toast{position:fixed;top:80px;right:24px;z-index:9999;padding:12px 20px;border-radius:var(--radius);font-size:13px;font-weight:500;animation:slideInRight .3s ease;box-shadow:0 8px 32px rgba(0,0,0,0.3);max-width:400px}
+.toast.success{background:#065f46;color:#6ee7b7;border:1px solid #059669}
+.toast.error{background:#7f1d1d;color:#fca5a5;border:1px solid #dc2626}
+.toast.info{background:#1e3a5f;color:#93c5fd;border:1px solid #2563eb}
+.toast.warning{background:#78350f;color:#fcd34d;border:1px solid #d97706}
+/* 响应式 */
+@media(max-width:1024px){.ml-grid{grid-template-columns:repeat(auto-fill,minmax(100px,1fr));max-height:300px}}
+</style>
+<style>
+/* i18n styles */
+/* AI NAILS Desktop v4.0 — Language Selector Styles */
+.lang-selector {
+  position: relative;
+  -webkit-app-region: no-drag;
+  z-index: 100;
+}
+.lang-current {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--text-secondary);
+  transition: var(--transition);
+  white-space: nowrap;
+}
+.lang-current:hover {
+  border-color: var(--accent);
+  color: var(--text-primary);
+}
+.lang-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 4px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  max-height: 320px;
+  overflow-y: auto;
+  min-width: 180px;
+  z-index: 200;
+}
+.lang-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--text-secondary);
+  transition: var(--transition);
+}
+.lang-option:hover {
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+}
+.lang-option span:first-child {
+  font-size: 16px;
+}
+
+/* RTL support */
+html[dir="rtl"] .sidebar-collapse-btn span,
+html[dir="rtl"] .sidebar-nav-item,
+html[dir="rtl"] .sidebar-section-title {
+  text-align: right;
+}
+html[dir="rtl"] #sidebar {
+  border-right: none;
+  border-left: 1px solid var(--border);
+}
+html[dir="rtl"] .lang-dropdown {
+  right: auto;
+  left: 0;
+}
+
+/* Nano Banana Pro — 生图结果 */
+.result-item img{width:100%;height:100%;object-fit:cover;border-radius:var(--radius-sm)}
+.result-item .loading-spinner{display:flex;align-items:center;justify-content:center;height:100%;font-size:24px;color:var(--accent)}
+.result-item .error-msg{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:var(--danger);font-size:12px;text-align:center;padding:8px}
+.result-item .download-overlay{position:absolute;top:6px;right:6px;background:rgba(0,0,0,0.6);border-radius:4px;padding:2px 6px;font-size:10px;color:var(--accent);cursor:pointer;opacity:0;transition:opacity 0.2s}
+.result-item:hover .download-overlay{opacity:1}
+.nanobanana-res-btn.selected,.nanobanana-ratio-btn.selected{background:rgba(0,240,255,0.15)!important;border-color:var(--accent)!important;color:var(--accent)!important}
+
+</style>
+
+</head>
+<body>
+
+<!-- AUTH OVERLAY -->
+<div id="auth-overlay">
+<div class="auth-container">
+<div class="auth-logo"><h1>AI NAILS</h1><p data-i18n="auth.subtitle">智能美甲创作平台 · 登录以开始创作</p></div>
+<div class="auth-tabs">
+<div class="auth-tab active" onclick="switchAuthTab('login')" data-i18n="auth.login">登录</div>
+<div class="auth-tab" onclick="switchAuthTab('register')" data-i18n="auth.register">注册</div>
+</div>
+<div id="auth-login-card">
+<div class="auth-mode-tabs">
+<div class="auth-tab active" onclick="switchAuthLoginMode('email')">邮箱登录</div>
+<div class="auth-tab" onclick="switchAuthLoginMode('phone')">手机登录</div>
+</div>
+<div id="auth-login-email">
+<div class="form-group"><label>邮箱地址</label><input class="form-input" id="auth-login-email-input" type="email" placeholder="your@email.com"></div>
+<div class="form-group"><label>密码</label><div style="position:relative"><input class="form-input" id="auth-login-password" type="password" placeholder="输入密码"><span style="position:absolute;right:10px;top:50%;transform:translateY(-50%);cursor:pointer;font-size:12px;color:var(--text-tertiary)" onclick="togglePassword('auth-login-password')">👁</span></div></div>
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px"><label class="checkbox-row"><input type="checkbox" checked>记住我</label><span class="auth-link" onclick="showForgotModal()">忘记密码？</span></div>
+</div>
+<div id="auth-login-phone" class="hidden">
+<div class="form-group"><label>手机号码</label><input class="form-input" id="auth-login-phone-input" placeholder="+86 138****8888"></div>
+<div class="form-group"><label>验证码</label><div class="input-row"><input class="form-input" id="auth-login-code" placeholder="6位验证码"><button class="btn btn-secondary btn-sm" id="auth-login-code-btn" onclick="sendAuthLoginCode()">获取验证码</button></div></div>
+</div>
+<button class="btn btn-primary" onclick="handleAppLogin()">登 录</button>
+<div class="social-login"><div class="social-btn" onclick="socialAppLogin('wechat')">💬</div><div class="social-btn" onclick="socialAppLogin('apple')">🍎</div><div class="social-btn" onclick="socialAppLogin('google')">🔍</div><div class="social-btn" onclick="biometricAppLogin()">🆔</div></div>
+<div class="auth-footer">还没有账号？<span class="auth-link" onclick="switchAuthTab('register')">立即注册</span></div>
+</div>
+<div id="auth-register-card" class="hidden">
+<div class="auth-mode-tabs">
+<div class="auth-tab active" onclick="switchAuthRegMode('email')">邮箱注册</div>
+<div class="auth-tab" onclick="switchAuthRegMode('phone')">手机注册</div>
+</div>
+<div id="auth-reg-email">
+<div class="form-group"><label>用户名</label><input class="form-input" id="auth-reg-username" placeholder="你的昵称"></div>
+<div class="form-group"><label>邮箱地址</label><input class="form-input" id="auth-reg-email" type="email" placeholder="your@email.com"></div>
+<div class="form-group"><label>密码</label><div style="position:relative"><input class="form-input" id="auth-reg-password" type="password" placeholder="至少8位，含大小写字母和数字" oninput="checkAuthPasswordStrength()"><span style="position:absolute;right:10px;top:50%;transform:translateY(-50%);cursor:pointer;font-size:12px;color:var(--text-tertiary)" onclick="togglePassword('auth-reg-password')">👁</span></div>
+<div class="strength-bar"><div class="strength-bar-fill" id="auth-strength-bar"></div></div><div style="font-size:10px;color:var(--text-tertiary);margin-top:2px" id="auth-strength-text">请输入密码</div>
+<div class="password-reqs"><span id="auth-req-length">· 至少8个字符</span><span id="auth-req-upper">· 包含大写字母</span><span id="auth-req-digit">· 包含数字</span></div></div>
+</div>
+<div id="auth-reg-phone" class="hidden">
+<div class="form-group"><label>手机号码</label><input class="form-input" id="auth-reg-phone-input" placeholder="+86 138****8888"></div>
+<div class="form-group"><label>验证码</label><div class="input-row"><input class="form-input" id="auth-reg-code" placeholder="6位验证码"><button class="btn btn-secondary btn-sm" id="auth-reg-code-btn" onclick="sendAuthRegCode()">获取验证码</button></div></div>
+<div class="form-group"><label>设置密码</label><input class="form-input" id="auth-reg-phone-password" type="password" placeholder="至少8位"></div>
+</div>
+<div class="form-group"><label>邀请码 <span style="color:var(--text-tertiary)">(选填)</span></label><input class="form-input" id="auth-reg-invite" placeholder="输入邀请码获取额外权益"></div>
+<label class="checkbox-row"><input type="checkbox" id="auth-reg-agree"> 我已阅读并同意 <span class="auth-link">服务条款</span> 和 <span class="auth-link">隐私政策</span></label>
+<button class="btn btn-primary" onclick="handleAppRegister()">注 册</button>
+<div class="auth-footer">已有账号？<span class="auth-link" onclick="switchAuthTab('login')">立即登录</span></div>
+</div>
+</div>
+</div>
+
+<!-- DESKTOP SHELL -->
+<div id="desktop-shell">
+<div id="titlebar">
+<span class="titlebar-logo">🦞 AI NAILS</span>
+<span class="titlebar-divider"></span>
+<span id="titlebar-page-name">创作舱 · TALK TO CREATE</span>
+<span style="flex:1"></span>
+<div id="lang-selector-container"></div>
+</div>
+<div id="main-content">
+<div id="sidebar">
+<div class="sidebar-user-area">
+<div class="user-avatar">👤</div>
+<div class="sidebar-user-info"><div id="sidebar-username">未登录</div><div class="sidebar-role">创作者</div></div>
+</div>
+<div class="sidebar-section-title" data-i18n="nav.section_nav">导航</div>
+<nav class="sidebar-nav">
+<button class="sidebar-nav-item active" data-page="create" onclick="navigateTo('create')"><span class="nav-icon">🎨</span><span class="sidebar-label" data-i18n="nav.create">创作舱</span><span class="sidebar-badge badge-hot" data-i18n="tag.ai">AI</span></button>
+<button class="sidebar-nav-item" data-page="medialibrary" onclick="navigateTo('medialibrary')"><span class="nav-icon">🖼️</span><span class="sidebar-label">资源库</span><span class="sidebar-badge badge-new">媒体</span></button>
+<button class="sidebar-nav-item" data-page="device" onclick="navigateTo('device')"><span class="nav-icon">🦞</span><span class="sidebar-label" data-i18n="nav.device">龙虾智控</span><span class="sidebar-badge badge-new" data-i18n="tag.new">设备</span></button>
+<button class="sidebar-nav-item" data-page="community" onclick="navigateTo('community')"><span class="nav-icon">🌍</span><span class="sidebar-label" data-i18n="nav.community">社区</span></button>
+<button class="sidebar-nav-item" data-page="payment" onclick="navigateTo('payment')"><span class="nav-icon">💳</span><span class="sidebar-label" data-i18n="nav.payment">支付中心</span></button>
+<div class="sidebar-section-title" data-i18n="nav.section_ai">AI 引擎</div>
+<button class="sidebar-nav-item" data-page="agents" onclick="navigateTo('agents')"><span class="nav-icon">🧠</span><span class="sidebar-label" data-i18n="nav.agents">智能体集群</span><span class="sidebar-badge badge-pro" data-i18n="tag.pro">Skill</span></button>
+<button class="sidebar-nav-item" data-page="providers" onclick="navigateTo('providers')"><span class="nav-icon">🔌</span><span class="sidebar-label" data-i18n="nav.providers">模型提供商</span></button>
+<button class="sidebar-nav-item" data-page="openclaw" onclick="navigateTo('openclaw')"><span class="nav-icon">🦞</span><span class="sidebar-label" data-i18n="nav.openclaw">OpenClaw</span></button>
+<div class="sidebar-section-title" data-i18n="nav.section_admin">管理</div>
+<button class="sidebar-nav-item" data-page="admin" onclick="navigateTo('admin')"><span class="nav-icon">⚙</span><span class="sidebar-label" data-i18n="nav.admin">管理后台</span></button>
+<button class="sidebar-nav-item" data-page="settings" onclick="navigateTo('settings')"><span class="nav-icon">🔧</span><span class="sidebar-label" data-i18n="nav.settings">设置</span></button>
+</nav>
+<div class="sidebar-collapse-btn" onclick="toggleSidebar()"><span data-i18n="sidebar.collapse">◀ 收起菜单</span></div>
+</div>
+<div class="content-panel">
+<!-- PAGE: MEDIA LIBRARY (独立资源库页面) -->
+<div class="content-page" id="page-medialibrary">
+<div class="card" style="margin-bottom:16px">
+<div class="card-header"><div><div class="card-title">🖼️ 媒体资源库</div><div class="card-subtitle">管理所有AI生成、本地上传和云端同步的图片与视频资源</div></div>
+<div style="display:flex;gap:8px">
+<button class="btn btn-sm btn-accent" onclick="openMediaUpload()">📤 上传资源</button>
+<button class="btn btn-sm btn-secondary" onclick="scanKnowledgeBaseLinks()">🔗 识别链接</button>
+</div>
+</div>
+<div class="ml-tabs" id="ml-tabs-standalone" style="padding:0;border:none">
+<button class="ml-tab active" onclick="filterMediaTabStandalone('all',this)">全部 <span class="tab-count" id="mls-count-all">0</span></button>
+<button class="ml-tab" onclick="filterMediaTabStandalone('image',this)">🖼️ 图片 <span class="tab-count" id="mls-count-image">0</span></button>
+<button class="ml-tab" onclick="filterMediaTabStandalone('video',this)">🎥 视频 <span class="tab-count" id="mls-count-video">0</span></button>
+<button class="ml-tab" onclick="filterMediaTabStandalone('ai-generated',this)">🤖 AI生成 <span class="tab-count" id="mls-count-ai">0</span></button>
+<button class="ml-tab" onclick="filterMediaTabStandalone('uploaded',this)">📤 本地上传 <span class="tab-count" id="mls-count-uploaded">0</span></button>
+<button class="ml-tab" onclick="filterMediaTabStandalone('cloud',this)">☁️ 云端图库 <span class="tab-count" id="mls-count-cloud">0</span></button>
+</div>
+<div class="ml-toolbar" style="padding:10px 0">
+<input class="ml-search" id="ml-search-standalone" placeholder="🔍 搜索资源名称..." oninput="searchMediaStandalone()">
+<div class="ml-tag-filters" id="ml-tag-filters-standalone">
+<span class="ml-filter-tag active" onclick="filterMediaTagStandalone('all',this)">全部</span>
+</div>
+</div>
+<div class="ml-link-scanner" id="ml-link-scanner-standalone" style="display:none;margin:0 0 8px">
+<span>🔗</span>
+<input id="ml-link-input-standalone" placeholder="粘贴知识库/图库链接，自动识别图片和视频..." onkeydown="if(event.key==='Enter')fetchLinkResourcesStandalone()">
+<button class="btn btn-xs btn-accent" onclick="fetchLinkResourcesStandalone()">识别</button>
+<span class="scan-status" id="ml-scan-status-standalone"></span>
+</div>
+<div class="ml-drop-zone" id="ml-drop-zone-standalone" onclick="openMediaUpload()" ondragover="event.preventDefault();this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" ondrop="handleMediaDropStandalone(event)" style="margin:0 0 12px">
+<div class="drop-icon">📁</div>
+<div>拖拽图片/视频到此处，或点击上传</div>
+<div style="font-size:11px;margin-top:4px;opacity:0.6">支持 JPG/PNG/GIF/WebP/MP4/WebM</div>
+</div>
+<div class="ml-grid" id="ml-grid-standalone" style="max-height:calc(100vh - 360px);padding:0">
+<div class="ml-empty" id="ml-empty-standalone">
+<div class="ml-empty-icon">📭</div>
+<p>资源库为空</p>
+<p style="font-size:11px">AI生成的图片/视频将自动保存到这里<br>也可以上传本地文件或识别在线链接</p>
+</div>
+</div>
+</div>
+</div>
+
+<!-- PAGE: CREATE -->
+<div class="content-page active" id="page-create">
+<div class="create-layout">
+<div class="create-main">
+<div class="card"><div class="card-header"><div><div class="card-title" data-i18n="create.title">✨ AI 甲面创作</div><div class="card-subtitle" data-i18n="create.subtitle">用自然语言描述你想要的甲面设计</div></div></div>
+<div class="create-prompt-area"><textarea id="create-prompt" placeholder="例如：赛博朋克风格，深蓝色微光渐变，蝴蝶翅膀纹理，金属质感……"></textarea></div>
+<div class="prompt-toolbar">
+<button class="btn btn-secondary btn-sm" onclick="showStylePicker()">🎭 风格库</button>
+<button class="btn btn-secondary btn-sm" onclick="triggerImageUpload()">📷 参考图</button>
+<button class="btn btn-secondary btn-sm" onclick="startVoiceInput()">🎤 语音输入</button>
+<button class="btn btn-primary btn-sm" onclick="generateNailArt()">✨ 生成设计</button>
+</div>
+<div id="upload-preview" class="upload-preview" style="display:none"><img id="upload-preview-img" src="" alt="参考图"><button class="remove-btn" onclick="clearImageUpload()">✕</button></div>
+<input type="file" id="image-upload-input" accept="image/*" style="display:none" onchange="handleImageUpload(event)">
+<div id="prompt-preview-card" class="prompt-preview" style="display:none"><div class="prompt-preview-label">AI 优化提示词</div><div class="prompt-preview-text" id="optimized-prompt"></div><div style="margin-top:8px" id="prompt-tags"></div></div>
+<!-- 一键添加生图 Skill -->
+<div class="quick-add-section" id="quick-add-section">
+<div class="quick-add-title">⚡ 一键添加生图 Skill</div>
+<div class="quick-add-grid" id="quick-add-grid">
+<div class="quick-add-chip" data-skill-id="creatok-image" onclick="quickAddImageSkill('creatok-image')"><span class="chip-icon">🖼️</span>CreatOK 生图<span class="chip-status">未安装</span></div>
+<div class="quick-add-chip" data-skill-id="clipcat-image" onclick="quickAddImageSkill('clipcat-image')"><span class="chip-icon">🎨</span>Clipcat 生图<span class="chip-status">未安装</span></div>
+<div class="quick-add-chip" data-skill-id="nanobanana-pro" onclick="quickAddImageSkill('nanobanana-pro')"><span class="chip-icon">🍌</span>Nano Banana<span class="chip-status">未安装</span></div>
+<div class="quick-add-chip" data-skill-id="creatok-video" onclick="quickAddImageSkill('creatok-video')"><span class="chip-icon">🎥</span>CreatOK 生视频<span class="chip-status">未安装</span></div>
+</div>
+<button class="quick-add-all-btn" id="quick-add-all-btn" onclick="quickAddAllImageSkills()"><span class="btn-text">🚀 一键安装全部生图 Skill</span><span class="btn-spinner"></span></button>
+</div>
+</div>
+<div id="result-grid" class="result-grid" style="display:none">
+<div class="result-item">💅</div><div class="result-item">🌸</div><div class="result-item">🦋</div><div class="result-item">✨</div><div class="result-item">🌊</div><div class="result-item">🔥</div>
+</div>
+<!-- 媒体资源库 -->
+<div class="media-library" id="media-library">
+<div class="ml-header">
+<div class="ml-title-area"><span class="ml-icon">🖼️</span><span class="ml-title">媒体资源库</span><span class="ml-count" id="ml-total-count">0 个资源</span></div>
+<div class="ml-actions">
+<button class="btn btn-xs btn-accent" onclick="openMediaUpload()">📤 上传资源</button>
+<button class="btn btn-xs btn-secondary" onclick="scanKnowledgeBaseLinks()">🔗 识别链接</button>
+</div>
+</div>
+<div class="ml-tabs" id="ml-tabs">
+<button class="ml-tab active" onclick="filterMediaTab('all')">全部 <span class="tab-count" id="ml-count-all">0</span></button>
+<button class="ml-tab" onclick="filterMediaTab('image')">🖼️ 图片 <span class="tab-count" id="ml-count-image">0</span></button>
+<button class="ml-tab" onclick="filterMediaTab('video')">🎥 视频 <span class="tab-count" id="ml-count-video">0</span></button>
+<button class="ml-tab" onclick="filterMediaTab('ai-generated')">🤖 AI生成 <span class="tab-count" id="ml-count-ai">0</span></button>
+<button class="ml-tab" onclick="filterMediaTab('uploaded')">📤 本地上传 <span class="tab-count" id="ml-count-uploaded">0</span></button>
+<button class="ml-tab" onclick="filterMediaTab('cloud')">☁️ 云端图库 <span class="tab-count" id="ml-count-cloud">0</span></button>
+</div>
+<div class="ml-toolbar">
+<input class="ml-search" id="ml-search" placeholder="🔍 搜索资源名称..." oninput="searchMedia()">
+<div class="ml-tag-filters" id="ml-tag-filters">
+<span class="ml-filter-tag active" onclick="filterMediaTag('all',this)">全部</span>
+</div>
+</div>
+<!-- 拖拽上传区域 -->
+<div class="ml-drop-zone" id="ml-drop-zone" onclick="openMediaUpload()" ondragover="event.preventDefault();this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" ondrop="handleMediaDrop(event)">
+<div class="drop-icon">📁</div>
+<div>拖拽图片/视频到此处，或点击上传</div>
+<div style="font-size:11px;margin-top:4px;opacity:0.6">支持 JPG/PNG/GIF/WebP/MP4/WebM</div>
+</div>
+<!-- 知识库超链接扫描 -->
+<div class="ml-link-scanner" id="ml-link-scanner" style="display:none">
+<span>🔗</span>
+<input id="ml-link-input" placeholder="粘贴知识库/图库链接，自动识别图片和视频..." onkeydown="if(event.key==='Enter')fetchLinkResources()">
+<button class="btn btn-xs btn-accent" onclick="fetchLinkResources()">识别</button>
+<span class="scan-status" id="ml-scan-status"></span>
+</div>
+<!-- 资源网格 -->
+<div class="ml-grid" id="ml-grid">
+<div class="ml-empty" id="ml-empty">
+<div class="ml-empty-icon">📭</div>
+<p>资源库为空</p>
+<p style="font-size:11px">AI生成的图片/视频将自动保存到这里<br>也可以上传本地文件或识别在线链接</p>
+</div>
+</div>
+</div>
+</div>
+<div>
+<div class="chat-panel">
+<div class="chat-msgs" id="create-chat-msgs">
+<div class="chat-msg agent"><div class="msg-avatar agent-av">🤖</div><div class="msg-bubble">你好！我是 AI NAILS 创作助手 🎨<br>你可以用自然语言描述想要的甲面设计，我会帮你优化提示词并生成预览。</div></div>
+</div>
+<div class="chat-input-row"><input id="create-chat-input" placeholder="描述你想要的甲面..." onkeydown="if(event.key==='Enter')sendCreateChat()"><button class="btn btn-primary btn-xs" onclick="sendCreateChat()">发送</button></div>
+</div>
+</div>
+</div>
+</div>
+
+<!-- 媒体资源库 - 上传弹窗 -->
+<div class="ml-upload-overlay hidden" id="ml-upload-overlay">
+<div class="ml-upload-card">
+<h3>📤 上传资源到媒体库</h3>
+<div class="ml-upload-tabs">
+<button class="ml-upload-tab active" onclick="switchUploadTab('local',this)">📁 本地上传</button>
+<button class="ml-upload-tab" onclick="switchUploadTab('url',this)">🌐 在线链接</button>
+<button class="ml-upload-tab" onclick="switchUploadTab('cloud',this)">☁️ 云端图库</button>
+</div>
+<!-- 本地上传 -->
+<div class="ml-upload-drop" id="ml-upload-drop-area" onclick="document.getElementById('ml-upload-file-input').click()" ondragover="event.preventDefault();this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" ondrop="handleUploadDrop(event)">
+<div class="upload-icon">📁</div>
+<div class="upload-text">点击或拖拽文件到此处</div>
+<div class="upload-hint">支持 JPG/PNG/GIF/WebP/MP4/WebM，单文件最大 50MB</div>
+</div>
+<input type="file" id="ml-upload-file-input" accept="image/*,video/*" multiple style="display:none" onchange="handleLocalFileSelect(event)">
+<!-- 在线链接 -->
+<div class="ml-url-input-area" id="ml-url-area" style="display:none">
+<input class="ml-url-input" id="ml-url-input" placeholder="粘贴图片或视频链接，每行一个..." oninput="previewUrlInput()">
+<div class="ml-url-preview" id="ml-url-preview" style="display:none"></div>
+</div>
+<!-- 云端图库 -->
+<div id="ml-cloud-area" style="display:none">
+<div style="padding:8px 0;font-size:13px;color:var(--text-secondary)">从云端图库同步资源：</div>
+<div style="display:flex;gap:8px;flex-wrap:wrap">
+<button class="btn btn-sm btn-secondary" onclick="syncCloudLibrary('unsplash')">📸 Unsplash</button>
+<button class="btn btn-sm btn-secondary" onclick="syncCloudLibrary('pexels')">🎬 Pexels</button>
+<button class="btn btn-sm btn-secondary" onclick="syncCloudLibrary('pixabay')">🖼️ Pixabay</button>
+<button class="btn btn-sm btn-secondary" onclick="syncCloudLibrary('custom')">🔗 自定义云端</button>
+</div>
+<div id="ml-cloud-status" style="margin-top:8px;font-size:11px;color:var(--text-tertiary)"></div>
+</div>
+<!-- 预览列表 -->
+<div class="ml-upload-preview-list" id="ml-upload-preview-list"></div>
+<div class="ml-upload-footer">
+<button class="btn btn-sm btn-secondary" onclick="closeMediaUpload()">取消</button>
+<button class="btn btn-sm btn-primary" id="ml-upload-confirm-btn" onclick="confirmMediaUpload()" disabled>上传到资源库</button>
+</div>
+</div>
+</div>
+
+<!-- 媒体资源库 - 预览弹窗 -->
+<div class="ml-preview-overlay hidden" id="ml-preview-overlay">
+<button class="ml-preview-close" onclick="closeMediaPreview()">✕</button>
+<button class="ml-preview-nav ml-preview-prev" onclick="navigateMediaPreview(-1)">◀</button>
+<button class="ml-preview-nav ml-preview-next" onclick="navigateMediaPreview(1)">▶</button>
+<div class="ml-preview-content" id="ml-preview-content"></div>
+<div class="ml-preview-info" id="ml-preview-info"></div>
+<div class="ml-preview-actions">
+<button class="btn btn-sm btn-primary" id="ml-preview-download" onclick="downloadMediaItem()">📥 下载</button>
+<button class="btn btn-sm btn-accent" id="ml-preview-copy" onclick="copyMediaToClipboard()">📋 复制</button>
+<button class="btn btn-sm btn-danger" id="ml-preview-delete" onclick="deleteMediaItem()">🗑 删除</button>
+</div>
+</div>
+
+<!-- PAGE: DEVICE -->
+<div class="content-page" id="page-device">
+<div class="page-tabs"><button class="page-tab active" onclick="switchDeviceMode('b2c')">B2C 消费者模式</button><button class="page-tab" onclick="switchDeviceMode('b2b')">B2B 门店模式</button></div>
+<!-- 连接面板：蓝牙 + WiFi -->
+<div class="connection-panel" id="connection-panel">
+  <!-- 蓝牙卡片 -->
+  <div class="conn-card bt-card">
+    <div class="conn-card-header">
+      <div class="conn-card-icon bt-icon">📶</div>
+      <div>
+        <div class="conn-card-title">蓝牙连接</div>
+        <div class="conn-card-status" id="bt-status-text">未连接</div>
+      </div>
+      <div style="margin-left:auto">
+        <label class="toggle-switch" style="transform:scale(0.85)">
+          <input type="checkbox" id="bt-toggle" onchange="toggleBluetooth(this.checked)">
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+    </div>
+    <div id="bt-scan-area" class="conn-scan-area hidden">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;font-size:12px;color:var(--text-secondary)">
+        <div class="spinner" style="width:16px;height:16px;border-width:2px"></div> 正在扫描设备...
+      </div>
+      <div id="bt-device-list"></div>
+    </div>
+    <div id="bt-connected-info" class="conn-connected-info hidden">
+      <div class="dev-icon">🦞</div>
+      <div class="dev-detail">
+        <div class="dev-name" id="bt-dev-name">AI NAILS Pro #001</div>
+        <div class="dev-meta" id="bt-dev-meta">信号: 强 | 已配对</div>
+      </div>
+    </div>
+    <div class="conn-btn-row">
+      <button class="btn btn-secondary btn-xs" id="bt-scan-btn" onclick="scanBluetooth()">🔍 扫描设备</button>
+      <button class="btn btn-danger btn-xs hidden" id="bt-disconnect-btn" onclick="disconnectBluetooth()">断开连接</button>
+    </div>
+  </div>
+  <!-- WiFi 卡片 -->
+  <div class="conn-card wifi-card">
+    <div class="conn-card-header">
+      <div class="conn-card-icon wifi-icon">📡</div>
+      <div>
+        <div class="conn-card-title">WiFi 连接</div>
+        <div class="conn-card-status" id="wifi-status-text">未连接</div>
+      </div>
+      <div style="margin-left:auto">
+        <label class="toggle-switch" style="transform:scale(0.85)">
+          <input type="checkbox" id="wifi-toggle" onchange="toggleWifi(this.checked)">
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+    </div>
+    <div id="wifi-scan-area" class="conn-scan-area hidden">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;font-size:12px;color:var(--text-secondary)">
+        <div class="spinner" style="width:16px;height:16px;border-width:2px"></div> 正在扫描 WiFi...
+      </div>
+      <div id="wifi-device-list"></div>
+    </div>
+    <div id="wifi-connected-info" class="conn-connected-info hidden">
+      <div class="dev-icon">🦞</div>
+      <div class="dev-detail">
+        <div class="dev-name" id="wifi-dev-name">AI NAILS Pro #001</div>
+        <div class="dev-meta" id="wifi-dev-meta">IP: 192.168.1.100 | 信号: 优</div>
+      </div>
+    </div>
+    <div class="conn-btn-row">
+      <button class="btn btn-secondary btn-xs" id="wifi-scan-btn" onclick="scanWifiDevices()">🔍 扫描设备</button>
+      <button class="btn btn-danger btn-xs hidden" id="wifi-disconnect-btn" onclick="disconnectWifi()">断开连接</button>
+    </div>
+  </div>
+</div>
+<!-- WiFi 配置弹窗 -->
+<div class="wifi-config-overlay hidden" id="wifi-config-overlay">
+  <div class="wifi-config-card">
+    <h3>⚙️ 配置设备 WiFi</h3>
+    <div class="wifi-sub" id="wifi-config-device-name">为 AI NAILS Pro #001 配置网络</div>
+    <div class="wifi-networks" id="wifi-networks-list">
+      <div class="wifi-network-item" onclick="selectWifiNetwork(this,'AI_NAILS_Office_5G')">
+        <span class="wifi-ssid">🔒 AI_NAILS_Office_5G</span>
+        <span class="wifi-secure">WPA2</span>
+      </div>
+      <div class="wifi-network-item" onclick="selectWifiNetwork(this,'AI_NAILS_Guest')">
+        <span class="wifi-ssid">📶 AI_NAILS_Guest</span>
+        <span class="wifi-secure">开放</span>
+      </div>
+      <div class="wifi-network-item" onclick="selectWifiNetwork(this,'NailStudio_WiFi')">
+        <span class="wifi-ssid">🔒 NailStudio_WiFi</span>
+        <span class="wifi-secure">WPA3</span>
+      </div>
+    </div>
+    <div class="wifi-pass-input" id="wifi-pass-input">
+      <div class="form-group">
+        <label>WiFi 密码</label>
+        <div class="wifi-pass-row">
+          <input class="form-input" id="wifi-password" type="password" placeholder="输入 WiFi 密码...">
+          <button class="btn btn-xs btn-secondary" onclick="toggleWifiPassVisibility()">👁</button>
+        </div>
+      </div>
+    </div>
+    <div class="conn-btn-row" style="justify-content:flex-end;margin-top:12px">
+      <button class="btn btn-secondary btn-xs" onclick="closeWifiConfig()">取消</button>
+      <button class="btn btn-primary btn-xs" onclick="connectWifiNetwork()">连接</button>
+    </div>
+  </div>
+</div>
+<div id="device-b2c">
+<div class="stat-grid" style="margin-bottom:20px">
+<div class="stat-card"><div class="stat-label">在线设备</div><div class="stat-value">12</div><div class="stat-change up">▲ 2台新增</div></div>
+<div class="stat-card"><div class="stat-label">今日打印量</div><div class="stat-value">847</div><div class="stat-change up">▲ 12%</div></div>
+<div class="stat-card"><div class="stat-label">墨水余量</div><div class="stat-value">72%</div><div class="stat-change">CMYK 四色</div></div>
+<div class="stat-card"><div class="stat-label">设备健康度</div><div class="stat-value">98%</div><div class="stat-change up">优秀</div></div>
+</div>
+<div class="device-dashboard">
+<div class="device-card">
+<div class="device-name"><span class="status-dot status-online"></span>AI NAILS Pro #001</div>
+<div style="font-size:11px;color:var(--text-secondary);margin-top:4px">SN: ANP-2026-0001 · 固件 v3.2.1</div>
+<div style="font-size:10px;margin-top:4px;display:flex;gap:6px;flex-wrap:wrap">
+  <span class="tag tag-accent">📡 WiFi</span><span class="tag tag-info">📶 蓝牙</span>
+</div>
+<div class="ink-bars"><div class="ink-bar ink-c" style="width:80%"></div><div class="ink-bar ink-m" style="width:65%"></div><div class="ink-bar ink-y" style="width:90%"></div><div class="ink-bar ink-k" style="width:55%"></div></div>
+<div style="font-size:10px;color:var(--text-tertiary);margin-top:4px;display:flex;gap:12px"><span>C:80%</span><span>M:65%</span><span>Y:90%</span><span>K:55%</span></div>
+<div class="device-actions"><button class="btn btn-secondary btn-xs">测试打印</button><button class="btn btn-secondary btn-xs">清洁喷头</button><button class="btn btn-accent btn-xs">校准</button><button class="btn btn-success btn-xs" onclick="quickConnectDevice('ANP-2026-0001','AI NAILS Pro #001')">🔗 快速连接</button></div>
+</div>
+<div class="device-card">
+<div class="device-name"><span class="status-dot status-online"></span>AI NAILS Pro #002</div>
+<div style="font-size:11px;color:var(--text-secondary);margin-top:4px">SN: ANP-2026-0002 · 固件 v3.2.1</div>
+<div style="font-size:10px;margin-top:4px;display:flex;gap:6px;flex-wrap:wrap">
+  <span class="tag tag-info">📶 蓝牙</span>
+</div>
+<div class="ink-bars"><div class="ink-bar ink-c" style="width:45%"></div><div class="ink-bar ink-m" style="width:70%"></div><div class="ink-bar ink-y" style="width:60%"></div><div class="ink-bar ink-k" style="width:80%"></div></div>
+<div style="font-size:10px;color:var(--text-tertiary);margin-top:4px;display:flex;gap:12px"><span>C:45%</span><span>M:70%</span><span>Y:60%</span><span>K:80%</span></div>
+<div class="device-actions"><button class="btn btn-secondary btn-xs">测试打印</button><button class="btn btn-secondary btn-xs">清洁喷头</button><button class="btn btn-accent btn-xs">校准</button><button class="btn btn-success btn-xs" onclick="quickConnectDevice('ANP-2026-0002','AI NAILS Pro #002')">🔗 快速连接</button></div>
+</div>
+<div class="device-card">
+<div class="device-name"><span class="status-dot status-idle"></span>AI NAILS Pro #003</div>
+<div style="font-size:11px;color:var(--text-secondary);margin-top:4px">SN: ANP-2026-0003 · 固件 v3.2.0</div>
+<div style="font-size:10px;margin-top:4px;display:flex;gap:6px;flex-wrap:wrap">
+  <span class="tag tag-accent">📡 WiFi</span>
+</div>
+<div class="ink-bars"><div class="ink-bar ink-c" style="width:15%"></div><div class="ink-bar ink-m" style="width:20%"></div><div class="ink-bar ink-y" style="width:30%"></div><div class="ink-bar ink-k" style="width:25%"></div></div>
+<div style="font-size:10px;color:var(--text-tertiary);margin-top:4px;display:flex;gap:12px"><span>C:15%</span><span>M:20%</span><span>Y:30%</span><span>K:25%</span></div>
+<div class="device-actions"><button class="btn btn-secondary btn-xs">测试打印</button><button class="btn btn-warning btn-xs" style="background:rgba(255,171,0,0.15);color:var(--warning)">更换墨盒</button><button class="btn btn-accent btn-xs">校准</button><button class="btn btn-success btn-xs" onclick="quickConnectDevice('ANP-2026-0003','AI NAILS Pro #003')">🔗 快速连接</button></div>
+</div>
+</div>
+</div>
+<div id="device-b2b" class="hidden">
+<div class="stat-grid" style="margin-bottom:20px">
+<div class="stat-card"><div class="stat-label">门店数量</div><div class="stat-value">48</div><div class="stat-change up">▲ 3家新增</div></div>
+<div class="stat-card"><div class="stat-label">总设备数</div><div class="stat-value">156</div><div class="stat-change up">▲ 12台</div></div>
+<div class="stat-card"><div class="stat-label">月打印总量</div><div class="stat-value">24.8K</div><div class="stat-change up">▲ 18%</div></div>
+<div class="stat-card"><div class="stat-label">耗材库存预警</div><div class="stat-value">7</div><div class="stat-change down">需补货</div></div>
+</div>
+<div class="card"><div class="card-title">门店设备总览</div><div class="card-subtitle">实时监控所有门店设备状态</div>
+<table class="admin-table" style="margin-top:12px"><thead><tr><th>门店</th><th>设备数</th><th>在线</th><th>墨水余量</th><th>今日打印</th><th>状态</th></tr></thead><tbody>
+<tr><td>深圳旗舰店</td><td>12</td><td>12</td><td>78%</td><td>342</td><td><span class="tag tag-success">正常</span></td></tr>
+<tr><td>上海旗舰店</td><td>10</td><td>9</td><td>65%</td><td>287</td><td><span class="tag tag-warning">1台离线</span></td></tr>
+<tr><td>北京旗舰店</td><td>8</td><td>8</td><td>82%</td><td>215</td><td><span class="tag tag-success">正常</span></td></tr>
+</tbody></table></div>
+</div>
+</div>
+
+<!-- PAGE: COMMUNITY -->
+<div class="content-page" id="page-community">
+<div class="page-tabs"><button class="page-tab active" onclick="switchCommunityTab('feed')">动态 Feed</button><button class="page-tab" onclick="switchCommunityTab('market')">交易市场</button><button class="page-tab" onclick="switchCommunityTab('leaderboard')">排行榜</button></div>
+<div id="comm-feed">
+<div class="feed-item"><div class="feed-avatar">🌸</div><div class="feed-content"><div class="feed-user">花漾美甲工作室<span class="feed-time"> · 2分钟前</span></div><div class="feed-text">新发布的「春日樱花」系列甲面设计，使用 AI NAILS 生成 + 微调，效果绝美！💅✨</div><div class="feed-actions"><span>❤ 128</span><span>💬 23</span><span>↗ 分享</span></div></div></div>
+<div class="feed-item"><div class="feed-avatar">🦋</div><div class="feed-content"><div class="feed-user">蝶变美甲<span class="feed-time"> · 15分钟前</span></div><div class="feed-text">赛博朋克主题美甲设计挑战！用 OpenClaw + Gemini 2.0 生成的渐变效果超出预期 🔥</div><div class="feed-actions"><span>❤ 256</span><span>💬 47</span><span>↗ 分享</span></div></div></div>
+<div class="feed-item"><div class="feed-avatar">✨</div><div class="feed-content"><div class="feed-user">星光璀璨 Nail Art<span class="feed-time"> · 1小时前</span></div><div class="feed-text">ClawSkill Hub 上新了「中国风刺绣」Skill，一键生成传统刺绣纹样美甲 🏮</div><div class="feed-actions"><span>❤ 89</span><span>💬 15</span><span>↗ 分享</span></div></div></div>
+</div>
+<div id="comm-market" class="hidden">
+<div class="market-item"><div class="market-preview">💅</div><div class="market-info"><div class="market-name">赛博朋克渐变套装</div><div class="market-author">by 蝶变美甲</div></div><div class="market-price">¥29.9</div><button class="btn btn-accent btn-xs">购买</button></div>
+<div class="market-item"><div class="market-preview">🌸</div><div class="market-info"><div class="market-name">春日樱花系列</div><div class="market-author">by 花漾工作室</div></div><div class="market-price">¥19.9</div><button class="btn btn-accent btn-xs">购买</button></div>
+<div class="market-item"><div class="market-preview">🦋</div><div class="market-info"><div class="market-name">蝴蝶梦境 · 限定</div><div class="market-author">by AI NAILS 官方</div></div><div class="market-price">¥39.9</div><button class="btn btn-accent btn-xs">购买</button></div>
+</div>
+<div id="comm-leaderboard" class="hidden">
+<table class="leaderboard-table"><thead><tr><th>#</th><th>创作者</th><th>作品数</th><th>获赞</th><th>销量</th></tr></thead><tbody>
+<tr><td><span class="rank-badge rank-1">1</span></td><td>蝶变美甲</td><td>128</td><td>12.4K</td><td>¥38,200</td></tr>
+<tr><td><span class="rank-badge rank-2">2</span></td><td>花漾工作室</td><td>96</td><td>9.8K</td><td>¥28,500</td></tr>
+<tr><td><span class="rank-badge rank-3">3</span></td><td>星光璀璨</td><td>84</td><td>7.2K</td><td>¥21,300</td></tr>
+<tr><td>4</td><td>极简美学</td><td>72</td><td>5.6K</td><td>¥18,900</td></tr>
+<tr><td>5</td><td>水墨丹青</td><td>65</td><td>4.8K</td><td>¥15,400</td></tr>
+</tbody></table>
+</div>
+</div>
+
+<!-- PAGE: PAYMENT -->
+<div class="content-page" id="page-payment">
+<div class="page-tabs"><button class="page-tab active" onclick="switchPayScene('recharge')">账户充值</button><button class="page-tab" onclick="switchPayScene('subscribe')">套餐订阅</button><button class="page-tab" onclick="switchPayScene('device')">设备购买</button></div>
+<h3 id="payment-title" style="margin-bottom:16px" data-i18n="payment.recharge">账户充值</h3>
+<div id="pay-scene-recharge">
+<div class="amount-grid">
+<button class="amount-btn selected" onclick="selectAmount(1000,this)">¥1,000</button>
+<button class="amount-btn" onclick="selectAmount(2000,this)">¥2,000</button>
+<button class="amount-btn" onclick="selectAmount(5000,this)">¥5,000</button>
+<button class="amount-btn" onclick="selectAmount(10000,this)">¥10,000</button>
+<button class="amount-btn" onclick="customAmount()">自定义</button>
+</div>
+</div>
+<div id="pay-scene-subscribe" class="hidden">
+<div class="subscription-grid">
+<div class="sub-card" onclick="selectSub('basic',this)"><div class="sub-name">基础版</div><div class="sub-price">¥99</div><div class="sub-features">每月100次生成<br>基础模板库<br>社区访问</div></div>
+<div class="sub-card selected" onclick="selectSub('pro',this)"><div class="sub-name">专业版</div><div class="sub-price">¥299</div><div class="sub-features">无限生成<br>全部模板<br>优先渲染<br>API 访问</div></div>
+<div class="sub-card" onclick="selectSub('business',this)"><div class="sub-name">商业版</div><div class="sub-price">¥999</div><div class="sub-features">多设备管理<br>B2B 后台<br>专属客服<br>定制模型</div></div>
+<div class="sub-card" onclick="selectSub('enterprise',this)"><div class="sub-name">企业版</div><div class="sub-price">联系销售</div><div class="sub-features">私有化部署<br>SLA 保障<br>专属模型训练</div></div>
+</div>
+</div>
+<div id="pay-scene-device" class="hidden"><div class="card"><div style="display:flex;align-items:center;gap:16px"><div style="font-size:48px">🦞</div><div><div style="font-weight:700;font-size:16px">AI NAILS 智能美甲打印机 Pro</div><div style="color:var(--text-secondary);font-size:13px">1200 DPI · CMYK 四色 · WiFi/蓝牙 · 甲型自适应</div><div style="font-weight:800;font-size:20px;margin-top:8px;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent">¥29,900</div></div></div></div></div>
+<div style="margin-top:16px"><div style="font-size:12px;color:var(--text-secondary);margin-bottom:8px;font-weight:600">选择币种</div><div class="currency-select" id="currency-select"><span class="currency-chip selected" onclick="selectCurrency('CNY',this)">¥ CNY</span><span class="currency-chip" onclick="selectCurrency('USD',this)">$ USD</span><span class="currency-chip" onclick="selectCurrency('EUR',this)">€ EUR</span><span class="currency-chip" onclick="selectCurrency('USDT',this)">₮ USDT</span><span class="currency-chip" onclick="selectCurrency('BTC',this)">₿ BTC</span></div></div>
+<div style="margin-top:16px"><div style="font-size:12px;color:var(--text-secondary);margin-bottom:8px;font-weight:600">支付方式</div><div class="payment-methods" id="payment-methods">
+<div class="payment-method selected" data-method="wechat" onclick="selectPayment('wechat',this)"><span class="pm-icon">💬</span><span>微信支付</span></div>
+<div class="payment-method" data-method="alipay" onclick="selectPayment('alipay',this)"><span class="pm-icon">🔵</span><span>支付宝</span></div>
+<div class="payment-method" data-method="stripe" onclick="selectPayment('stripe',this)" style="display:none"><span class="pm-icon">💳</span><span>Visa/Mastercard</span></div>
+<div class="payment-method" data-method="paypal" onclick="selectPayment('paypal',this)" style="display:none"><span class="pm-icon">🅿</span><span>PayPal</span></div>
+<div class="payment-method" data-method="crypto" onclick="selectPayment('crypto',this)" style="display:none"><span class="pm-icon">₿</span><span>数字货币</span></div>
+<div class="payment-method" data-method="bank" onclick="selectPayment('bank',this)"><span class="pm-icon">🏦</span><span>对公转账</span></div>
+</div></div>
+<div class="payment-summary"><div class="summary-row"><span>项目</span><span id="summary-item">账户充值</span></div><div class="summary-row"><span>金额</span><span id="summary-amount">¥1,000</span></div><div class="summary-row"><span>支付方式</span><span id="summary-method">微信支付</span></div><div class="summary-row total"><span>应付总额</span><span id="summary-total">¥1,000</span></div></div>
+<button class="btn btn-primary" onclick="handlePay()">确认支付</button>
+</div>
+
+<!-- PAGE: AGENTS -->
+<div class="content-page" id="page-agents">
+<div class="page-tabs"><button class="page-tab active" onclick="switchAgentTab('installed')">已安装</button><button class="page-tab" onclick="switchAgentTab('hub')">Hub 市场</button><button class="page-tab" onclick="switchAgentTab('custom')">自定义添加</button><button class="page-tab" onclick="switchAgentTab('chat')">对话创建</button></div>
+<div id="agent-installed">
+<div class="skill-grid" id="installed-skills-grid">
+<div class="skill-card anygen"><div class="skill-header"><span class="skill-icon">📊</span><div><div class="skill-name">AnyGen · PPT 生成</div><div class="skill-version">v2.0.0 · ANYGEN</div></div></div><div class="skill-desc">AI 驱动一键生成专业PPT/幻灯片，支持企业汇报、产品发布</div><div class="skill-tags"><span class="tag tag-gold">AnyGen</span><span class="tag tag-accent">PPT</span></div><div class="skill-actions"><button class="btn btn-xs btn-secondary" onclick="openAnyGenConfig()">⚙</button><button class="btn btn-xs btn-primary" onclick="openAnyGenUsePanel('slide')">▶ 使用</button><label class="toggle-switch"><input type="checkbox" checked onchange="handleSkillToggle('anygen-slide',this.checked)"><span class="toggle-slider"></span></label></div></div>
+<div class="skill-card anygen"><div class="skill-header"><span class="skill-icon">📄</span><div><div class="skill-name">AnyGen · 文档生成</div><div class="skill-version">v2.0.0 · ANYGEN</div></div></div><div class="skill-desc">AI 生成Word文档、PRD、白皮书、技术方案，支持多格式导出</div><div class="skill-tags"><span class="tag tag-gold">AnyGen</span><span class="tag tag-accent">文档</span></div><div class="skill-actions"><button class="btn btn-xs btn-secondary" onclick="openAnyGenConfig()">⚙</button><button class="btn btn-xs btn-primary" onclick="openAnyGenUsePanel('doc')">▶ 使用</button><label class="toggle-switch"><input type="checkbox" checked onchange="handleSkillToggle('anygen-doc',this.checked)"><span class="toggle-slider"></span></label></div></div>
+<div class="skill-card anygen"><div class="skill-header"><span class="skill-icon">📐</span><div><div class="skill-name">AnyGen · 图表生成</div><div class="skill-version">v2.0.0 · ANYGEN</div></div></div><div class="skill-desc">智能生成架构图、流程图、思维导图、ER图、UML图</div><div class="skill-tags"><span class="tag tag-gold">AnyGen</span><span class="tag tag-accent">图表</span></div><div class="skill-actions"><button class="btn btn-xs btn-secondary" onclick="openAnyGenConfig()">⚙</button><button class="btn btn-xs btn-primary" onclick="openAnyGenUsePanel('smart_draw')">▶ 使用</button><label class="toggle-switch"><input type="checkbox" checked onchange="handleSkillToggle('anygen-diagram',this.checked)"><span class="toggle-slider"></span></label></div></div>
+<div class="skill-card heygen"><div class="skill-header"><span class="skill-icon">🎬</span><div><div class="skill-name">HeyGen · 数字人视频</div><div class="skill-version">v2.0.0 · HEYGEN</div></div></div><div class="skill-desc">AI 数字人播报视频生成，适合产品介绍、营销推广、培训内容</div><div class="skill-tags"><span class="tag tag-success">HeyGen</span><span class="tag tag-accent">视频</span></div><div class="skill-actions"><button class="btn btn-xs btn-secondary" onclick="openHeyGenConfig()">⚙</button><button class="btn btn-xs btn-primary" onclick="openHeyGenUsePanel('video')">▶ 使用</button><label class="toggle-switch"><input type="checkbox" checked onchange="handleSkillToggle('heygen-video',this.checked)"><span class="toggle-slider"></span></label></div></div>
+<div class="skill-card heygen"><div class="skill-header"><span class="skill-icon">🧑‍💼</span><div><div class="skill-name">HeyGen · 定制数字人</div><div class="skill-version">v2.0.0 · HEYGEN</div></div></div><div class="skill-desc">创建品牌专属 AI 数字人形象，支持真人克隆和虚拟角色</div><div class="skill-tags"><span class="tag tag-success">HeyGen</span><span class="tag tag-accent2">数字人</span></div><div class="skill-actions"><button class="btn btn-xs btn-secondary" onclick="openHeyGenConfig()">⚙</button><button class="btn btn-xs btn-primary" onclick="openHeyGenUsePanel('avatar')">▶ 使用</button><label class="toggle-switch"><input type="checkbox" onchange="handleSkillToggle('heygen-avatar',this.checked)"><span class="toggle-slider"></span></label></div></div>
+<div class="skill-card"><div class="skill-header"><span class="skill-icon">🎨</span><div><div class="skill-name">Nano Banana Pro 逆向生图</div><div class="skill-version">v2.1.0 · 官方</div></div></div><div class="skill-desc">将参考图转换为JSON提示符，支持改主体/换背景/风格迁移</div><div class="skill-tags"><span class="tag tag-accent">图像</span><span class="tag tag-accent">Gemini</span></div><div class="skill-actions"><button class="btn btn-xs btn-secondary" onclick="showToast('Skill 配置已打开','info')">⚙</button><label class="toggle-switch"><input type="checkbox" checked><span class="toggle-slider"></span></label></div></div>
+</div>
+</div>
+<div id="agent-hub" class="hidden">
+<div class="skill-grid" id="skill-hub-grid">
+<div class="skill-card anygen"><div class="skill-header"><span class="skill-icon">📊</span><div><div class="skill-name">AnyGen · PPT 生成</div><div class="skill-version">v2.0.0 · <span class="tag tag-gold" style="font-size:10px">ANYGEN</span></div></div></div><div class="skill-desc">AI 驱动一键生成专业PPT/幻灯片，支持企业汇报、产品发布、教学课件</div><div class="skill-tags"><span class="tag tag-gold">AnyGen</span><span class="tag tag-accent">PPT</span><span class="tag tag-accent">内容生成</span></div><div class="skill-actions"><button class="btn btn-xs btn-danger" onclick="togglePresetSkill('anygen-slide',false);renderSkillHub();renderInstalledSkills();showToast('已卸载','info')">卸载</button></div></div>
+<div class="skill-card anygen"><div class="skill-header"><span class="skill-icon">📄</span><div><div class="skill-name">AnyGen · 文档生成</div><div class="skill-version">v2.0.0 · <span class="tag tag-gold" style="font-size:10px">ANYGEN</span></div></div></div><div class="skill-desc">AI 生成Word文档、PRD、白皮书、技术方案，支持多格式导出</div><div class="skill-tags"><span class="tag tag-gold">AnyGen</span><span class="tag tag-accent">文档</span></div><div class="skill-actions"><button class="btn btn-xs btn-danger" onclick="togglePresetSkill('anygen-doc',false);renderSkillHub();renderInstalledSkills();showToast('已卸载','info')">卸载</button></div></div>
+<div class="skill-card anygen"><div class="skill-header"><span class="skill-icon">📐</span><div><div class="skill-name">AnyGen · 图表生成</div><div class="skill-version">v2.0.0 · <span class="tag tag-gold" style="font-size:10px">ANYGEN</span></div></div></div><div class="skill-desc">智能生成架构图、流程图、思维导图、ER图、UML图，专业/手绘风格</div><div class="skill-tags"><span class="tag tag-gold">AnyGen</span><span class="tag tag-accent">图表</span><span class="tag tag-accent">架构</span></div><div class="skill-actions"><button class="btn btn-xs btn-danger" onclick="togglePresetSkill('anygen-diagram',false);renderSkillHub();renderInstalledSkills();showToast('已卸载','info')">卸载</button></div></div>
+<div class="skill-card anygen"><div class="skill-header"><span class="skill-icon">🌐</span><div><div class="skill-name">AnyGen · 网站生成</div><div class="skill-version">v2.0.0 · <span class="tag tag-gold" style="font-size:10px">ANYGEN</span></div></div></div><div class="skill-desc">AI 快速生成落地页、官网、产品展示页，支持响应式设计</div><div class="skill-tags"><span class="tag tag-gold">AnyGen</span><span class="tag tag-accent">网站</span></div><div class="skill-actions"><button class="btn btn-xs btn-primary" onclick="togglePresetSkill('anygen-website',true);renderSkillHub();renderInstalledSkills();showToast('已安装','success')">安装</button></div></div>
+<div class="skill-card anygen"><div class="skill-header"><span class="skill-icon">🔬</span><div><div class="skill-name">AnyGen · 深度研究</div><div class="skill-version">v2.0.0 · <span class="tag tag-gold" style="font-size:10px">ANYGEN</span></div></div></div><div class="skill-desc">AI 驱动的市场调研、竞品分析、行业报告生成</div><div class="skill-tags"><span class="tag tag-gold">AnyGen</span><span class="tag tag-accent">研究</span></div><div class="skill-actions"><button class="btn btn-xs btn-primary" onclick="togglePresetSkill('anygen-research',true);renderSkillHub();renderInstalledSkills();showToast('已安装','success')">安装</button></div></div>
+<div class="skill-card anygen"><div class="skill-header"><span class="skill-icon">💰</span><div><div class="skill-name">AnyGen · 金融分析</div><div class="skill-version">v2.0.0 · <span class="tag tag-gold" style="font-size:10px">ANYGEN</span></div></div></div><div class="skill-desc">AI 财报分析、估值模型、金融研究报告生成</div><div class="skill-tags"><span class="tag tag-gold">AnyGen</span><span class="tag tag-accent">金融</span></div><div class="skill-actions"><button class="btn btn-xs btn-primary" onclick="togglePresetSkill('anygen-finance',true);renderSkillHub();renderInstalledSkills();showToast('已安装','success')">安装</button></div></div>
+<div class="skill-card anygen"><div class="skill-header"><span class="skill-icon">📈</span><div><div class="skill-name">AnyGen · 数据分析</div><div class="skill-version">v2.0.0 · <span class="tag tag-gold" style="font-size:10px">ANYGEN</span></div></div></div><div class="skill-desc">AI 数据分析与可视化，CSV/Excel数据自动生成图表和洞察</div><div class="skill-tags"><span class="tag tag-gold">AnyGen</span><span class="tag tag-accent">数据</span></div><div class="skill-actions"><button class="btn btn-xs btn-primary" onclick="togglePresetSkill('anygen-data',true);renderSkillHub();renderInstalledSkills();showToast('已安装','success')">安装</button></div></div>
+<div class="skill-card anygen"><div class="skill-header"><span class="skill-icon">🎨</span><div><div class="skill-name">AnyGen · AI 设计</div><div class="skill-version">v2.0.0 · <span class="tag tag-gold" style="font-size:10px">ANYGEN</span></div></div></div><div class="skill-desc">AI 图像设计、海报生成、Banner制作、社交媒体素材</div><div class="skill-tags"><span class="tag tag-gold">AnyGen</span><span class="tag tag-accent">设计</span></div><div class="skill-actions"><button class="btn btn-xs btn-primary" onclick="togglePresetSkill('anygen-designer',true);renderSkillHub();renderInstalledSkills();showToast('已安装','success')">安装</button></div></div>
+<div class="skill-card heygen"><div class="skill-header"><span class="skill-icon">🎬</span><div><div class="skill-name">HeyGen · 数字人视频</div><div class="skill-version">v2.0.0 · <span class="tag tag-success" style="font-size:10px">HEYGEN</span></div></div></div><div class="skill-desc">AI 数字人播报视频生成，适合产品介绍、营销推广、培训内容</div><div class="skill-tags"><span class="tag tag-success">HeyGen</span><span class="tag tag-accent">视频</span></div><div class="skill-actions"><button class="btn btn-xs btn-danger" onclick="togglePresetSkill('heygen-video',false);renderSkillHub();renderInstalledSkills();showToast('已卸载','info')">卸载</button></div></div>
+<div class="skill-card heygen"><div class="skill-header"><span class="skill-icon">🧑‍💼</span><div><div class="skill-name">HeyGen · 定制数字人</div><div class="skill-version">v2.0.0 · <span class="tag tag-success" style="font-size:10px">HEYGEN</span></div></div></div><div class="skill-desc">创建品牌专属 AI 数字人形象，支持真人克隆和虚拟角色</div><div class="skill-tags"><span class="tag tag-success">HeyGen</span><span class="tag tag-accent2">数字人</span></div><div class="skill-actions"><button class="btn btn-xs btn-primary" onclick="togglePresetSkill('heygen-avatar',true);renderSkillHub();renderInstalledSkills();showToast('已安装','success')">安装</button></div></div>
+<div class="skill-card heygen"><div class="skill-header"><span class="skill-icon">🌍</span><div><div class="skill-name">HeyGen · 视频翻译</div><div class="skill-version">v2.0.0 · <span class="tag tag-success" style="font-size:10px">HEYGEN</span></div></div></div><div class="skill-desc">视频多语言配音与字幕生成，助力全球市场推广</div><div class="skill-tags"><span class="tag tag-success">HeyGen</span><span class="tag tag-accent">翻译</span></div><div class="skill-actions"><button class="btn btn-xs btn-primary" onclick="togglePresetSkill('heygen-translate',true);renderSkillHub();renderInstalledSkills();showToast('已安装','success')">安装</button></div></div>
+<div class="skill-card heygen"><div class="skill-header"><span class="skill-icon">🔴</span><div><div class="skill-name">HeyGen · 流式数字人</div><div class="skill-version">v2.0.0 · <span class="tag tag-success" style="font-size:10px">HEYGEN</span></div></div></div><div class="skill-desc">实时交互式 AI 数字人，适用于在线客服、直播带货场景</div><div class="skill-tags"><span class="tag tag-success">HeyGen</span><span class="tag tag-accent">直播</span></div><div class="skill-actions"><button class="btn btn-xs btn-primary" onclick="togglePresetSkill('heygen-streaming',true);renderSkillHub();renderInstalledSkills();showToast('已安装','success')">安装</button></div></div>
+</div>
+</div>
+<div id="agent-custom" class="hidden">
+<div class="card"><div class="card-title">添加自定义 Skill</div><div class="card-subtitle">手动配置 Skill 参数，支持 AnyGen/HeyGen/自定义服务商</div>
+<div class="form-row"><div class="form-group"><label>Skill 名称 *</label><input class="form-input" id="custom-skill-name" placeholder="例如：我的美甲风格助手"></div><div class="form-group"><label>版本号</label><input class="form-input" id="custom-skill-version" placeholder="v1.0.0"></div></div>
+<div class="form-group"><label>描述 *</label><input class="form-input" id="custom-skill-desc" placeholder="简要描述这个 Skill 的功能"></div>
+<div class="form-row"><div class="form-group"><label>标签</label><input class="form-input" id="custom-skill-tags" placeholder="美甲, AI, 设计（逗号分隔）"></div><div class="form-group"><label>服务商</label><select class="form-input" id="custom-skill-provider"><option value="custom">自定义</option><option value="anygen">AnyGen</option><option value="heygen">HeyGen</option><option value="creatok">CreatOK</option><option value="clipcat">Clipcat</option><option value="revor">Revor</option><option value="nanobanana">NanoBanana</option></select></div></div>
+<div class="form-group"><label>System Prompt</label><textarea class="form-input" id="custom-skill-prompt" rows="3" placeholder="输入 Skill 的系统提示词..."></textarea></div>
+<div class="form-group"><label>触发词</label><input class="form-input" id="custom-skill-triggers" placeholder="触发此 Skill 的关键词（逗号分隔）"></div>
+<button class="btn btn-primary btn-sm" onclick="addCustomSkillV2()">添加 Skill</button>
+</div>
+</div>
+<div id="agent-chat" class="hidden">
+<div class="chat-panel" style="height:500px">
+<div class="chat-msgs" id="skill-chat-msgs">
+<div class="chat-msg agent"><div class="msg-avatar agent-av">🧠</div><div class="msg-bubble">你好！我是 Skill 创建助手 🦞<br>告诉我你想要什么功能的 Skill，我会自动生成 SKILL.md 配置并安装。<br><br>例如：<br>· "帮我创建一个美甲风格迁移的 Skill"<br>· "我需要一个自动生成美甲设计报告的 Skill"</div></div>
+</div>
+<div class="chat-input-row"><input id="skill-chat-input" placeholder="描述你想要的 Skill 功能..." onkeydown="if(event.key==='Enter')sendSkillChat()"><button class="btn btn-primary btn-xs" onclick="sendSkillChat()">发送</button></div>
+</div>
+</div>
+</div>
+
+<!-- PAGE: PROVIDERS -->
+<div class="content-page" id="page-providers">
+<div class="card" style="margin-bottom:20px"><div style="display:flex;align-items:center;justify-content:space-between"><div><div class="card-title" style="margin-bottom:0">🔌 AI 大模型提供商</div><div class="card-subtitle">配置和管理你的 AI 模型服务商，当前默认：<span id="default-provider-name" style="color:var(--accent)">OpenAI</span></div></div><div style="text-align:right"><div style="font-size:11px;color:var(--text-tertiary)">API 调用统计</div><div style="font-size:18px;font-weight:800">12,847</div><div style="font-size:11px;color:var(--success)">今日 ▲ 23%</div></div></div></div>
+<div class="provider-grid">
+<div class="provider-card active-provider" id="provider-openai" onclick="setDefaultProvider('openai')">
+<div class="provider-badge badge-default">默认</div>
+<div class="provider-header"><span class="provider-icon">🧠</span><div><div class="provider-name">OpenAI</div><div class="provider-model">GPT-4o · GPT-4o-mini · o1</div></div></div>
+<div class="provider-desc">最强大的通用大模型，支持文本/图像/代码多模态理解与生成</div>
+<div class="provider-status"><span class="status-dot status-online"></span>已连接 · API Key: sk-••••••••aB3x</div>
+</div>
+<div class="provider-card" id="provider-anthropic" onclick="setDefaultProvider('anthropic')">
+<div class="provider-badge badge-recommend">推荐</div>
+<div class="provider-header"><span class="provider-icon">🔮</span><div><div class="provider-name">Anthropic</div><div class="provider-model">Claude 3.5 Sonnet · Claude 3 Opus</div></div></div>
+<div class="provider-desc">擅长长文本分析和复杂推理，支持200K上下文窗口</div>
+<div class="provider-status"><span class="status-dot status-online"></span>已连接 · API Key: sk-ant-••••••••xY9z</div>
+</div>
+<div class="provider-card" id="provider-google" onclick="setDefaultProvider('google')">
+<div class="provider-header"><span class="provider-icon">🌐</span><div><div class="provider-name">Google Gemini</div><div class="provider-model">Gemini 2.0 Flash · Gemini 2.0 Pro</div></div></div>
+<div class="provider-desc">多模态能力强，原生支持图像/视频/音频理解，超快推理速度</div>
+<div class="provider-status"><span class="status-dot status-online"></span>已连接 · API Key: ********</div>
+</div>
+<div class="provider-card" id="provider-deepseek" onclick="setDefaultProvider('deepseek')">
+<div class="provider-header"><span class="provider-icon">🔍</span><div><div class="provider-name">DeepSeek</div><div class="provider-model">DeepSeek-V3 · DeepSeek-R1</div></div></div>
+<div class="provider-desc">国产开源大模型，性价比极高，R1推理模型能力出色</div>
+<div class="provider-status"><span class="status-dot status-online"></span>已连接 · API Key: ********</div>
+</div>
+<div class="provider-card" id="provider-qwen" onclick="setDefaultProvider('qwen')">
+<div class="provider-header"><span class="provider-icon">☁</span><div><div class="provider-name">通义千问</div><div class="provider-model">Qwen-Max · Qwen2.5-72B</div></div></div>
+<div class="provider-desc">阿里云通义大模型，中文理解能力强，支持多轮对话和代码生成</div>
+<div class="provider-status"><span class="status-dot status-online"></span>已连接 · API Key: sk-qw-••••••••rT6n</div>
+</div>
+<div class="provider-card" id="provider-ollama" onclick="setDefaultProvider('ollama')" style="border:1px solid rgba(52,211,153,0.3);background:linear-gradient(135deg,rgba(52,211,153,0.06),rgba(16,185,129,0.06))">
+<div class="provider-badge badge-hot" style="background:#10b981">本地</div>
+<div class="provider-header"><span class="provider-icon">🦙</span><div><div class="provider-name">Ollama 本地模型</div><div class="provider-model">GPT-OSS 20B · Qwen3-Coder 480B</div></div></div>
+<div class="provider-desc">本地大模型，用于提示词优化和设计意图理解。运行在 http://localhost:11434</div>
+<div class="provider-status"><span id="ollama-status" class="status-dot status-idle"></span><span id="ollama-status-text">检测中...</span></div>
+<div class="provider-actions" style="margin-top:8px;display:flex;gap:6px">
+<button class="btn btn-xs btn-accent" onclick="event.stopPropagation();testOllamaConnection()" style="background:#10b981;border-color:#10b981">🔌 检测连接</button>
+<button class="btn btn-xs btn-secondary" onclick="event.stopPropagation();refreshOllamaModels()">📋 刷新模型</button>
+</div>
+</div>
+<div class="provider-card" id="provider-custom" onclick="setDefaultProvider('custom')">
+<div class="provider-header"><span class="provider-icon">⚡</span><div><div class="provider-name">自定义端点</div><div class="provider-model">OpenAI 兼容 API · 自部署模型</div></div></div>
+<div class="provider-desc">连接任何兼容 OpenAI API 格式的自部署模型或第三方服务</div>
+<div class="provider-status"><span class="status-dot status-idle"></span>未配置 · 点击配置自定义端点</div>
+</div>
+<div class="provider-card" id="provider-nanobanana" onclick="setDefaultProvider('nanobanana')" style="border:1px solid rgba(0,240,255,0.3);background:linear-gradient(135deg,rgba(0,240,255,0.06),rgba(180,76,255,0.06))">
+<div class="provider-badge badge-hot" style="background:var(--accent3)">生图</div>
+<div class="provider-header"><span class="provider-icon">🍌</span><div><div class="provider-name">Nano Banana Pro</div><div class="provider-model">Gemini 3 Pro Image · 真实AI生图引擎</div></div></div>
+<div class="provider-desc">开源免费AI图像生成，支持文生图/图生图/风格迁移，1K/2K/4K分辨率</div>
+<div class="provider-status"><span id="nanobanana-status" class="status-dot status-idle"></span><span id="nanobanana-status-text">未配置API Key · 点击设置</span></div>
+<div class="provider-actions" style="margin-top:8px;display:flex;gap:6px">
+<button class="btn btn-xs btn-accent" onclick="event.stopPropagation();openNanoBananaSettings()">🔑 设置API Key</button>
+<button class="btn btn-xs btn-secondary" onclick="event.stopPropagation();testNanoBananaConnection()">🔌 测试连接</button>
+</div>
+</div>
+</div>
+</div>
+
+<!-- PAGE: OPENCLAW -->
+<div class="content-page" id="page-openclaw">
+<div class="openclaw-hero">
+<div class="oc-icon">🦞</div>
+<h2>OpenClaw 控制台</h2>
+<p>AI NAILS 的智能体编排引擎 — 多模型协同、Skill 热插拔、实时推理链路追踪</p>
+<button class="btn btn-primary" onclick="openOpenClawConsole()" style="font-size:15px;padding:14px 32px">🚀 打开 OpenClaw 控制台</button>
+<div style="margin-top:8px;font-size:11px;color:var(--text-tertiary)">http://127.0.0.1:18789/chat?session=main</div>
+</div>
+<div style="margin-bottom:12px;font-size:14px;font-weight:700">快速会话入口</div>
+<div class="openclaw-sessions">
+<div class="openclaw-session-card" onclick="openOpenClawSession('main')"><div class="session-icon">🏠</div><div class="session-name">Main 主会话</div><div class="session-desc">默认对话窗口</div></div>
+<div class="openclaw-session-card" onclick="openOpenClawSession('nails-design')"><div class="session-icon">💅</div><div class="session-name">美甲设计工作台</div><div class="session-desc">甲面生成与优化</div></div>
+<div class="openclaw-session-card" onclick="openOpenClawSession('skill-dev')"><div class="session-icon">🧠</div><div class="session-name">Skill 开发</div><div class="session-desc">创建和调试 Skill</div></div>
+<div class="openclaw-session-card" onclick="openOpenClawSession('agents')"><div class="session-icon">🤖</div><div class="session-name">智能体编排</div><div class="session-desc">多 Agent 协同</div></div>
+</div>
+</div>
+
+<!-- PAGE: ADMIN -->
+<div class="content-page" id="page-admin">
+<div class="stat-grid" style="margin-bottom:20px">
+<div class="stat-card"><div class="stat-label">总用户数</div><div class="stat-value">12,847</div><div class="stat-change up">▲ 8%</div></div>
+<div class="stat-card"><div class="stat-label">今日订单</div><div class="stat-value">384</div><div class="stat-change up">▲ 15%</div></div>
+<div class="stat-card"><div class="stat-label">营收 (本月)</div><div class="stat-value">¥847K</div><div class="stat-change up">▲ 22%</div></div>
+<div class="stat-card"><div class="stat-label">风控拦截</div><div class="stat-value">23</div><div class="stat-change down">▼ 5%</div></div>
+</div>
+<div class="card"><div class="card-header"><div class="card-title">订单管理</div></div>
+<table class="admin-table"><thead><tr><th>订单号</th><th>用户</th><th>金额</th><th>类型</th><th>时间</th><th>状态</th><th>操作</th></tr></thead><tbody>
+<tr><td>#AN20260602-001</td><td>蝶变美甲</td><td>¥299</td><td>订阅</td><td>10分钟前</td><td><span class="tag tag-success">已完成</span></td><td><button class="btn btn-xs btn-secondary">详情</button></td></tr>
+<tr><td>#AN20260602-002</td><td>花漾工作室</td><td>¥29,900</td><td>设备</td><td>1小时前</td><td><span class="tag tag-warning">待发货</span></td><td><button class="btn btn-xs btn-primary">发货</button></td></tr>
+<tr><td>#AN20260602-003</td><td>极简美学</td><td>¥1,000</td><td>充值</td><td>2小时前</td><td><span class="tag tag-success">已完成</span></td><td><button class="btn btn-xs btn-secondary">详情</button></td></tr>
+<tr><td>#AN20260602-004</td><td>user_8f3a2</td><td>¥299</td><td>订阅</td><td>3小时前</td><td><span class="tag tag-danger">风控中</span></td><td><button class="btn btn-xs btn-danger">释放</button></td></tr>
+</tbody></table></div>
+</div>
+
+<!-- PAGE: SETTINGS -->
+<div class="content-page" id="page-settings">
+<div class="settings-section"><h3>账户设置</h3>
+<div class="setting-row"><div><div class="setting-label">账户安全</div><div class="setting-desc">修改密码、绑定手机/邮箱</div></div><button class="btn btn-secondary btn-sm">管理</button></div>
+<div class="setting-row"><div><div class="setting-label">通知偏好</div><div class="setting-desc">管理推送通知和邮件提醒</div></div><label class="toggle-switch"><input type="checkbox" checked><span class="toggle-slider"></span></label></div>
+</div>
+<div class="settings-section"><h3>外观</h3>
+<div class="setting-row"><div><div class="setting-label">深色模式</div><div class="setting-desc">使用赛博深色主题</div></div><label class="toggle-switch"><input type="checkbox" checked><span class="toggle-slider"></span></label></div>
+<div class="setting-row"><div><div class="setting-label">侧边栏自动收起</div><div class="setting-desc">鼠标离开时自动折叠侧边栏</div></div><label class="toggle-switch"><input type="checkbox"><span class="toggle-slider"></span></label></div>
+</div>
+<div class="settings-section"><h3>关于</h3>
+<div class="setting-row"><div><div class="setting-label">版本</div><div class="setting-desc">AI NAILS Desktop v4.0.0</div></div><span style="color:var(--accent);font-size:12px">已是最新</span></div>
+<div class="setting-row"><div><div class="setting-label">OpenClaw 引擎</div><div class="setting-desc">智能体编排核心</div></div><span style="font-size:12px;color:var(--text-secondary)">v2.0</span></div>
+</div>
+<div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--border)">
+<button class="btn btn-danger btn-sm" onclick="handleLogout()">退出登录</button>
+</div>
+</div>
+</div>
+</div>
+<div id="statusbar">
+<div class="status-left">
+<span class="status-item"><span style="color:var(--success)">●</span> <span data-i18n="status.normal">系统正常</span></span>
+<span class="status-item">🦞 <span data-i18n="status.openclaw">OpenClaw 已连接</span></span>
+<span class="status-item">AI 模型: <span id="status-provider" style="color:var(--accent)">GPT-4o</span></span>
+</div>
+<div class="status-right">
+<span class="status-item" data-i18n="status.cmd_palette">⌘K 命令面板</span>
+<span class="status-item" id="status-time">21:24</span>
+</div>
+</div>
+</div>
+
+<!-- NANO BANANA API KEY MODAL -->
+<div class="modal-overlay hidden" id="nanobanana-modal"><div class="modal" style="width:480px">
+<h3>🍌 Nano Banana Pro API 配置</h3>
+<p style="font-size:12px;color:var(--text-secondary);margin-bottom:16px">使用 Gemini 3 Pro Image 模型进行真实AI图像生成。免费获取 API Key: <a href="https://aistudio.google.com/apikey" target="_blank" style="color:var(--accent)">Google AI Studio</a></p>
+<div class="form-group"><label>API Key</label><div class="input-row"><input class="form-input" id="nanobanana-api-key" type="password" placeholder="输入你的 Gemini API Key..."><button class="btn btn-secondary btn-sm" onclick="togglePassword('nanobanana-api-key')" style="white-space:nowrap">👁</button></div></div>
+<div class="form-group"><label>默认分辨率</label><div style="display:flex;gap:8px"><button class="btn btn-xs btn-secondary nanobanana-res-btn selected" onclick="selectNanoBananaRes('2K',this)">2K</button><button class="btn btn-xs btn-secondary nanobanana-res-btn" onclick="selectNanoBananaRes('1K',this)">1K</button><button class="btn btn-xs btn-secondary nanobanana-res-btn" onclick="selectNanoBananaRes('4K',this)">4K</button></div></div>
+<div class="form-group"><label>默认宽高比</label><div style="display:flex;gap:6px;flex-wrap:wrap"><button class="btn btn-xs btn-secondary nanobanana-ratio-btn selected" onclick="selectNanoBananaRatio('1:1',this)">1:1</button><button class="btn btn-xs btn-secondary nanobanana-ratio-btn" onclick="selectNanoBananaRatio('3:4',this)">3:4</button><button class="btn btn-xs btn-secondary nanobanana-ratio-btn" onclick="selectNanoBananaRatio('9:16',this)">9:16</button><button class="btn btn-xs btn-secondary nanobanana-ratio-btn" onclick="selectNanoBananaRatio('16:9',this)">16:9</button></div></div>
+<div class="modal-actions"><button class="btn btn-secondary btn-sm" onclick="closeNanoBananaSettings()">取消</button><button class="btn btn-primary btn-sm" onclick="saveNanoBananaSettings()">💾 保存配置</button></div>
+</div></div>
+
+<!-- FORGOT PASSWORD MODAL -->
+<div class="modal-overlay hidden" id="forgot-modal"><div class="modal"><h3>找回密码</h3><p>请输入您的注册邮箱，我们将发送重置链接。</p><div class="form-group"><input class="form-input" id="forgot-email" type="email" placeholder="your@email.com"></div><div class="modal-actions"><button class="btn btn-secondary btn-sm" onclick="closeForgotModal()">取消</button><button class="btn btn-primary btn-sm" onclick="handleForgotPassword()">发送重置链接</button></div></div></div>
+
+<!-- PROCESSING MODAL -->
+<div class="modal-overlay hidden" id="processing-modal"><div class="modal"><div class="processing-animation"><div class="spinner"></div><p>正在处理支付，请稍候...</p></div></div></div>
+
+<!-- QR CODE MODAL -->
+<div class="modal-overlay hidden" id="qr-modal"><div class="modal"><div class="qr-container"><div class="qr-code">📱</div><p>请使用 <span id="qr-method-name">微信</span> 扫描二维码支付</p><p style="font-weight:800;font-size:18px;color:var(--accent)" id="qr-amount">¥1,000</p><p style="font-size:11px;color:var(--text-tertiary)">二维码有效时间：5分钟</p></div><div class="modal-actions"><button class="btn btn-secondary btn-sm" onclick="closeQrModal()">取消</button></div></div></div>
+
+<!-- SUCCESS MODAL -->
+<div class="modal-overlay hidden" id="success-modal"><div class="modal" style="text-align:center"><div class="success-icon">✅</div><h3>支付成功！</h3><p id="success-msg">已成功支付 ¥1,000</p><div class="modal-actions" style="justify-content:center"><button class="btn btn-primary btn-sm" onclick="closeSuccessModal()">确 定</button></div></div></div>
+
+<!-- STYLE PICKER MODAL -->
+<div class="modal-overlay hidden" id="style-modal"><div class="modal" style="width:480px"><h3>🎭 选择美甲风格</h3><div class="style-grid">
+<div class="style-item" onclick="selectStyle('赛博朋克')"><div>🤖</div><div class="style-label">赛博朋克</div></div>
+<div class="style-item" onclick="selectStyle('中国风')"><div>🏮</div><div class="style-label">中国风</div></div>
+<div class="style-item" onclick="selectStyle('极简')"><div>⚪</div><div class="style-label">极简</div></div>
+<div class="style-item" onclick="selectStyle('花卉')"><div>🌸</div><div class="style-label">花卉</div></div>
+<div class="style-item" onclick="selectStyle('渐变')"><div>🌈</div><div class="style-label">渐变</div></div>
+<div class="style-item" onclick="selectStyle('哥特')"><div>🦇</div><div class="style-label">哥特</div></div>
+<div class="style-item" onclick="selectStyle('波普')"><div>🎯</div><div class="style-label">波普</div></div>
+<div class="style-item" onclick="selectStyle('水彩')"><div>🎨</div><div class="style-label">水彩</div></div>
+</div><div class="modal-actions"><button class="btn btn-secondary btn-sm" onclick="closeStyleModal()">关闭</button></div></div></div>
+
+<!-- COMMAND PALETTE -->
+<div class="hidden" id="command-palette"><div class="cmd-box">
+<div class="cmd-input-wrap"><input id="cmd-input" placeholder="搜索命令..." oninput="filterCommands()" onkeydown="handleCmdKey(event)"></div>
+<div class="cmd-list" id="cmd-list"></div>
+</div></div>
+
+<!-- TOAST CONTAINER -->
+<div id="toast-container"></div>
+
+<script>
+// AI NAILS Desktop v4.0 — 完整 JavaScript 功能
+// ================================================================
+let isLoggedIn = false, currentPage = 'create', authMode = 'login';
+let authLoginMode = 'email', authRegMode = 'email', sidebarCollapsed = false;
+let payScene = 'recharge', selectedAmount = 1000, selectedCurrency = 'CNY';
+let selectedPayment = 'wechat', selectedSubTier = 'pro', cmdSelectedIdx = 0;
+let defaultProvider = 'openai';
+
+// 预置 API Keys（从环境变量注入）
+window.__ANYGEN_API_KEY__ = 'sk-ag-4bKlpcgdrZ1ScIKQ3_YvhyCMsP9j23KsxbwMJgeTNYUg6JjrBnovgXsWroPPqbS2yCBTfIJ5zLEA-7EdZupnUw';
+window.__HEYGEN_API_KEY__ = 'sk_V2_hgu_kv96HGuWU6i_6MTJwWuKVHuRaGfSRUTSPtsqcQwl1aAc';
+window.__CLIPCAT_API_KEY__ = 'sk-Ycd5iEn_F3ZJ9vyW3msbmYqWQD6XckfV';
+
+// AUTH
+function switchAuthTab(tab){authMode=tab;document.getElementById('auth-login-card').classList.toggle('hidden',tab!=='login');document.getElementById('auth-register-card').classList.toggle('hidden',tab!=='register')}
+function switchAuthLoginMode(mode){authLoginMode=mode;document.querySelectorAll('#auth-login-card .auth-tab').forEach(el=>{el.classList.toggle('active',(mode==='email'&&el.textContent.includes('邮箱'))||(mode==='phone'&&el.textContent.includes('手机')))});document.getElementById('auth-login-email').classList.toggle('hidden',mode!=='email');document.getElementById('auth-login-phone').classList.toggle('hidden',mode!=='phone')}
+function switchAuthRegMode(mode){authRegMode=mode;document.querySelectorAll('#auth-register-card .auth-tab').forEach(el=>{el.classList.toggle('active',(mode==='email'&&el.textContent.includes('邮箱'))||(mode==='phone'&&el.textContent.includes('手机')))});document.getElementById('auth-reg-email').classList.toggle('hidden',mode!=='email');document.getElementById('auth-reg-phone').classList.toggle('hidden',mode!=='phone')}
+function togglePassword(id){const i=document.getElementById(id);i.type=i.type==='password'?'text':'password'}
+function checkAuthPasswordStrength(){const p=document.getElementById('auth-reg-password').value,b=document.getElementById('auth-strength-bar'),t=document.getElementById('auth-strength-text');let s=0;if(p.length>=8){s++;document.getElementById('auth-req-length').classList.add('met')}else document.getElementById('auth-req-length').classList.remove('met');if(/[A-Z]/.test(p)){s++;document.getElementById('auth-req-upper').classList.add('met')}else document.getElementById('auth-req-upper').classList.remove('met');if(/\d/.test(p)){s++;document.getElementById('auth-req-digit').classList.add('met')}else document.getElementById('auth-req-digit').classList.remove('met');if(/[^A-Za-z0-9]/.test(p))s++;b.className='strength-bar-fill';if(s===0){b.style.width='0%';t.textContent='请输入密码'}else if(s===1){b.style.width='25%';b.classList.add('strength-weak');t.textContent='弱'}else if(s===2){b.style.width='50%';b.classList.add('strength-fair');t.textContent='一般'}else if(s===3){b.style.width='75%';b.classList.add('strength-good');t.textContent='强'}else{b.style.width='100%';b.classList.add('strength-strong');t.textContent='非常强'}}
+
+function handleAppLogin(){
+  if(authLoginMode==='email'){const e=document.getElementById('auth-login-email-input').value,p=document.getElementById('auth-login-password').value;if(!e||!p){showToast('请填写完整信息','error');return}if(!e.includes('@')){showToast('请输入有效的邮箱地址','error');return}}
+  else{const p=document.getElementById('auth-login-phone-input').value,c=document.getElementById('auth-login-code').value;if(!p||!c){showToast('请填写完整信息','error');return}if(c.length!==6){showToast('请输入6位验证码','error');return}}
+  showToast(i18n.t('toast.login_success'),'success');enterDesktop();
+}
+function socialAppLogin(pr){const n={wechat:'微信',apple:'Apple ID',google:'Google'};showToast(`正在跳转${n[pr]}授权...`,'info');setTimeout(()=>{showToast(`${n[pr]}登录成功！`,'success');enterDesktop()},1500)}
+function biometricAppLogin(){showToast('正在验证生物识别...','info');setTimeout(()=>{showToast('面容识别成功！👋','success');enterDesktop()},1200)}
+function handleAppRegister(){
+  if(!document.getElementById('auth-reg-agree').checked){showToast('请先同意服务条款和隐私政策','error');return}
+  if(authRegMode==='email'){const u=document.getElementById('auth-reg-username').value,em=document.getElementById('auth-reg-email').value,pw=document.getElementById('auth-reg-password').value;if(!u||!em||!pw){showToast('请填写完整信息','error');return}if(pw.length<8){showToast('密码至少8个字符','error');return}document.getElementById('sidebar-username').textContent=u}
+  else{const ph=document.getElementById('auth-reg-phone-input').value,co=document.getElementById('auth-reg-code').value,pw=document.getElementById('auth-reg-phone-password').value;if(!ph||!co||!pw){showToast('请填写完整信息','error');return}document.getElementById('sidebar-username').textContent='用户 '+ph.slice(-4)}
+  const inv=document.getElementById('auth-reg-invite').value;showToast(i18n.t('toast.register_success')+(inv?' 邀请码已确认！':''),'success');setTimeout(()=>enterDesktop(),1000)
+}
+function sendAuthLoginCode(){const b=document.getElementById('auth-login-code-btn');if(b.disabled)return;showToast('验证码已发送','success');startCountdown(b)}
+function sendAuthRegCode(){const b=document.getElementById('auth-reg-code-btn');if(b.disabled)return;showToast('验证码已发送','success');startCountdown(b)}
+function startCountdown(btn){let s=60;btn.disabled=true;btn.textContent=`${s}s后重试`;const t=setInterval(()=>{s--;btn.textContent=`${s}s后重试`;if(s<=0){clearInterval(t);btn.disabled=false;btn.textContent='获取验证码'}},1000)}
+function enterDesktop(){isLoggedIn=true;document.getElementById('auth-overlay').classList.add('hidden');document.getElementById('desktop-shell').classList.add('visible');updateStatusTime();setInterval(updateStatusTime,30000)}
+function handleLogout(){isLoggedIn=false;document.getElementById('desktop-shell').classList.remove('visible');document.getElementById('auth-overlay').classList.remove('hidden');switchAuthTab('login');navigateTo('create');showToast(i18n.t('toast.logout'),'info')}
+
+// NAVIGATION
+function navigateTo(page){
+  currentPage=page;
+  document.querySelectorAll('.sidebar-nav-item').forEach(el=>el.classList.toggle('active',el.dataset.page===page));
+  document.querySelectorAll('.content-page').forEach(el=>el.classList.remove('active'));
+  const t=document.getElementById('page-'+page);if(t)t.classList.add('active');
+  document.getElementById('titlebar-page-name').textContent=i18n.t('page.'+page)||page;
+}
+function toggleSidebar(){sidebarCollapsed=!sidebarCollapsed;document.getElementById('sidebar').classList.toggle('collapsed',sidebarCollapsed);document.querySelector('.sidebar-collapse-btn').textContent=sidebarCollapsed?'▶':'◀ 收起菜单'}
+
+// DEVICE
+function switchDeviceMode(mode){document.querySelectorAll('#page-device .auth-tab').forEach(el=>{el.classList.toggle('active',(mode==='b2c'&&el.textContent.includes('B2C'))||(mode==='b2b'&&el.textContent.includes('B2B')))});document.getElementById('device-b2c').classList.toggle('hidden',mode!=='b2c');document.getElementById('device-b2b').classList.toggle('hidden',mode!=='b2b')}
+
+// PAYMENT
+function switchPayScene(scene){payScene=scene;document.querySelectorAll('#page-payment .auth-tab').forEach((el,i)=>{el.classList.toggle('active',['recharge','subscribe','device'][i]===scene)});document.getElementById('pay-scene-recharge').classList.toggle('hidden',scene!=='recharge');document.getElementById('pay-scene-subscribe').classList.toggle('hidden',scene!=='subscribe');document.getElementById('pay-scene-device').classList.toggle('hidden',scene!=='device');const t={recharge:'账户充值',subscribe:'套餐订阅',device:'设备购买'};document.getElementById('payment-title').textContent=t[scene];if(scene==='device')selectedAmount=29900;else if(scene==='subscribe')selectedAmount=299;else selectedAmount=1000;updatePaymentSummary()}
+function selectAmount(amt,btn){selectedAmount=amt;document.querySelectorAll('#pay-scene-recharge .amount-btn').forEach(el=>el.classList.remove('selected'));if(btn)btn.classList.add('selected');updatePaymentSummary()}
+function selectSub(tier,btn){selectedSubTier=tier;document.querySelectorAll('#pay-scene-subscribe .sub-card').forEach(el=>el.classList.remove('selected'));if(btn)btn.classList.add('selected');const p={basic:99,pro:299,business:999,enterprise:0};selectedAmount=p[tier];updatePaymentSummary()}
+function selectCurrency(cur,el){selectedCurrency=cur;document.querySelectorAll('#currency-select .currency-chip').forEach(c=>c.classList.remove('selected'));if(el)el.classList.add('selected');const m=document.getElementById('payment-methods');m.querySelectorAll('.payment-method').forEach(pm=>{const method=pm.dataset.method;if(cur==='USDT'||cur==='BTC'){pm.style.display=method==='crypto'?'flex':'none';if(method==='crypto')selectPayment('crypto',pm)}else if(cur==='USD'||cur==='EUR'){pm.style.display=['stripe','paypal','crypto'].includes(method)?'flex':'none';if(method==='stripe')selectPayment('stripe',pm)}else{pm.style.display='flex'}});updatePaymentSummary()}
+function selectPayment(method,el){selectedPayment=method;document.querySelectorAll('#payment-methods .payment-method').forEach(m=>m.classList.remove('selected'));if(el)el.classList.add('selected');updatePaymentSummary()}
+function updatePaymentSummary(){const sym={CNY:'¥',USD:'$',EUR:'€',USDT:'₮',BTC:'₿'};const s=sym[selectedCurrency]||'¥';const mn={wechat:'微信支付',alipay:'支付宝',stripe:'Visa/Mastercard',paypal:'PayPal',crypto:'数字货币',bank:'对公转账'};let item='账户充值';if(payScene==='subscribe'){const tn={basic:'基础版订阅',pro:'专业版订阅',business:'商业版订阅',enterprise:'企业版订阅'};item=tn[selectedSubTier]||'套餐订阅'}else if(payScene==='device')item='AI NAILS 智能美甲打印机';document.getElementById('summary-item').textContent=item;document.getElementById('summary-amount').textContent=s+selectedAmount.toLocaleString();document.getElementById('summary-method').textContent=mn[selectedPayment]||'微信支付';document.getElementById('summary-total').textContent=s+selectedAmount.toLocaleString()}
+function customAmount(){const a=prompt('输入自定义金额 (¥):','200');if(a&&!isNaN(a)&&Number(a)>0){selectedAmount=Number(a);document.querySelectorAll('#pay-scene-recharge .amount-btn').forEach(el=>el.classList.remove('selected'));updatePaymentSummary()}}
+function handlePay(){const p=document.getElementById('processing-modal');p.classList.remove('hidden');setTimeout(()=>{p.classList.add('hidden');if(selectedPayment==='wechat'||selectedPayment==='alipay'){document.getElementById('qr-method-name').textContent=selectedPayment==='wechat'?'微信':'支付宝';const s={CNY:'¥',USD:'$',EUR:'€'}[selectedCurrency]||'¥';document.getElementById('qr-amount').textContent=s+selectedAmount.toLocaleString();document.getElementById('qr-modal').classList.remove('hidden');setTimeout(()=>{document.getElementById('qr-modal').classList.add('hidden');showPaymentSuccess()},3000)}else if(selectedPayment==='crypto'){showToast('钱包地址: 0xAI_Nails_7F3a...9B2c（已复制）','info');setTimeout(()=>showPaymentSuccess(),2000)}else if(selectedPayment==='bank'){showToast('银行信息已复制','info');setTimeout(()=>showPaymentSuccess(),2000)}else setTimeout(()=>showPaymentSuccess(),1500)},2000)}
+function showPaymentSuccess(){const s={CNY:'¥',USD:'$',EUR:'€'}[selectedCurrency]||'¥';document.getElementById('success-msg').textContent='已成功支付 '+s+selectedAmount.toLocaleString();document.getElementById('success-modal').classList.remove('hidden')}
+function closeSuccessModal(){document.getElementById('success-modal').classList.add('hidden');showToast(i18n.t('toast.payment_success'),'success')}
+function closeQrModal(){document.getElementById('qr-modal').classList.add('hidden');showToast('支付已取消','error')}
+
+// COMMUNITY
+function switchCommunityTab(tab){document.querySelectorAll('#page-community .page-tab').forEach((el,i)=>{el.classList.toggle('active',['feed','market','leaderboard'][i]===tab)});document.getElementById('comm-feed').classList.toggle('hidden',tab!=='feed');document.getElementById('comm-market').classList.toggle('hidden',tab!=='market');document.getElementById('comm-leaderboard').classList.toggle('hidden',tab!=='leaderboard')}
+
+// AGENTS
+function switchAgentTab(tab){document.querySelectorAll('#page-agents .page-tab').forEach((el,i)=>{el.classList.toggle('active',['installed','hub','custom','chat'][i]===tab)});document.getElementById('agent-installed').classList.toggle('hidden',tab!=='installed');document.getElementById('agent-hub').classList.toggle('hidden',tab!=='hub');document.getElementById('agent-custom').classList.toggle('hidden',tab!=='custom');document.getElementById('agent-chat').classList.toggle('hidden',tab!=='chat');if(tab==='hub'&&typeof renderSkillHub==='function')renderSkillHub();if(tab==='installed'&&typeof renderInstalledSkills==='function')renderInstalledSkills()}
+
+function installSkillFromHub(name){
+  showToast(`正在从 ClawSkill Hub 安装 "${name}"...`,'info');
+  setTimeout(()=>{
+    const grid=document.getElementById('installed-skills-grid');
+    const card=document.createElement('div');
+    card.className='skill-card';
+    card.innerHTML=`<div class="skill-header"><span class="skill-icon">📦</span><div><div class="skill-name">${name}</div><div class="skill-version">v1.0.0 · 新安装</div></div></div><div class="skill-desc">从 ClawSkill Hub 官方市场安装</div><div class="skill-tags"><span class="tag tag-gold">Hub</span><span class="tag tag-success">已安装</span></div><div class="skill-actions"><button class="btn btn-xs btn-secondary" onclick="showToast('Skill 配置已打开','info')">⚙</button><label class="toggle-switch"><input type="checkbox" checked><span class="toggle-slider"></span></label></div>`;
+    grid.appendChild(card);
+    showToast(`✅ "${name}" 安装成功！`,'success');
+  },800)
+}
+
+function addCustomSkill(){
+  // 代理到新版本
+  if(typeof addCustomSkillV2 === 'function'){ addCustomSkillV2(); return; }
+  const name=document.getElementById('custom-skill-name').value;
+  const version=document.getElementById('custom-skill-version').value||'v1.0.0';
+  const desc=document.getElementById('custom-skill-desc').value;
+  const tags=document.getElementById('custom-skill-tags').value;
+  if(!name||!desc){showToast('请填写 Skill 名称和描述','error');return}
+  const grid=document.getElementById('installed-skills-grid');
+  const card=document.createElement('div');
+  card.className='skill-card';
+  const tagHtml=tags?tags.split(',').map(t=>`<span class="tag tag-accent">${t.trim()}</span>`).join(''):'<span class="tag tag-accent">自定义</span>';
+  card.innerHTML=`<div class="skill-header"><span class="skill-icon">🔧</span><div><div class="skill-name">${name}</div><div class="skill-version">${version}</div></div></div><div class="skill-desc">${desc}</div><div class="skill-tags">${tagHtml}<span class="tag" style="background:rgba(180,76,255,0.12);color:var(--accent2)">自定义</span></div><div class="skill-actions"><button class="btn btn-xs btn-danger" onclick="this.closest('.skill-card').remove();showToast('Skill 已移除','info')">🗑</button><label class="toggle-switch"><input type="checkbox" checked><span class="toggle-slider"></span></label></div>`;
+  grid.appendChild(card);
+  document.getElementById('custom-skill-name').value='';document.getElementById('custom-skill-version').value='';document.getElementById('custom-skill-desc').value='';document.getElementById('custom-skill-tags').value='';document.getElementById('custom-skill-prompt').value='';document.getElementById('custom-skill-triggers').value='';
+  showToast(`✅ Skill "${name}" 已添加！`,'success');
+}
+
+function sendSkillChat(){
+  const input=document.getElementById('skill-chat-input');
+  const msg=input.value.trim();
+  if(!msg)return;
+  const msgs=document.getElementById('skill-chat-msgs');
+  msgs.innerHTML+=`<div class="chat-msg user"><div class="msg-avatar user-av">👤</div><div class="msg-bubble">${msg}</div></div>`;
+  input.value='';
+  msgs.scrollTop=msgs.scrollHeight;
+  setTimeout(()=>{
+    msgs.innerHTML+=`<div class="chat-msg agent"><div class="msg-avatar agent-av">🧠</div><div class="msg-bubble">已理解你的需求。我为你创建了以下 Skill 配置：<br><br><b>名称：</b>${msg.slice(0,30)}...<br><b>触发词：</b>自动识别<br><b>配置：</b>已生成 SKILL.md 模板<br><br>点击下方按钮安装 👇<br><button class="btn btn-xs btn-primary" onclick="installSkillFromHub('${msg.slice(0,20)}')" style="margin-top:8px">📥 安装此 Skill</button></div></div>`;
+    msgs.scrollTop=msgs.scrollHeight;
+  },1000)
+}
+
+// AI PROVIDERS
+function setDefaultProvider(provider){
+  defaultProvider=provider;
+  const names={openai:'OpenAI',anthropic:'Anthropic',google:'Google Gemini',deepseek:'DeepSeek',qwen:'通义千问',custom:'自定义端点',nanobanana:'Nano Banana Pro'};
+  document.getElementById('default-provider-name').textContent=names[provider]||provider;
+  document.getElementById('status-provider').textContent=provider==='openai'?'GPT-4o':provider==='anthropic'?'Claude':provider==='google'?'Gemini':provider==='deepseek'?'DeepSeek':provider==='qwen'?'Qwen':provider==='nanobanana'?'Nano Banana':'Custom';
+  document.querySelectorAll('.provider-card').forEach(c=>c.classList.remove('active-provider'));
+  const card=document.getElementById('provider-'+provider);
+  if(card)card.classList.add('active-provider');
+  
+  // 如果切换到 nanobanana 且未配置，自动弹出设置
+  if(provider==='nanobanana' && !NanoBananaService.isConfigured()){
+    setTimeout(()=>openNanoBananaSettings(),500);
+  }
+  
+  showToast(`默认提供商已切换至 ${names[provider]}`,'success');
+}
+
+// Nano Banana Pro 配置管理
+function openNanoBananaSettings(){
+  document.getElementById('nanobanana-modal').classList.remove('hidden');
+  const key = NanoBananaService.getApiKey();
+  if(key) document.getElementById('nanobanana-api-key').value = key;
+  updateNanoBananaUI();
+}
+
+function closeNanoBananaSettings(){
+  document.getElementById('nanobanana-modal').classList.add('hidden');
+}
+
+function saveNanoBananaSettings(){
+  const key = document.getElementById('nanobanana-api-key').value.trim();
+  if(!key){showToast('请输入 API Key','error');return}
+  NanoBananaService.setApiKey(key);
+  localStorage.setItem('nanobanana_resolution', nanobananaResolution);
+  localStorage.setItem('nanobanana_ratio', nanobananaRatio);
+  closeNanoBananaSettings();
+  updateNanoBananaUI();
+  showToast('✅ Nano Banana Pro 配置已保存！','success');
+}
+
+function selectNanoBananaRes(res, btn){
+  nanobananaResolution = res;
+  document.querySelectorAll('.nanobanana-res-btn').forEach(b=>b.classList.remove('selected'));
+  if(btn) btn.classList.add('selected');
+}
+
+function selectNanoBananaRatio(ratio, btn){
+  nanobananaRatio = ratio;
+  document.querySelectorAll('.nanobanana-ratio-btn').forEach(b=>b.classList.remove('selected'));
+  if(btn) btn.classList.add('selected');
+}
+
+function updateNanoBananaUI(){
+  const status = document.getElementById('nanobanana-status');
+  const statusText = document.getElementById('nanobanana-status-text');
+  if(NanoBananaService.isConfigured()){
+    status.className = 'status-dot status-online';
+    statusText.textContent = '已配置 · Gemini 3 Pro Image';
+  } else {
+    status.className = 'status-dot status-idle';
+    statusText.textContent = '未配置API Key · 点击设置';
+  }
+}
+
+async function testNanoBananaConnection(){
+  if(!NanoBananaService.isConfigured()){
+    showToast('⚠️ 请先配置 API Key','error');
+    openNanoBananaSettings();
+    return;
+  }
+  showToast('🔌 正在测试 Nano Banana Pro 连接...','info');
+  try {
+    const images = await NanoBananaService.generateImage('A simple test image: a tiny cute pink heart icon on white background, minimal', {
+      aspectRatio: '1:1',
+      imageSize: '1K'
+    });
+    if(images.length > 0){
+      showToast('✅ Nano Banana Pro 连接成功！API 正常响应','success');
+      updateNanoBananaUI();
+    }
+  } catch(err){
+    console.error('[NanoBanana] 测试失败:', err);
+    let msg = '连接失败';
+    if(err.message==='API_KEY_INVALID') msg = 'API Key 无效';
+    else if(err.message==='API_RATE_LIMIT') msg = 'API 频率限制';
+    showToast('❌ '+msg,'error');
+  }
+}
+
+// OpenClaw
+function openOpenClawConsole(){
+  window.open('http://127.0.0.1:18789/chat?session=main','_blank');
+  showToast('🚀 正在打开 OpenClaw 控制台...','success');
+}
+function openOpenClawSession(session){
+  window.open(`http://127.0.0.1:18789/chat?session=${session}`,'_blank');
+  showToast(`正在打开 ${session} 会话...`,'info');
+}
+
+// CREATE - AI generation (真实 Nano Banana Pro API)
+let nanobananaResolution = localStorage.getItem('nanobanana_resolution') || '2K';
+let nanobananaRatio = localStorage.getItem('nanobanana_ratio') || '1:1';
+
+async function generateNailArt(){
+  const prompt=document.getElementById('create-prompt').value;
+  if(!prompt){showToast('请先描述你想要的甲面设计','error');return}
+  window._lastCanvasImages = [];
+  window._lastGeneratedImages = null;
+  
+  const resultGrid=document.getElementById('result-grid');
+  resultGrid.style.display='grid';
+  
+  // 显示加载状态
+  const loadingHTML = '<div class="result-item"><div class="loading-spinner"><div class="spinner"></div></div></div>';
+  resultGrid.innerHTML = loadingHTML.repeat(4);
+  
+  const preview=document.getElementById('prompt-preview-card');
+  preview.style.display='block';
+  
+  // 根据当前 provider 决定行为
+  if(defaultProvider==='nanobanana'){
+    // 使用 Nano Banana Pro 真实生图
+    if(!NanoBananaService.isConfigured()){
+      showToast('⚠️ 请先配置 Nano Banana Pro API Key（点击提供商页面的设置按钮）','error');
+      resultGrid.innerHTML='<div class="result-item">💅</div><div class="result-item">🌸</div><div class="result-item">🦋</div><div class="result-item">✨</div><div class="result-item">🌊</div><div class="result-item">🔥</div>';
+      return;
+    }
+    
+    showToast('🍌 Nano Banana Pro 正在生成... Gemini 3 Pro Image 引擎 · '+nanobananaResolution+'分辨率','info');
+    document.getElementById('optimized-prompt').textContent=`"${prompt}" — Nano Banana Pro (Gemini 3 Pro Image) · ${nanobananaResolution} · ${nanobananaRatio}`;
+    document.getElementById('prompt-tags').innerHTML='<span class="tag tag-accent">🍌 Nano Banana Pro</span><span class="tag" style="background:rgba(180,76,255,0.12);color:var(--accent2)">Gemini 3 Pro Image</span><span class="tag tag-success">真实生图</span>';
+    
+    try {
+      const images = await NanoBananaService.generateVariants(prompt, 4, {
+        aspectRatio: nanobananaRatio,
+        imageSize: nanobananaResolution
+      });
+      
+      window._lastGeneratedImages = images;
+      window._lastGeneratedPrompt = prompt;
+      window._lastGeneratedProvider = 'NanoBanana';
+      
+      // 渲染真实图片 + 一键保存按钮
+      resultGrid.innerHTML = images.map((img, i) => `
+        <div class="result-item" style="position:relative">
+          <img src="data:${img.mimeType};base64,${img.base64}" alt="AI Nail Design ${i+1}" loading="lazy">
+          <div class="download-overlay" onclick="downloadNailImage('${img.base64}','${img.mimeType}','nail-design-${i+1}')">⬇ 下载</div>
+        </div>
+      `).join('') + `
+        <div class="result-item" style="background:linear-gradient(135deg,rgba(0,240,255,0.1),rgba(180,76,255,0.1));border:1px dashed var(--accent);cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-size:11px;color:var(--accent)" onclick="saveAllGeneratedToLibrary(window._lastGeneratedImages, window._lastGeneratedPrompt, window._lastGeneratedProvider);showToast('✅ 已保存全部生成结果到资源库','success')">
+          <span style="font-size:24px">💾</span>
+          <span>一键保存</span>
+          <span style="font-size:10px;opacity:0.7">全部到资源库</span>
+        </div>`;
+      
+      showToast(`✅ 成功生成 ${images.length} 张美甲设计！`,'success');
+      document.getElementById('prompt-tags').innerHTML='<span class="tag tag-accent">🍌 Nano Banana Pro</span><span class="tag tag-success">真实AI生图</span><span class="tag tag-accent2">'+images.length+'张</span>';
+    } catch(err) {
+      console.error('[NanoBanana] 生图失败:', err);
+      let errMsg = '生图失败';
+      if(err.message==='API_KEY_MISSING') errMsg='请先配置 API Key';
+      else if(err.message==='API_KEY_INVALID') errMsg='API Key 无效，请检查';
+      else if(err.message==='API_RATE_LIMIT') errMsg='API 调用频率限制，请稍后重试';
+      else if(err.message.startsWith('NO_IMAGE')) errMsg='提示词可能被安全过滤，请修改描述';
+      
+      resultGrid.innerHTML=`
+        <div class="result-item"><div class="error-msg">❌<br>${errMsg}</div></div>
+        <div class="result-item">💅</div><div class="result-item">🌸</div><div class="result-item">🦋</div>
+      `;
+      showToast('❌ '+errMsg,'error');
+      document.getElementById('prompt-tags').innerHTML='<span class="tag tag-accent">🍌 Nano Banana Pro</span><span class="tag tag-danger">生图失败</span>';
+    }
+  } else {
+    // 其他 provider — 模拟生成
+    showToast('✨ AI 正在生成... OpenClaw 解析意图 → 图案重构 → 甲型自适应形变 → 1200 DPI 渲染','info');
+    document.getElementById('optimized-prompt').textContent=`"${prompt}" — 经过 ${defaultProvider==='openai'?'GPT-4o':defaultProvider==='anthropic'?'Claude 3.5':defaultProvider==='google'?'Gemini 2.0':defaultProvider} 优化，分辨率 1200 DPI，甲型自适应拓扑形变`;
+    document.getElementById('prompt-tags').innerHTML='<span class="tag tag-accent">🎯 AI优化</span><span class="tag" style="background:rgba(180,76,255,0.12);color:var(--accent2)">94% 置信度</span><span class="tag tag-success">0.8s</span>';
+    resultGrid.innerHTML='<div class="result-item">💅</div><div class="result-item">🌸</div><div class="result-item">🦋</div><div class="result-item">✨</div><div class="result-item">🌊</div><div class="result-item">🔥</div>';
+  }
+}
+
+function downloadNailImage(base64, mimeType, filename) {
+  const ext = mimeType.split('/')[1] || 'png';
+  const link = document.createElement('a');
+  link.href = `data:${mimeType};base64,${base64}`;
+  link.download = `${filename}.${ext}`;
+  link.click();
+  showToast('📥 图片已下载','success');
+}
+
+function startVoiceInput(){showToast('🎤 语音输入已激活，请说话...','info');setTimeout(()=>{document.getElementById('create-prompt').value='赛博朋克风格，深蓝色微光渐变，蝴蝶翅膀纹理，金属质感';showToast('语音识别完成！','success')},2000)}
+function triggerImageUpload(){document.getElementById('image-upload-input').click()}
+function handleImageUpload(e){const file=e.target.files[0];if(file){const reader=new FileReader();reader.onload=function(ev){document.getElementById('upload-preview-img').src=ev.target.result;document.getElementById('upload-preview').style.display='block'};reader.readAsDataURL(file);showToast('图片已上传，AI 将以此作为参考','success')}}
+function clearImageUpload(){document.getElementById('upload-preview').style.display='none';document.getElementById('image-upload-input').value=''}
+
+function showStylePicker(){document.getElementById('style-modal').classList.remove('hidden')}
+function closeStyleModal(){document.getElementById('style-modal').classList.add('hidden')}
+function selectStyle(style){document.getElementById('create-prompt').value=style+'风格美甲设计';closeStyleModal();showToast(`已选择风格: ${style}`,'success')}
+
+function sendCreateChat(){
+  const input=document.getElementById('create-chat-input');
+  const msg=input.value.trim();
+  if(!msg)return;
+  const msgs=document.getElementById('create-chat-msgs');
+  msgs.innerHTML+=`<div class="chat-msg user"><div class="msg-avatar user-av">👤</div><div class="msg-bubble">${msg}</div></div>`;
+  input.value='';msgs.scrollTop=msgs.scrollHeight;
+  setTimeout(()=>{
+    document.getElementById('create-prompt').value=msg;
+    msgs.innerHTML+=`<div class="chat-msg agent"><div class="msg-avatar agent-av">🤖</div><div class="msg-bubble">已理解！为你优化提示词并准备生成...<br>风格识别: ${msg.includes('赛博')?'赛博朋克':msg.includes('花')?'花卉':msg.includes('简约')?'极简':'自定义'} · 甲型: 通用适配<br><button class="btn btn-xs btn-primary" style="margin-top:8px" onclick="generateNailArt()">✨ 立即生成</button></div></div>`;
+    msgs.scrollTop=msgs.scrollHeight;
+  },800)
+}
+
+// MODALS
+function showForgotModal(){document.getElementById('forgot-modal').classList.remove('hidden')}
+function closeForgotModal(){document.getElementById('forgot-modal').classList.add('hidden')}
+function handleForgotPassword(){const e=document.getElementById('forgot-email').value;if(!e){showToast('请输入邮箱地址','error');return}showToast('重置链接已发送至您的邮箱','success');closeForgotModal()}
+
+// COMMAND PALETTE
+const commands=[
+  {section:'导航',name:'创作舱',shortcut:'⌘1',action:()=>navigateTo('create')},
+  {section:'导航',name:'龙虾智控',shortcut:'⌘2',action:()=>navigateTo('device')},
+  {section:'导航',name:'社区',shortcut:'⌘3',action:()=>navigateTo('community')},
+  {section:'导航',name:'支付中心',shortcut:'⌘4',action:()=>navigateTo('payment')},
+  {section:'导航',name:'智能体集群',shortcut:'⌘5',action:()=>navigateTo('agents')},
+  {section:'导航',name:'模型提供商',shortcut:'⌘6',action:()=>navigateTo('providers')},
+  {section:'导航',name:'OpenClaw控制台',shortcut:'⌘7',action:()=>navigateTo('openclaw')},
+  {section:'导航',name:'管理后台',shortcut:'⌘8',action:()=>navigateTo('admin')},
+  {section:'导航',name:'设置',shortcut:'⌘,',action:()=>navigateTo('settings')},
+  {section:'操作',name:'切换侧边栏',shortcut:'⌘\\',action:()=>toggleSidebar()},
+  {section:'操作',name:'打开OpenClaw',shortcut:'',action:()=>openOpenClawConsole()},
+  {section:'操作',name:'退出登录',shortcut:'⌘⇧Q',action:()=>handleLogout()},
+];
+function openCommandPalette(){document.getElementById('command-palette').classList.remove('hidden');document.getElementById('cmd-input').value='';document.getElementById('cmd-input').focus();cmdSelectedIdx=0;filterCommands()}
+function closeCommandPalette(){document.getElementById('command-palette').classList.add('hidden')}
+function filterCommands(){const q=document.getElementById('cmd-input').value.toLowerCase();const f=q?commands.filter(c=>c.name.toLowerCase().includes(q)||c.section.toLowerCase().includes(q)):commands;const l=document.getElementById('cmd-list');let h='',ls='';f.forEach((c,i)=>{if(c.section!==ls){h+=`<div class="cmd-section">${c.section}</div>`;ls=c.section}h+=`<div class="cmd-item${i===cmdSelectedIdx?' selected':''}" onclick="executeCommand(${i})"><span>${c.name}</span><span class="cmd-shortcut">${c.shortcut}</span></div>`});l.innerHTML=h}
+function handleCmdKey(e){if(e.key==='Escape'){closeCommandPalette();return}if(e.key==='ArrowDown'){cmdSelectedIdx=Math.min(cmdSelectedIdx+1,document.querySelectorAll('#cmd-list .cmd-item').length-1);filterCommands();e.preventDefault()}if(e.key==='ArrowUp'){cmdSelectedIdx=Math.max(cmdSelectedIdx-1,0);filterCommands();e.preventDefault()}if(e.key==='Enter'){const items=document.querySelectorAll('#cmd-list .cmd-item');if(items[cmdSelectedIdx])items[cmdSelectedIdx].click()}}
+function executeCommand(idx){const q=document.getElementById('cmd-input').value.toLowerCase();const f=q?commands.filter(c=>c.name.toLowerCase().includes(q)||c.section.toLowerCase().includes(q)):commands;if(f[idx]){closeCommandPalette();f[idx].action()}}
+
+// TOAST
+function showToast(msg,type='info'){const c=document.getElementById('toast-container');const t=document.createElement('div');t.className=`toast toast-${type}`;t.textContent=msg;c.appendChild(t);setTimeout(()=>t.remove(),2500)}
+
+// STATUS BAR
+function updateStatusTime(){document.getElementById('status-time').textContent=new Date().toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit'})}
+
+// KEYBOARD SHORTCUTS
+document.addEventListener('keydown',(e)=>{if(!isLoggedIn)return;const mod=e.metaKey||e.ctrlKey;if(mod&&e.key==='k'){e.preventDefault();openCommandPalette();return}if(mod&&e.key==='\\'){e.preventDefault();toggleSidebar();return}if(mod&&e.key===','){e.preventDefault();navigateTo('settings');return}if(mod&&e.key>='1'&&e.key<='8'){e.preventDefault();const pages=['create','device','community','payment','agents','providers','openclaw','admin'];navigateTo(pages[parseInt(e.key)-1])}});
+document.addEventListener('click',(e)=>{const p=document.getElementById('command-palette');if(!p.classList.contains('hidden')&&!p.contains(e.target))closeCommandPalette()});
+
+// INIT
+updatePaymentSummary();
+updateStatusTime();
+
+// Electron IPC
+if(window.electronAPI){
+  window.electronAPI.onNavigate((page)=>navigateTo(page));
+  window.electronAPI.onToggleSidebar(()=>toggleSidebar());
+  window.electronAPI.onCommandPalette(()=>openCommandPalette());
+}
+
+</script>
+<script>
+/* Nano Banana Pro Service — 内嵌 */
+/**
+ * AI NAILS Desktop v4.0 — Nano Banana Pro 生图服务
+ * 
+ * 使用 Google Gemini 原生 API 生成图像:
+ * - Endpoint: https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent
+ * - 认证方式: X-goog-api-key header
+ * - 支持 AIza 和 AQ. 前缀的 API Key
+ * - 获取 Key: https://aistudio.google.com/apikey
+ */
+
+const NanoBananaService = {
+  // 配置
+  apiKey: '',  // 请在此处填入你的 Google API Key: https://aistudio.google.com/apikey
+  
+  // Google Gemini 图片生成 API
+  googleBaseUrl: 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image:generateContent',
+  
+  // 美甲风格预设提示词增强
+  nailStyleEnhancers: {
+    '赛博朋克': 'cyberpunk style, neon lights, holographic effect, metallic texture, dark background with vibrant glowing colors, futuristic nail art design',
+    '中国风': 'traditional Chinese style, elegant ink wash painting, red and gold accents, delicate floral patterns, jade-inspired textures, classic oriental nail art',
+    '极简': 'minimalist style, clean lines, matte finish, subtle geometric patterns, monochrome palette, sophisticated simple nail design',
+    '花卉': 'floral botanical style, watercolor flowers, soft pastel petals, romantic garden theme, delicate botanical nail art',
+    '渐变': 'smooth gradient ombre effect, seamless color transition, glossy finish, dreamy color blend nail art',
+    '哥特': 'gothic dark romantic style, deep burgundy and black, ornate baroque patterns, dramatic mysterious nail design',
+    '波普': 'pop art style, bold colors, comic book halftone dots, vibrant Warhol-inspired nail art, graphic design elements',
+    '水彩': 'watercolor painting effect, soft bleeding colors, artistic brush strokes, dreamy translucent layers, ethereal nail art',
+    '星空': 'galaxy cosmic style, deep space nebula, scattered stars, shimmering glitter, celestial nail art design',
+    '大理石': 'luxurious marble stone texture, elegant veins, polished glossy finish, natural stone nail art',
+    '琉璃': 'stained glass effect, translucent jewel tones, mosaic patterns, luminous colorful nail design',
+    '金属': 'liquid metal chrome effect, mirror finish, silver and gold metallic, futuristic reflective nail art',
+  },
+
+  // 支持的宽高比
+  aspectRatios: ['1:1', '2:3', '3:2', '3:4', '4:3', '4:5', '5:4', '9:16', '16:9', '21:9'],
+
+  // 支持的分辨率
+  imageSizes: ['1K', '2K', '4K'],
+
+  /**
+   * 判断 API Key 类型
+   * @returns {'google'|'geminigen'|'unknown'}
+   */
+  _detectKeyType() {
+    const key = this.getApiKey();
+    // AIza 和 AQ. 前缀都可以直接调用 Google Gemini 原生 API
+    if (key.startsWith('AIza') || key.startsWith('AQ.')) return 'google';
+    return 'unknown';
+  },
+
+  /**
+   * 设置 API Key
+   */
+  setApiKey(key) {
+    this.apiKey = key;
+    localStorage.setItem('nanobanana_api_key', key);
+  },
+
+  /**
+   * 获取已保存的 API Key
+   */
+  getApiKey() {
+    if (!this.apiKey) {
+      this.apiKey = localStorage.getItem('nanobanana_api_key') || '';
+    }
+    return this.apiKey;
+  },
+
+  /**
+   * 检查是否已配置 API Key
+   */
+  isConfigured() {
+    return this.getApiKey().length > 0;
+  },
+
+  /**
+   * 获取当前使用的 API 提供商名称
+   */
+  getProviderName() {
+    return 'Google Gemini (Nano Banana Pro)';
+  },
+
+  /**
+   * 增强美甲提示词 - 加入专业术语
+   */
+  enhanceNailPrompt(userPrompt, style) {
+    let prompt = userPrompt;
+    
+    // 检测已知风格并添加英文增强
+    for (const [styleName, enhancer] of Object.entries(this.nailStyleEnhancers)) {
+      if (userPrompt.includes(styleName)) {
+        prompt = `${userPrompt}. ${enhancer}`;
+        break;
+      }
+    }
+
+    // 添加美甲专业提示词
+    const nailPrefix = 'Professional nail art design, high quality, detailed nail surface, ' +
+      'perfectly shaped nails, beauty salon photography, macro close-up, clean background, ' +
+      'studio lighting, 1200 DPI rendering quality: ';
+    
+    // 如果用户已经描述了完整内容，不加前缀
+    if (prompt.length < 30) {
+      prompt = nailPrefix + prompt;
+    } else if (!prompt.toLowerCase().includes('nail')) {
+      prompt = prompt + '. Professional nail art design, high detail.';
+    }
+
+    return prompt;
+  },
+
+  /**
+   * 调用 Google Gemini 原生 API 生成图像
+   */
+  async _generateGoogle(prompt, options) {
+    const apiKey = this.getApiKey();
+    const { aspectRatio = '1:1', imageSize = '2K', referenceImage = null } = options;
+
+    const parts = [{ text: prompt }];
+
+    // 如果有参考图，添加到请求中
+    if (referenceImage) {
+      let base64Data;
+      let mimeType = 'image/png';
+
+      if (referenceImage instanceof File) {
+        base64Data = await this._fileToBase64(referenceImage);
+        mimeType = referenceImage.type || 'image/png';
+      } else if (typeof referenceImage === 'string' && referenceImage.startsWith('data:')) {
+        const match = referenceImage.match(/^data:([^;]+);base64,(.+)$/);
+        if (match) {
+          mimeType = match[1];
+          base64Data = match[2];
+        } else {
+          base64Data = referenceImage;
+        }
+      }
+
+      if (base64Data) {
+        parts.push({
+          inlineData: { mimeType: mimeType, data: base64Data }
+        });
+      }
+    }
+
+    const requestBody = {
+      contents: [{ parts: parts }],
+      generationConfig: {
+        responseModalities: ['IMAGE'],
+        responseFormat: {
+          image: { aspectRatio: aspectRatio, imageSize: imageSize }
+        }
+      }
+    };
+
+    const url = this.googleBaseUrl;
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-goog-api-key': apiKey
+      },
+      body: JSON.stringify(requestBody)
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      const errorMsg = errorData.error?.message || `HTTP ${response.status}`;
+      
+      if (response.status === 400) {
+        throw new Error('API_BAD_REQUEST: ' + errorMsg);
+      } else if (response.status === 401 || response.status === 403) {
+        throw new Error('API_KEY_INVALID');
+      } else if (response.status === 429) {
+        throw new Error('API_RATE_LIMIT: 图片生成配额已用完，请稍后再试或更换 API Key。文本对话功能不受影响。');
+      } else {
+        throw new Error('API_ERROR: ' + errorMsg);
+      }
+    }
+
+    const result = await response.json();
+    return this._parseGoogleResponse(result);
+  },
+
+  /**
+   * 解析 Google Gemini 原生 API 响应
+   */
+  _parseGoogleResponse(result) {
+    const images = [];
+    if (result.candidates) {
+      for (const candidate of result.candidates) {
+        if (candidate.content && candidate.content.parts) {
+          for (const part of candidate.content.parts) {
+            if (part.inlineData) {
+              images.push({
+                base64: part.inlineData.data,
+                mimeType: part.inlineData.mimeType || 'image/png'
+              });
+            }
+          }
+        }
+      }
+    }
+
+    if (images.length === 0) {
+      let textResponse = '';
+      if (result.candidates) {
+        for (const candidate of result.candidates) {
+          if (candidate.content && candidate.content.parts) {
+            for (const part of candidate.content.parts) {
+              if (part.text) textResponse += part.text;
+            }
+          }
+        }
+      }
+      if (textResponse) {
+        throw new Error('NO_IMAGE: ' + textResponse.substring(0, 100));
+      }
+      throw new Error('NO_IMAGE_GENERATED');
+    }
+
+    return images;
+  },
+
+  /**
+   * 主入口: 调用 API 生成图像
+   */
+  async generateImage(prompt, options = {}) {
+    const apiKey = this.getApiKey();
+    if (!apiKey) {
+      throw new Error('API_KEY_MISSING');
+    }
+
+    const { aspectRatio = '1:1', imageSize = '2K', style = '', referenceImage = null } = options;
+
+    // 增强提示词
+    const enhancedPrompt = this.enhanceNailPrompt(prompt, style);
+
+    console.log(`[NanoBanana] 提示词: "${enhancedPrompt.substring(0, 80)}..."`);
+
+    const images = await this._generateGoogle(enhancedPrompt, options);
+
+    // 返回 base64 格式的图片
+    return images;
+  },
+
+  /**
+   * 批量生成多张设计变体
+   */
+  async generateVariants(prompt, count = 4, options = {}) {
+    const results = [];
+    
+    const variations = [
+      '',
+      ' slight variation, different color accent',
+      ' alternative angle, different lighting',
+      ' creative interpretation, unique twist',
+      ' different background texture',
+      ' mirror effect variation'
+    ];
+
+    for (let i = 0; i < count; i++) {
+      const variantPrompt = prompt + (variations[i] || '');
+      try {
+        const images = await this.generateImage(variantPrompt, options);
+        results.push(...images);
+      } catch (err) {
+        console.warn(`[NanoBanana] Variant ${i + 1} failed:`, err.message);
+        if (i === 0) throw err;
+      }
+      
+      if (i < count - 1) {
+        await this._delay(800);
+      }
+    }
+
+    return results;
+  },
+
+  /**
+   * 下载远程图片为 Blob
+   */
+  async _downloadImage(url) {
+    const response = await fetch(url);
+    if (!response.ok) throw new Error(`Download failed: ${response.status}`);
+    return response.blob();
+  },
+
+  /**
+   * Blob 转 base64
+   */
+  _blobToBase64(blob) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const dataUrl = reader.result;
+        const base64 = dataUrl.split(',')[1];
+        resolve(base64);
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+  },
+
+  /**
+   * File 转 base64
+   */
+  _fileToBase64(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const dataUrl = reader.result;
+        const base64 = dataUrl.split(',')[1];
+        resolve(base64);
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  },
+
+  /**
+   * 延迟
+   */
+  _delay(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+};
+
+// 导出到全局
+window.NanoBananaService = NanoBananaService;
+
+</script>
+<script>
+/* Ollama Local Service — 内嵌 */
+/**
+ * AI NAILS Desktop v4.0 — Ollama 本地大模型服务
+ * 
+ * 使用本地 Ollama 进行美甲提示词优化:
+ * - 将用户的中文描述转为高质量英文生图提示词
+ * - 分析参考图并生成风格描述
+ * - 生成多种设计变体提示词
+ * 
+ * Endpoint: http://localhost:11434/api/generate
+ * 默认模型: qwen3-coder:480b-cloud (可配置)
+ */
+
+const OllamaService = {
+  // 配置
+  baseUrl: 'http://localhost:11434',
+  model: 'qwen3-coder:480b-cloud',  // qwen3 效果最好，gpt-oss 常返回空
+  fallbackModel: 'deepseek-v3.1:671b-cloud',
+  
+  // 美甲风格关键词库
+  nailStyleKeywords: {
+    '赛博朋克': ['cyberpunk', 'neon lights', 'holographic', 'metallic', 'dark background', 'futuristic'],
+    '中国风': ['traditional Chinese', 'ink wash', 'red gold', 'floral patterns', 'jade texture', 'oriental'],
+    '极简': ['minimalist', 'clean lines', 'matte finish', 'geometric', 'monochrome', 'sophisticated'],
+    '花卉': ['floral', 'watercolor', 'pastel petals', 'romantic garden', 'botanical'],
+    '渐变': ['gradient', 'ombre', 'seamless color transition', 'glossy', 'dreamy blend'],
+    '哥特': ['gothic', 'dark romantic', 'burgundy black', 'baroque', 'dramatic'],
+    '波普': ['pop art', 'bold colors', 'halftone dots', 'Warhol-inspired', 'graphic'],
+    '水彩': ['watercolor', 'bleeding colors', 'artistic brush', 'translucent layers', 'ethereal'],
+    '星空': ['galaxy', 'cosmic', 'nebula', 'stars', 'shimmering glitter', 'celestial'],
+    '大理石': ['marble', 'stone texture', 'elegant veins', 'polished', 'luxurious'],
+    '琉璃': ['stained glass', 'jewel tones', 'mosaic', 'translucent', 'luminous'],
+    '金属': ['liquid metal', 'chrome', 'mirror finish', 'silver gold', 'reflective'],
+  },
+
+  /**
+   * 检测 Ollama 服务是否可用
+   */
+  async checkAvailability() {
+    try {
+      const resp = await fetch(`${this.baseUrl}/api/tags`, { signal: AbortSignal.timeout(3000) });
+      return resp.ok;
+    } catch (e) {
+      return false;
+    }
+  },
+
+  /**
+   * 获取可用模型列表
+   */
+  async listModels() {
+    try {
+      const resp = await fetch(`${this.baseUrl}/api/tags`);
+      const data = await resp.json();
+      return data.models || [];
+    } catch (e) {
+      return [];
+    }
+  },
+
+  /**
+   * 核心: 优化美甲提示词
+   * 将用户输入转为高质量英文生图提示词
+   */
+  async enhancePrompt(userInput, style = '') {
+    // 先用本地增强把中文关键词转为英文
+    const localEnhanced = this.localEnhance(userInput);
+    
+    // 提取纯英文部分传给 Ollama（中文会干扰模型）
+    const englishOnly = localEnhanced.replace(/[\u4e00-\u9fff]+/g, '').replace(/[，。！？、；：""（）【】《》]+/g, '').replace(/\s+/g, ' ').trim();
+    const promptText = englishOnly || localEnhanced;
+    
+    const userMessage = `Generate a detailed English prompt for AI image generation of nail art: ${promptText}. Output only the prompt.`;
+
+    const response = await this._callOllama('', userMessage);
+    return response.trim() || promptText;
+  },
+
+  /**
+   * 生成多个设计变体提示词
+   */
+  async generateVariantPrompts(basePrompt, count = 4) {
+    const variants = [];
+    
+    // 先用 Ollama 优化基础提示词
+    const enhancedBase = await this.enhancePrompt(basePrompt);
+    variants.push(enhancedBase);
+
+    // 生成变体 — 通过修改后缀实现
+    const variationSuffixes = [
+      ', different color palette',
+      ', alternative nail shape and length',
+      ', different background and lighting',
+      ', more minimalist and elegant version',
+      ', more ornate and detailed version',
+      ', warm golden hour lighting mood'
+    ];
+
+    for (let i = 1; i < count && i <= variationSuffixes.length; i++) {
+      try {
+        const variantPrompt = `Generate a detailed English prompt for AI image generation of nail art: ${this.localEnhance(basePrompt)}${variationSuffixes[i-1]}. Output only the prompt.`;
+        const variant = await this._callOllama('', variantPrompt);
+        if (variant.trim()) {
+          variants.push(variant.trim());
+        } else {
+          variants.push(`${enhancedBase}${variationSuffixes[i-1]}`);
+        }
+      } catch (e) {
+        variants.push(`${enhancedBase}${variationSuffixes[i-1]}`);
+      }
+    }
+
+    return variants;
+  },
+
+  /**
+   * 分析参考图片并生成风格描述
+   */
+  async analyzeReferenceImage(imageBase64, mimeType = 'image/png') {
+    const systemPrompt = `You are a nail art expert. Analyze this nail art reference image and describe it in detail in English. Focus on: colors, patterns, textures, nail shape, finish, and overall style. Output a concise paragraph (under 100 words).`;
+
+    try {
+      const resp = await fetch(`${this.baseUrl}/api/generate`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: this.model,
+          system: systemPrompt,
+          prompt: 'Describe this nail art image in detail:',
+          images: [imageBase64],
+          stream: false
+        })
+      });
+
+      if (!resp.ok) {
+        // 如果视觉模型不支持，回退到文本描述
+        return 'Professional nail art design with elegant details';
+      }
+
+      const data = await resp.json();
+      return data.response?.trim() || 'Elegant nail art design';
+    } catch (e) {
+      console.warn('[Ollama] Image analysis failed, using text-only mode');
+      return 'Beautiful nail art design';
+    }
+  },
+
+  /**
+   * 调用 Ollama API (核心方法)
+   */
+  async _callOllama(systemPrompt, userMessage) {
+    const body = {
+      model: this.model,
+      prompt: userMessage,
+      stream: false,
+      options: {
+        temperature: 0.7,
+        top_p: 0.9,
+        num_predict: 300
+      }
+    };
+    if (systemPrompt) body.system = systemPrompt;
+
+    try {
+      const resp = await fetch(`${this.baseUrl}/api/generate`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+        signal: AbortSignal.timeout(60000)
+      });
+
+      if (!resp.ok) {
+        throw new Error(`HTTP ${resp.status}`);
+      }
+
+      const data = await resp.json();
+      return data.response || '';
+    } catch (e) {
+      console.warn(`[Ollama] ${this.model} failed:`, e.message);
+      // 尝试回退模型
+      if (this.model !== this.fallbackModel) {
+        console.log(`[Ollama] Trying fallback model: ${this.fallbackModel}`);
+        body.model = this.fallbackModel;
+        const fallbackResp = await fetch(`${this.baseUrl}/api/generate`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body),
+          signal: AbortSignal.timeout(60000)
+        });
+        if (fallbackResp.ok) {
+          const data = await fallbackResp.json();
+          return data.response || '';
+        }
+      }
+      throw e;
+    }
+  },
+
+  /**
+   * 快速本地提示词增强 (不依赖 API，纯本地处理)
+   * 当 Ollama 不可用时的回退方案
+   */
+  localEnhance(userInput) {
+    let enhanced = userInput;
+    
+    // 检测中文风格关键词并替换为英文
+    for (const [cn, enKeywords] of Object.entries(this.nailStyleKeywords)) {
+      if (userInput.includes(cn)) {
+        enhanced = `${userInput}. ${enKeywords.join(', ')}, nail art design`;
+        break;
+      }
+    }
+
+    // 如果没有匹配到任何风格，添加通用美甲关键词
+    if (enhanced === userInput) {
+      enhanced = `${userInput}, professional nail art design, high quality, studio lighting, macro close-up, 1200 DPI`;
+    }
+
+    return enhanced;
+  }
+};
+
+</script>
+
+<script>
+/* Ollama Local Service — 内嵌 */
+/**
+ * AI NAILS Desktop v4.0 — Ollama 本地大模型服务
+ * 
+ * 使用本地 Ollama 进行美甲提示词优化:
+ * - 将用户的中文描述转为高质量英文生图提示词
+ * - 分析参考图并生成风格描述
+ * - 生成多种设计变体提示词
+ * 
+ * Endpoint: http://localhost:11434/api/generate
+ * 默认模型: qwen3-coder:480b-cloud (可配置)
+ */
+
+const OllamaService = {
+  // 配置
+  baseUrl: 'http://localhost:11434',
+  model: 'qwen3-coder:480b-cloud',
+  fallbackModel: 'deepseek-v3.1:671b-cloud',
+  
+  // 美甲风格关键词库
+  nailStyleKeywords: {
+    '赛博朋克': ['cyberpunk', 'neon lights', 'holographic', 'metallic', 'dark background', 'futuristic'],
+    '中国风': ['traditional Chinese', 'ink wash', 'red gold', 'floral patterns', 'jade texture', 'oriental'],
+    '极简': ['minimalist', 'clean lines', 'matte finish', 'geometric', 'monochrome', 'sophisticated'],
+    '花卉': ['floral', 'watercolor', 'pastel petals', 'romantic garden', 'botanical'],
+    '渐变': ['gradient', 'ombre', 'seamless color transition', 'glossy', 'dreamy blend'],
+    '哥特': ['gothic', 'dark romantic', 'burgundy black', 'baroque', 'dramatic'],
+    '波普': ['pop art', 'bold colors', 'halftone dots', 'Warhol-inspired', 'graphic'],
+    '水彩': ['watercolor', 'bleeding colors', 'artistic brush', 'translucent layers', 'ethereal'],
+    '星空': ['galaxy', 'cosmic', 'nebula', 'stars', 'shimmering glitter', 'celestial'],
+    '大理石': ['marble', 'stone texture', 'elegant veins', 'polished', 'luxurious'],
+    '琉璃': ['stained glass', 'jewel tones', 'mosaic', 'translucent', 'luminous'],
+    '金属': ['liquid metal', 'chrome', 'mirror finish', 'silver gold', 'reflective'],
+  },
+
+  /**
+   * 检测 Ollama 服务是否可用
+   */
+  async checkAvailability() {
+    try {
+      const resp = await fetch(`${this.baseUrl}/api/tags`, { signal: AbortSignal.timeout(3000) });
+      return resp.ok;
+    } catch (e) {
+      return false;
+    }
+  },
+
+  /**
+   * 获取可用模型列表
+   */
+  async listModels() {
+    try {
+      const resp = await fetch(`${this.baseUrl}/api/tags`);
+      const data = await resp.json();
+      return data.models || [];
+    } catch (e) {
+      return [];
+    }
+  },
+
+  /**
+   * 核心: 优化美甲提示词
+   * 将用户输入转为高质量英文生图提示词
+   */
+  async enhancePrompt(userInput, style = '') {
+    const styleHint = style ? `Style preference: ${style}. ` : '';
+    const systemPrompt = 'You are a nail art prompt engineer. Reply ONLY with the detailed English image generation prompt. No explanations, no Chinese, no prefixes.';
+    const userMessage = `Nail design: ${userInput}`;
+
+    const response = await this._callOllama(systemPrompt, userMessage);
+    return response.trim();
+  },
+
+  /**
+   * 生成多个设计变体提示词
+   */
+  async generateVariantPrompts(basePrompt, count = 4) {
+    const variants = [];
+    
+    // 先用 Ollama 优化基础提示词
+    const enhancedBase = await this.enhancePrompt(basePrompt);
+    variants.push(enhancedBase);
+
+    // 生成变体
+    const variationDirections = [
+      'different color palette',
+      'alternative nail shape',
+      'different background style',
+      'more minimalist version',
+      'more ornate version',
+      'different lighting mood'
+    ];
+
+    for (let i = 1; i < count; i++) {
+      const direction = variationDirections[i - 1] || variationDirections[0];
+      
+      try {
+        const sysPrompt = 'Reply ONLY with the modified prompt. No explanations.';
+        const variant = await this._callOllama(sysPrompt, 
+          `Create a ${direction} variation: "${enhancedBase}"`);
+        variants.push(variant.trim());
+      } catch (e) {
+        variants.push(`${enhancedBase}, ${direction}`);
+      }
+    }
+
+    return variants;
+  },
+
+  /**
+   * 分析参考图片并生成风格描述
+   */
+  async analyzeReferenceImage(imageBase64, mimeType = 'image/png') {
+    const systemPrompt = `You are a nail art expert. Analyze this nail art reference image and describe it in detail in English. Focus on: colors, patterns, textures, nail shape, finish, and overall style. Output a concise paragraph (under 100 words).`;
+
+    try {
+      const resp = await fetch(`${this.baseUrl}/api/generate`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: this.model,
+          system: systemPrompt,
+          prompt: 'Describe this nail art image in detail:',
+          images: [imageBase64],
+          stream: false
+        })
+      });
+
+      if (!resp.ok) {
+        // 如果视觉模型不支持，回退到文本描述
+        return 'Professional nail art design with elegant details';
+      }
+
+      const data = await resp.json();
+      return data.response?.trim() || 'Elegant nail art design';
+    } catch (e) {
+      console.warn('[Ollama] Image analysis failed, using text-only mode');
+      return 'Beautiful nail art design';
+    }
+  },
+
+  /**
+   * 调用 Ollama API (核心方法)
+   */
+  async _callOllama(systemPrompt, userMessage) {
+    const body = {
+      model: this.model,
+      prompt: userMessage,
+      stream: false,
+      options: {
+        temperature: 0.7,
+        top_p: 0.9,
+        num_predict: 300
+      }
+    };
+    if (systemPrompt) body.system = systemPrompt;
+
+    try {
+      const resp = await fetch(`${this.baseUrl}/api/generate`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+        signal: AbortSignal.timeout(60000)
+      });
+
+      if (!resp.ok) {
+        throw new Error(`HTTP ${resp.status}`);
+      }
+
+      const data = await resp.json();
+      return data.response || '';
+    } catch (e) {
+      console.warn(`[Ollama] ${this.model} failed:`, e.message);
+      // 尝试回退模型
+      if (this.model !== this.fallbackModel) {
+        console.log(`[Ollama] Trying fallback model: ${this.fallbackModel}`);
+        body.model = this.fallbackModel;
+        const fallbackResp = await fetch(`${this.baseUrl}/api/generate`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body),
+          signal: AbortSignal.timeout(60000)
+        });
+        if (fallbackResp.ok) {
+          const data = await fallbackResp.json();
+          return data.response || '';
+        }
+      }
+      throw e;
+    }
+  },
+
+  /**
+   * 快速本地提示词增强 (不依赖 API，纯本地处理)
+   * 当 Ollama 不可用时的回退方案
+   */
+  localEnhance(userInput) {
+    let enhanced = userInput;
+    
+    // 检测中文风格关键词并替换为英文
+    for (const [cn, enKeywords] of Object.entries(this.nailStyleKeywords)) {
+      if (userInput.includes(cn)) {
+        enhanced = `${userInput}. ${enKeywords.join(', ')}, nail art design`;
+        break;
+      }
+    }
+
+    // 如果没有匹配到任何风格，添加通用美甲关键词
+    if (enhanced === userInput) {
+      enhanced = `${userInput}, professional nail art design, high quality, studio lighting, macro close-up, 1200 DPI`;
+    }
+
+    return enhanced;
+  }
+};
+
+
+// ============ AnyGen 使用面板 ============
+</script>
+
+<!-- AnyGen 使用面板 -->
+<div class="skill-use-panel hidden" id="anygen-use-panel">
+<div class="skill-use-card">
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+<h3 id="anygen-panel-title">📊 PPT 生成</h3>
+<button class="btn btn-xs btn-secondary" onclick="closeAnyGenPanel()">✕</button>
+</div>
+<p id="anygen-panel-desc" style="color:var(--text-tertiary);font-size:12px;margin-bottom:16px">AI 驱动一键生成专业PPT</p>
+<div class="form-group"><label>生成描述 *</label><textarea class="form-input" id="anygen-prompt" rows="4" placeholder="描述你想要生成的内容，例如：一份关于2025年AI美甲市场趋势的10页PPT汇报"></textarea></div>
+<div style="display:flex;gap:8px;margin-bottom:16px">
+<button class="btn btn-primary btn-sm" onclick="executeAnyGen()">🚀 开始生成</button>
+<button class="btn btn-secondary btn-sm" onclick="openAnyGenConfig()">⚙ API 配置</button>
+</div>
+<div id="anygen-result"></div>
+</div>
+</div>
+
+<!-- HeyGen 使用面板 -->
+<div class="skill-use-panel hidden" id="heygen-use-panel">
+<div class="skill-use-card">
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+<h3 id="heygen-panel-title">🎬 数字人视频</h3>
+<button class="btn btn-xs btn-secondary" onclick="closeHeyGenPanel()">✕</button>
+</div>
+<p id="heygen-panel-desc" style="color:var(--text-tertiary);font-size:12px;margin-bottom:16px">AI 数字人播报视频生成</p>
+<div class="form-group"><label>视频脚本 *</label><textarea class="form-input" id="heygen-script" rows="6" placeholder="输入数字人播报的脚本内容，例如：欢迎来到AI Nails美甲工作室，我们提供最前沿的AI美甲设计服务..."></textarea></div>
+<div style="display:flex;gap:8px;margin-bottom:16px">
+<button class="btn btn-primary btn-sm" onclick="executeHeyGen()">🎬 生成视频</button>
+<button class="btn btn-secondary btn-sm" onclick="openHeyGenConfig()">⚙ API 配置</button>
+</div>
+<div id="heygen-result"></div>
+</div>
+</div>
+
+<!-- AnyGen 配置弹窗 -->
+<div class="skill-config-modal hidden" id="anygen-config-modal">
+<div class="skill-config-card">
+<h3>⚙ AnyGen API 配置</h3>
+<p class="api-status">状态: <span id="anygen-config-status" style="color:var(--danger)">未配置</span></p>
+<div class="form-group"><label>API Key</label><input class="form-input" id="anygen-config-key" placeholder="sk-ag-..." type="password"></div>
+<p style="font-size:11px;color:var(--text-tertiary);margin-bottom:12px">获取 Key: <a href="https://www.anygen.io/home" target="_blank" style="color:var(--accent)">anygen.io</a></p>
+<div style="display:flex;gap:8px">
+<button class="btn btn-primary btn-sm" onclick="saveAnyGenConfig()">💾 保存</button>
+<button class="btn btn-secondary btn-sm" onclick="closeAnyGenConfig()">取消</button>
+</div>
+</div>
+</div>
+
+<!-- HeyGen 配置弹窗 -->
+<div class="skill-config-modal hidden" id="heygen-config-modal">
+<div class="skill-config-card">
+<h3>⚙ HeyGen API 配置</h3>
+<p class="api-status">状态: <span id="heygen-config-status" style="color:var(--danger)">未配置</span></p>
+<div class="form-group"><label>API Key</label><input class="form-input" id="heygen-config-key" placeholder="sk_V2_..." type="password"></div>
+<p style="font-size:11px;color:var(--text-tertiary);margin-bottom:12px">获取 Key: <a href="https://www.heygen.com" target="_blank" style="color:var(--accent)">heygen.com</a></p>
+<div style="display:flex;gap:8px">
+<button class="btn btn-primary btn-sm" onclick="saveHeyGenConfig()">💾 保存</button>
+<button class="btn btn-secondary btn-sm" onclick="closeHeyGenConfig()">取消</button>
+</div>
+</div>
+</div>
+
+<!-- CreatOK 使用面板 -->
+<div class="skill-use-panel hidden" id="creatok-use-panel">
+<div class="skill-use-card">
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+<h3 id="creatok-panel-title">🖼️ AI 生图</h3>
+<button class="btn btn-xs btn-secondary" onclick="closeCreatOKPanel()">✕</button>
+</div>
+<p id="creatok-panel-desc" style="color:var(--text-tertiary);font-size:12px;margin-bottom:16px">通过文字描述生成高质量AI图片</p>
+<div class="form-group"><label>内容描述 *</label><textarea class="form-input" id="creatok-prompt" rows="4" placeholder="描述你想要生成的图片/视频内容..."></textarea></div>
+<div style="display:flex;gap:8px;margin-bottom:16px">
+<button class="btn btn-primary btn-sm" onclick="executeCreatOK()">🚀 开始生成</button>
+<button class="btn btn-secondary btn-sm" onclick="openCreatOKConfig()">⚙ API 配置</button>
+</div>
+<div id="creatok-result"></div>
+</div>
+</div>
+
+<!-- Clipcat 使用面板 -->
+<div class="skill-use-panel hidden" id="clipcat-use-panel">
+<div class="skill-use-card">
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+<h3 id="clipcat-panel-title">🔎 视频搜索</h3>
+<button class="btn btn-xs btn-secondary" onclick="closeClipcatPanel()">✕</button>
+</div>
+<p id="clipcat-panel-desc" style="color:var(--text-tertiary);font-size:12px;margin-bottom:16px">搜索 TikTok 热门带货视频</p>
+<div class="form-group"><label>搜索内容 *</label><textarea class="form-input" id="clipcat-prompt" rows="3" placeholder="输入搜索关键词或视频URL..."></textarea></div>
+<div style="display:flex;gap:8px;margin-bottom:16px">
+<button class="btn btn-primary btn-sm" onclick="executeClipcat()">🚀 执行</button>
+<button class="btn btn-secondary btn-sm" onclick="openClipcatConfig()">⚙ API 配置</button>
+</div>
+<div id="clipcat-result"></div>
+</div>
+</div>
+
+<!-- Revor 使用面板 -->
+<div class="skill-use-panel hidden" id="revor-use-panel">
+<div class="skill-use-card">
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+<h3>📨 Revor 智能外展</h3>
+<button class="btn btn-xs btn-secondary" onclick="closeRevorPanel()">✕</button>
+</div>
+<p style="color:var(--text-tertiary);font-size:12px;margin-bottom:16px">通过 LinkedIn/Email/WhatsApp 自动化外展</p>
+<div class="form-group"><label>目标渠道</label>
+<select class="form-input" id="revor-channel">
+<option value="linkedin">LinkedIn</option>
+<option value="email">Email</option>
+<option value="whatsapp">WhatsApp</option>
+</select></div>
+<div class="form-group"><label>目标联系人 *</label><input class="form-input" id="revor-recipient" placeholder="联系人的 LinkedIn URL 或邮箱"></div>
+<div class="form-group"><label>消息内容 *</label><textarea class="form-input" id="revor-message" rows="4" placeholder="输入外展消息内容..."></textarea></div>
+<div style="display:flex;gap:8px;margin-bottom:16px">
+<button class="btn btn-primary btn-sm" onclick="executeRevor()">📨 发送</button>
+<button class="btn btn-secondary btn-sm" onclick="openRevorConfig()">⚙ API 配置</button>
+</div>
+<div id="revor-result"></div>
+</div>
+</div>
+
+<!-- CreatOK 配置弹窗 -->
+<div class="skill-config-modal hidden" id="creatok-config-modal">
+<div class="skill-config-card">
+<h3>⚙ CreatOK API 配置</h3>
+<p class="api-status">状态: <span id="creatok-config-status" style="color:var(--danger)">未配置</span></p>
+<div class="form-group"><label>API Key</label><input class="form-input" id="creatok-config-key" placeholder="输入 CreatOK API Key..." type="password"></div>
+<p style="font-size:11px;color:var(--text-tertiary);margin-bottom:12px">获取 Key: <a href="https://github.com/EchoSell/creatok-skills" target="_blank" style="color:var(--accent)">CreatOK GitHub</a></p>
+<div style="display:flex;gap:8px">
+<button class="btn btn-primary btn-sm" onclick="saveCreatOKConfig()">💾 保存</button>
+<button class="btn btn-secondary btn-sm" onclick="closeCreatOKConfig()">取消</button>
+</div>
+</div>
+</div>
+
+<!-- Clipcat 配置弹窗 -->
+<div class="skill-config-modal hidden" id="clipcat-config-modal">
+<div class="skill-config-card">
+<h3>⚙ Clipcat API 配置</h3>
+<p class="api-status">状态: <span id="clipcat-config-status" style="color:var(--danger)">未配置</span></p>
+<div class="form-group"><label>API Key</label><input class="form-input" id="clipcat-config-key" placeholder="sk-..." type="password"></div>
+<p style="font-size:11px;color:var(--text-tertiary);margin-bottom:12px">获取 Key: <a href="https://clipcat.ai/workspace?modal=settings&tab=apikeys" target="_blank" style="color:var(--accent)">clipcat.ai</a></p>
+<div style="display:flex;gap:8px">
+<button class="btn btn-primary btn-sm" onclick="saveClipcatConfig()">💾 保存</button>
+<button class="btn btn-secondary btn-sm" onclick="closeClipcatConfig()">取消</button>
+</div>
+</div>
+</div>
+
+<!-- Revor 配置弹窗 -->
+<div class="skill-config-modal hidden" id="revor-config-modal">
+<div class="skill-config-card">
+<h3>⚙ Revor API 配置</h3>
+<p class="api-status">状态: <span id="revor-config-status" style="color:var(--danger)">未配置</span></p>
+<div class="form-group"><label>API Key</label><input class="form-input" id="revor-config-key" placeholder="输入 Revor API Key..." type="password"></div>
+<p style="font-size:11px;color:var(--text-tertiary);margin-bottom:12px">获取 Key: <a href="https://revor.ai" target="_blank" style="color:var(--accent)">revor.ai</a></p>
+<div style="display:flex;gap:8px">
+<button class="btn btn-primary btn-sm" onclick="saveRevorConfig()">💾 保存</button>
+<button class="btn btn-secondary btn-sm" onclick="closeRevorConfig()">取消</button>
+</div>
+</div>
+</div>
+
+<!-- 加载外部 Skill 服务脚本 -->
+<script src="anygen_service.js"></script>
+<script src="heygen_service.js"></script>
+<script src="creatok_service.js"></script>
+<script src="clipcat_service.js"></script>
+<script src="revor_service.js"></script>
+<script src="skill_integration.js"></script>
+
+</body>
+</html>

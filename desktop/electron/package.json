@@ -1,6 +1,6 @@
 {
   "name": "ai-nails-desktop",
-  "version": "4.0.0",
+  "version": "4.1.0",
   "description": "AI NAILS Desktop — 智能美甲创作平台 macOS 桌面应用",
   "main": "main.js",
   "author": "AI NAILS (深圳市斯密爱科技有限公司)",
@@ -69,8 +69,7 @@
     "files": [
       "main.js",
       "preload.js",
-      "../../preview/index.html",
-      "../../preview/**/*",
+      "preview/**/*",
       "assets/**/*"
     ],
     "extraResources": []

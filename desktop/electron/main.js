@@ -30,6 +30,7 @@ function createWindow() {
   if (!fs.existsSync(indexPath)) {
     indexPath = path.join(__dirname, '../../preview/index.html');
   }
+  console.log('[AI NAILS] Loading:', indexPath, 'exists:', fs.existsSync(indexPath));
   mainWindow.loadFile(indexPath);
 
   mainWindow.once('ready-to-show', () => {
