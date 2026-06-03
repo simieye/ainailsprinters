@@ -152,6 +152,53 @@ html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFo
 .progress-bar{height:6px;background:var(--bg-tertiary);border-radius:3px;margin-top:8px;overflow:hidden}.progress-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--accent),var(--accent2))}
 /* DEVICE ACTIONS */
 .device-actions{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+/* CONNECTION PANEL */
+.connection-panel{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px}
+.conn-card{background:var(--bg-secondary);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px;transition:var(--transition)}
+.conn-card:hover{border-color:var(--border-light)}
+.conn-card.bt-card{border-left:3px solid #0082fc}
+.conn-card.wifi-card{border-left:3px solid var(--accent)}
+.conn-card-header{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.conn-card-icon{width:42px;height:42px;border-radius:var(--radius);display:flex;align-items:center;justify-content:center;font-size:20px}
+.bt-icon{background:rgba(0,130,252,0.12);color:#0082fc}
+.wifi-icon{background:rgba(0,240,255,0.1);color:var(--accent)}
+.conn-card-title{font-size:14px;font-weight:700}
+.conn-card-status{font-size:11px;color:var(--text-tertiary)}
+.conn-card-status.connected{color:var(--success)}
+.conn-card-status.scanning{color:var(--accent);animation:pulse-text 1.5s infinite}
+@keyframes pulse-text{0%,100%{opacity:1}50%{opacity:0.5}}
+.conn-scan-area{max-height:160px;overflow-y:auto;margin:10px 0}
+.conn-device-item{display:flex;align-items:center;justify-content:space-between;padding:8px 10px;background:var(--bg-tertiary);border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:6px;transition:var(--transition);cursor:pointer}
+.conn-device-item:hover{border-color:var(--accent);background:rgba(0,240,255,0.04)}
+.conn-device-info{display:flex;flex-direction:column;gap:2px}
+.conn-device-name{font-size:13px;font-weight:600}
+.conn-device-id{font-size:10px;color:var(--text-tertiary)}
+.conn-device-signal{display:flex;gap:2px;align-items:flex-end}
+.signal-bar{width:3px;background:var(--text-tertiary);border-radius:1px;transition:var(--transition)}
+.signal-bar.active{background:var(--accent)}
+.signal-bar:nth-child(1){height:6px}.signal-bar:nth-child(2){height:10px}.signal-bar:nth-child(3){height:14px}.signal-bar:nth-child(4){height:18px}
+.conn-connected-info{background:var(--bg-tertiary);border:1px solid var(--success);border-radius:var(--radius-sm);padding:10px 12px;margin:8px 0;display:flex;align-items:center;gap:10px}
+.conn-connected-info .dev-icon{font-size:22px}
+.conn-connected-info .dev-detail{flex:1}
+.conn-connected-info .dev-detail .dev-name{font-size:13px;font-weight:600}
+.conn-connected-info .dev-detail .dev-meta{font-size:10px;color:var(--text-tertiary)}
+.conn-btn-row{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
+/* WIFI CONFIG MODAL */
+.wifi-config-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:1000;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
+.wifi-config-overlay.hidden{display:none}
+.wifi-config-card{background:var(--bg-primary);border:1px solid var(--border);border-radius:var(--radius-lg);padding:24px;width:90%;max-width:420px;box-shadow:var(--shadow)}
+.wifi-config-card h3{font-size:16px;font-weight:700;margin-bottom:4px}
+.wifi-config-card .wifi-sub{font-size:12px;color:var(--text-secondary);margin-bottom:16px}
+.wifi-networks{max-height:200px;overflow-y:auto;margin-bottom:12px}
+.wifi-network-item{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:var(--bg-tertiary);border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:6px;cursor:pointer;transition:var(--transition)}
+.wifi-network-item:hover{border-color:var(--accent)}
+.wifi-network-item.selected{border-color:var(--accent);background:rgba(0,240,255,0.06)}
+.wifi-network-item .wifi-ssid{font-size:13px;font-weight:600;display:flex;align-items:center;gap:6px}
+.wifi-network-item .wifi-secure{font-size:10px;color:var(--text-tertiary)}
+.wifi-pass-input{display:none;margin-top:12px}
+.wifi-pass-input.visible{display:block}
+.wifi-pass-row{display:flex;gap:8px}
+.wifi-pass-row input{flex:1}
 /* PAYMENT PAGE */
 .amount-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:8px;margin-bottom:16px}
 .amount-btn{padding:12px;background:var(--bg-tertiary);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text-primary);font-size:14px;font-weight:700;cursor:pointer;transition:var(--transition);text-align:center}
@@ -260,7 +307,96 @@ html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFo
 .quick-add-toast.success{background:#065f46;color:#6ee7b7;border:1px solid #059669}
 .quick-add-toast.info{background:#1e3a5f;color:#93c5fd;border:1px solid #2563eb}
 @keyframes slideInRight{from{transform:translateX(100%);opacity:0}to{transform:translateX(0);opacity:1}}
-
+/* ========== 媒体资源库 ========== */
+.media-library{margin-top:16px;background:var(--bg-secondary);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+.ml-header{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--border);flex-wrap:wrap;gap:10px}
+.ml-title-area{display:flex;align-items:center;gap:8px}
+.ml-icon{font-size:20px}
+.ml-title{font-size:14px;font-weight:700;color:var(--text-primary)}
+.ml-count{font-size:11px;color:var(--text-tertiary);background:var(--bg-tertiary);padding:2px 8px;border-radius:10px}
+.ml-actions{display:flex;gap:6px;flex-wrap:wrap}
+.ml-tabs{display:flex;gap:0;padding:0 16px;border-bottom:1px solid var(--border)}
+.ml-tab{padding:8px 16px;font-size:12px;cursor:pointer;color:var(--text-tertiary);border-bottom:2px solid transparent;transition:var(--transition);background:none;border-top:none;border-left:none;border-right:none;font-family:inherit}
+.ml-tab:hover{color:var(--text-primary)}
+.ml-tab.active{color:var(--accent);border-bottom-color:var(--accent);font-weight:600}
+.ml-tab .tab-count{font-size:10px;margin-left:4px;opacity:0.7}
+.ml-toolbar{display:flex;align-items:center;gap:8px;padding:10px 16px;flex-wrap:wrap}
+.ml-search{flex:1;min-width:160px;padding:7px 12px;background:var(--bg-tertiary);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text-primary);font-size:12px;outline:none;font-family:inherit}
+.ml-search:focus{border-color:var(--accent)}
+.ml-tag-filters{display:flex;gap:6px;flex-wrap:wrap}
+.ml-filter-tag{padding:4px 10px;font-size:11px;border-radius:12px;cursor:pointer;border:1px solid var(--border);background:var(--bg-tertiary);color:var(--text-secondary);transition:var(--transition);white-space:nowrap}
+.ml-filter-tag:hover{border-color:var(--accent)}
+.ml-filter-tag.active{background:rgba(0,240,255,0.12);border-color:var(--accent);color:var(--accent)}
+.ml-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px;padding:12px 16px;max-height:400px;overflow-y:auto}
+.ml-item{position:relative;aspect-ratio:1;background:var(--bg-tertiary);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;cursor:pointer;transition:var(--transition);display:flex;align-items:center;justify-content:center}
+.ml-item:hover{border-color:var(--accent);transform:scale(1.03);box-shadow:0 4px 16px rgba(0,0,0,0.3)}
+.ml-item img,.ml-item video{width:100%;height:100%;object-fit:cover}
+.ml-item .ml-placeholder{font-size:28px;opacity:0.5}
+.ml-item .ml-type-badge{position:absolute;top:4px;left:4px;font-size:9px;padding:1px 5px;border-radius:8px;background:rgba(0,0,0,0.7);color:#fff}
+.ml-item .ml-save-badge{position:absolute;top:4px;right:4px;font-size:9px;padding:1px 5px;border-radius:8px;background:var(--accent);color:#000;font-weight:600}
+.ml-item .ml-item-menu{position:absolute;bottom:4px;right:4px;width:24px;height:24px;border-radius:50%;background:rgba(0,0,0,0.7);border:none;color:#fff;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .2s}
+.ml-item:hover .ml-item-menu{opacity:1}
+.ml-item .ml-item-info{position:absolute;bottom:0;left:0;right:0;padding:4px 8px;background:linear-gradient(transparent,rgba(0,0,0,0.7));font-size:10px;color:#fff;opacity:0;transition:opacity .2s;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ml-item:hover .ml-item-info{opacity:1}
+.ml-empty{padding:40px 16px;text-align:center;color:var(--text-tertiary);font-size:13px}
+.ml-empty .ml-empty-icon{font-size:40px;margin-bottom:10px;opacity:0.6}
+.ml-empty p{margin:4px 0}
+.ml-drop-zone{border:2px dashed var(--border);border-radius:var(--radius);padding:30px;text-align:center;color:var(--text-tertiary);font-size:13px;cursor:pointer;transition:var(--transition);margin:0 16px 12px}
+.ml-drop-zone:hover,.ml-drop-zone.drag-over{border-color:var(--accent);background:rgba(0,240,255,0.04);color:var(--text-primary)}
+.ml-drop-zone .drop-icon{font-size:36px;margin-bottom:8px}
+/* 上传弹窗 */
+.ml-upload-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:999;display:flex;align-items:center;justify-content:center}
+.ml-upload-overlay.hidden{display:none}
+.ml-upload-card{background:var(--bg-secondary);border:1px solid var(--border);border-radius:var(--radius);padding:24px;width:460px;max-width:90vw;max-height:80vh;overflow-y:auto}
+.ml-upload-card h3{font-size:16px;margin:0 0 16px;color:var(--text-primary);display:flex;align-items:center;gap:8px}
+.ml-upload-tabs{display:flex;gap:0;margin-bottom:16px;border-bottom:1px solid var(--border)}
+.ml-upload-tab{flex:1;padding:8px;text-align:center;font-size:12px;cursor:pointer;color:var(--text-tertiary);border-bottom:2px solid transparent;background:none;border-top:none;border-left:none;border-right:none;font-family:inherit;transition:var(--transition)}
+.ml-upload-tab.active{color:var(--accent);border-bottom-color:var(--accent);font-weight:600}
+.ml-upload-drop{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px;border:2px dashed var(--border);border-radius:var(--radius);cursor:pointer;transition:var(--transition);margin-bottom:12px}
+.ml-upload-drop:hover,.ml-upload-drop.drag-over{border-color:var(--accent);background:rgba(0,240,255,0.04)}
+.ml-upload-drop .upload-icon{font-size:48px;margin-bottom:10px}
+.ml-upload-drop .upload-text{font-size:13px;color:var(--text-secondary);margin-bottom:4px}
+.ml-upload-drop .upload-hint{font-size:11px;color:var(--text-tertiary)}
+.ml-url-input-area{display:flex;flex-direction:column;gap:8px}
+.ml-url-input{width:100%;padding:10px 12px;background:var(--bg-tertiary);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text-primary);font-size:13px;outline:none;font-family:monospace}
+.ml-url-input:focus{border-color:var(--accent)}
+.ml-url-preview{display:flex;align-items:center;gap:8px;padding:8px;background:var(--bg-tertiary);border-radius:var(--radius-sm);font-size:11px;color:var(--text-secondary)}
+.ml-url-preview img{width:48px;height:48px;object-fit:cover;border-radius:4px}
+.ml-upload-preview-list{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.ml-upload-preview-item{position:relative;width:72px;height:72px;border-radius:var(--radius-sm);overflow:hidden;border:1px solid var(--border)}
+.ml-upload-preview-item img{width:100%;height:100%;object-fit:cover}
+.ml-upload-preview-item .remove-btn{position:absolute;top:-4px;right:-4px;width:18px;height:18px;border-radius:50%;background:var(--danger);color:#fff;border:none;cursor:pointer;font-size:10px;display:flex;align-items:center;justify-content:center}
+.ml-upload-footer{display:flex;justify-content:flex-end;gap:8px;margin-top:16px}
+/* 预览弹窗 */
+.ml-preview-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:1000;display:flex;align-items:center;justify-content:center;flex-direction:column}
+.ml-preview-overlay.hidden{display:none}
+.ml-preview-content{max-width:85vw;max-height:75vh;display:flex;align-items:center;justify-content:center}
+.ml-preview-content img,.ml-preview-content video{max-width:100%;max-height:75vh;border-radius:var(--radius);box-shadow:0 8px 40px rgba(0,0,0,0.5)}
+.ml-preview-info{display:flex;align-items:center;gap:12px;margin-top:16px;color:var(--text-secondary);font-size:12px;flex-wrap:wrap;justify-content:center}
+.ml-preview-info .tag{font-size:11px}
+.ml-preview-actions{display:flex;gap:8px;margin-top:12px}
+.ml-preview-close{position:absolute;top:16px;right:24px;width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,0.1);border:none;color:#fff;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:var(--transition)}
+.ml-preview-close:hover{background:rgba(255,255,255,0.2)}
+.ml-preview-nav{position:absolute;top:50%;transform:translateY(-50%);width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,0.1);border:none;color:#fff;font-size:20px;cursor:pointer;transition:var(--transition);display:flex;align-items:center;justify-content:center}
+.ml-preview-nav:hover{background:rgba(255,255,255,0.25)}
+.ml-preview-prev{left:16px}
+.ml-preview-next{right:16px}
+/* 知识库超链接识别 */
+.ml-link-scanner{display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--bg-tertiary);border-radius:var(--radius-sm);margin:8px 16px;font-size:11px;color:var(--text-secondary)}
+.ml-link-scanner input{flex:1;padding:6px 10px;background:var(--bg-primary);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text-primary);font-size:11px;outline:none;font-family:monospace}
+.ml-link-scanner input:focus{border-color:var(--accent)}
+.ml-link-scanner .scan-status{font-size:11px;white-space:nowrap}
+.ml-link-scanner .scan-status.success{color:var(--success)}
+.ml-link-scanner .scan-status.error{color:var(--danger)}
+.ml-link-scanner .scan-status.scanning{color:var(--accent)}
+/* Toast */
+.toast{position:fixed;top:80px;right:24px;z-index:9999;padding:12px 20px;border-radius:var(--radius);font-size:13px;font-weight:500;animation:slideInRight .3s ease;box-shadow:0 8px 32px rgba(0,0,0,0.3);max-width:400px}
+.toast.success{background:#065f46;color:#6ee7b7;border:1px solid #059669}
+.toast.error{background:#7f1d1d;color:#fca5a5;border:1px solid #dc2626}
+.toast.info{background:#1e3a5f;color:#93c5fd;border:1px solid #2563eb}
+.toast.warning{background:#78350f;color:#fcd34d;border:1px solid #d97706}
+/* 响应式 */
+@media(max-width:1024px){.ml-grid{grid-template-columns:repeat(auto-fill,minmax(100px,1fr));max-height:300px}}
 </style>
 <style>
 /* i18n styles */
@@ -417,6 +553,7 @@ html[dir="rtl"] .lang-dropdown {
 <div class="sidebar-section-title" data-i18n="nav.section_nav">导航</div>
 <nav class="sidebar-nav">
 <button class="sidebar-nav-item active" data-page="create" onclick="navigateTo('create')"><span class="nav-icon">🎨</span><span class="sidebar-label" data-i18n="nav.create">创作舱</span><span class="sidebar-badge badge-hot" data-i18n="tag.ai">AI</span></button>
+<button class="sidebar-nav-item" data-page="medialibrary" onclick="navigateTo('medialibrary')"><span class="nav-icon">🖼️</span><span class="sidebar-label">资源库</span><span class="sidebar-badge badge-new">媒体</span></button>
 <button class="sidebar-nav-item" data-page="device" onclick="navigateTo('device')"><span class="nav-icon">🦞</span><span class="sidebar-label" data-i18n="nav.device">龙虾智控</span><span class="sidebar-badge badge-new" data-i18n="tag.new">设备</span></button>
 <button class="sidebar-nav-item" data-page="community" onclick="navigateTo('community')"><span class="nav-icon">🌍</span><span class="sidebar-label" data-i18n="nav.community">社区</span></button>
 <button class="sidebar-nav-item" data-page="payment" onclick="navigateTo('payment')"><span class="nav-icon">💳</span><span class="sidebar-label" data-i18n="nav.payment">支付中心</span></button>
@@ -431,6 +568,50 @@ html[dir="rtl"] .lang-dropdown {
 <div class="sidebar-collapse-btn" onclick="toggleSidebar()"><span data-i18n="sidebar.collapse">◀ 收起菜单</span></div>
 </div>
 <div class="content-panel">
+<!-- PAGE: MEDIA LIBRARY (独立资源库页面) -->
+<div class="content-page" id="page-medialibrary">
+<div class="card" style="margin-bottom:16px">
+<div class="card-header"><div><div class="card-title">🖼️ 媒体资源库</div><div class="card-subtitle">管理所有AI生成、本地上传和云端同步的图片与视频资源</div></div>
+<div style="display:flex;gap:8px">
+<button class="btn btn-sm btn-accent" onclick="openMediaUpload()">📤 上传资源</button>
+<button class="btn btn-sm btn-secondary" onclick="scanKnowledgeBaseLinks()">🔗 识别链接</button>
+</div>
+</div>
+<div class="ml-tabs" id="ml-tabs-standalone" style="padding:0;border:none">
+<button class="ml-tab active" onclick="filterMediaTabStandalone('all',this)">全部 <span class="tab-count" id="mls-count-all">0</span></button>
+<button class="ml-tab" onclick="filterMediaTabStandalone('image',this)">🖼️ 图片 <span class="tab-count" id="mls-count-image">0</span></button>
+<button class="ml-tab" onclick="filterMediaTabStandalone('video',this)">🎥 视频 <span class="tab-count" id="mls-count-video">0</span></button>
+<button class="ml-tab" onclick="filterMediaTabStandalone('ai-generated',this)">🤖 AI生成 <span class="tab-count" id="mls-count-ai">0</span></button>
+<button class="ml-tab" onclick="filterMediaTabStandalone('uploaded',this)">📤 本地上传 <span class="tab-count" id="mls-count-uploaded">0</span></button>
+<button class="ml-tab" onclick="filterMediaTabStandalone('cloud',this)">☁️ 云端图库 <span class="tab-count" id="mls-count-cloud">0</span></button>
+</div>
+<div class="ml-toolbar" style="padding:10px 0">
+<input class="ml-search" id="ml-search-standalone" placeholder="🔍 搜索资源名称..." oninput="searchMediaStandalone()">
+<div class="ml-tag-filters" id="ml-tag-filters-standalone">
+<span class="ml-filter-tag active" onclick="filterMediaTagStandalone('all',this)">全部</span>
+</div>
+</div>
+<div class="ml-link-scanner" id="ml-link-scanner-standalone" style="display:none;margin:0 0 8px">
+<span>🔗</span>
+<input id="ml-link-input-standalone" placeholder="粘贴知识库/图库链接，自动识别图片和视频..." onkeydown="if(event.key==='Enter')fetchLinkResourcesStandalone()">
+<button class="btn btn-xs btn-accent" onclick="fetchLinkResourcesStandalone()">识别</button>
+<span class="scan-status" id="ml-scan-status-standalone"></span>
+</div>
+<div class="ml-drop-zone" id="ml-drop-zone-standalone" onclick="openMediaUpload()" ondragover="event.preventDefault();this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" ondrop="handleMediaDropStandalone(event)" style="margin:0 0 12px">
+<div class="drop-icon">📁</div>
+<div>拖拽图片/视频到此处，或点击上传</div>
+<div style="font-size:11px;margin-top:4px;opacity:0.6">支持 JPG/PNG/GIF/WebP/MP4/WebM</div>
+</div>
+<div class="ml-grid" id="ml-grid-standalone" style="max-height:calc(100vh - 360px);padding:0">
+<div class="ml-empty" id="ml-empty-standalone">
+<div class="ml-empty-icon">📭</div>
+<p>资源库为空</p>
+<p style="font-size:11px">AI生成的图片/视频将自动保存到这里<br>也可以上传本地文件或识别在线链接</p>
+</div>
+</div>
+</div>
+</div>
+
 <!-- PAGE: CREATE -->
 <div class="content-page active" id="page-create">
 <div class="create-layout">
@@ -461,6 +642,51 @@ html[dir="rtl"] .lang-dropdown {
 <div id="result-grid" class="result-grid" style="display:none">
 <div class="result-item">💅</div><div class="result-item">🌸</div><div class="result-item">🦋</div><div class="result-item">✨</div><div class="result-item">🌊</div><div class="result-item">🔥</div>
 </div>
+<!-- 媒体资源库 -->
+<div class="media-library" id="media-library">
+<div class="ml-header">
+<div class="ml-title-area"><span class="ml-icon">🖼️</span><span class="ml-title">媒体资源库</span><span class="ml-count" id="ml-total-count">0 个资源</span></div>
+<div class="ml-actions">
+<button class="btn btn-xs btn-accent" onclick="openMediaUpload()">📤 上传资源</button>
+<button class="btn btn-xs btn-secondary" onclick="scanKnowledgeBaseLinks()">🔗 识别链接</button>
+</div>
+</div>
+<div class="ml-tabs" id="ml-tabs">
+<button class="ml-tab active" onclick="filterMediaTab('all')">全部 <span class="tab-count" id="ml-count-all">0</span></button>
+<button class="ml-tab" onclick="filterMediaTab('image')">🖼️ 图片 <span class="tab-count" id="ml-count-image">0</span></button>
+<button class="ml-tab" onclick="filterMediaTab('video')">🎥 视频 <span class="tab-count" id="ml-count-video">0</span></button>
+<button class="ml-tab" onclick="filterMediaTab('ai-generated')">🤖 AI生成 <span class="tab-count" id="ml-count-ai">0</span></button>
+<button class="ml-tab" onclick="filterMediaTab('uploaded')">📤 本地上传 <span class="tab-count" id="ml-count-uploaded">0</span></button>
+<button class="ml-tab" onclick="filterMediaTab('cloud')">☁️ 云端图库 <span class="tab-count" id="ml-count-cloud">0</span></button>
+</div>
+<div class="ml-toolbar">
+<input class="ml-search" id="ml-search" placeholder="🔍 搜索资源名称..." oninput="searchMedia()">
+<div class="ml-tag-filters" id="ml-tag-filters">
+<span class="ml-filter-tag active" onclick="filterMediaTag('all',this)">全部</span>
+</div>
+</div>
+<!-- 拖拽上传区域 -->
+<div class="ml-drop-zone" id="ml-drop-zone" onclick="openMediaUpload()" ondragover="event.preventDefault();this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" ondrop="handleMediaDrop(event)">
+<div class="drop-icon">📁</div>
+<div>拖拽图片/视频到此处，或点击上传</div>
+<div style="font-size:11px;margin-top:4px;opacity:0.6">支持 JPG/PNG/GIF/WebP/MP4/WebM</div>
+</div>
+<!-- 知识库超链接扫描 -->
+<div class="ml-link-scanner" id="ml-link-scanner" style="display:none">
+<span>🔗</span>
+<input id="ml-link-input" placeholder="粘贴知识库/图库链接，自动识别图片和视频..." onkeydown="if(event.key==='Enter')fetchLinkResources()">
+<button class="btn btn-xs btn-accent" onclick="fetchLinkResources()">识别</button>
+<span class="scan-status" id="ml-scan-status"></span>
+</div>
+<!-- 资源网格 -->
+<div class="ml-grid" id="ml-grid">
+<div class="ml-empty" id="ml-empty">
+<div class="ml-empty-icon">📭</div>
+<p>资源库为空</p>
+<p style="font-size:11px">AI生成的图片/视频将自动保存到这里<br>也可以上传本地文件或识别在线链接</p>
+</div>
+</div>
+</div>
 </div>
 <div>
 <div class="chat-panel">
@@ -473,9 +699,167 @@ html[dir="rtl"] .lang-dropdown {
 </div>
 </div>
 
+<!-- 媒体资源库 - 上传弹窗 -->
+<div class="ml-upload-overlay hidden" id="ml-upload-overlay">
+<div class="ml-upload-card">
+<h3>📤 上传资源到媒体库</h3>
+<div class="ml-upload-tabs">
+<button class="ml-upload-tab active" onclick="switchUploadTab('local',this)">📁 本地上传</button>
+<button class="ml-upload-tab" onclick="switchUploadTab('url',this)">🌐 在线链接</button>
+<button class="ml-upload-tab" onclick="switchUploadTab('cloud',this)">☁️ 云端图库</button>
+</div>
+<!-- 本地上传 -->
+<div class="ml-upload-drop" id="ml-upload-drop-area" onclick="document.getElementById('ml-upload-file-input').click()" ondragover="event.preventDefault();this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" ondrop="handleUploadDrop(event)">
+<div class="upload-icon">📁</div>
+<div class="upload-text">点击或拖拽文件到此处</div>
+<div class="upload-hint">支持 JPG/PNG/GIF/WebP/MP4/WebM，单文件最大 50MB</div>
+</div>
+<input type="file" id="ml-upload-file-input" accept="image/*,video/*" multiple style="display:none" onchange="handleLocalFileSelect(event)">
+<!-- 在线链接 -->
+<div class="ml-url-input-area" id="ml-url-area" style="display:none">
+<input class="ml-url-input" id="ml-url-input" placeholder="粘贴图片或视频链接，每行一个..." oninput="previewUrlInput()">
+<div class="ml-url-preview" id="ml-url-preview" style="display:none"></div>
+</div>
+<!-- 云端图库 -->
+<div id="ml-cloud-area" style="display:none">
+<div style="padding:8px 0;font-size:13px;color:var(--text-secondary)">从云端图库同步资源：</div>
+<div style="display:flex;gap:8px;flex-wrap:wrap">
+<button class="btn btn-sm btn-secondary" onclick="syncCloudLibrary('unsplash')">📸 Unsplash</button>
+<button class="btn btn-sm btn-secondary" onclick="syncCloudLibrary('pexels')">🎬 Pexels</button>
+<button class="btn btn-sm btn-secondary" onclick="syncCloudLibrary('pixabay')">🖼️ Pixabay</button>
+<button class="btn btn-sm btn-secondary" onclick="syncCloudLibrary('custom')">🔗 自定义云端</button>
+</div>
+<div id="ml-cloud-status" style="margin-top:8px;font-size:11px;color:var(--text-tertiary)"></div>
+</div>
+<!-- 预览列表 -->
+<div class="ml-upload-preview-list" id="ml-upload-preview-list"></div>
+<div class="ml-upload-footer">
+<button class="btn btn-sm btn-secondary" onclick="closeMediaUpload()">取消</button>
+<button class="btn btn-sm btn-primary" id="ml-upload-confirm-btn" onclick="confirmMediaUpload()" disabled>上传到资源库</button>
+</div>
+</div>
+</div>
+
+<!-- 媒体资源库 - 预览弹窗 -->
+<div class="ml-preview-overlay hidden" id="ml-preview-overlay">
+<button class="ml-preview-close" onclick="closeMediaPreview()">✕</button>
+<button class="ml-preview-nav ml-preview-prev" onclick="navigateMediaPreview(-1)">◀</button>
+<button class="ml-preview-nav ml-preview-next" onclick="navigateMediaPreview(1)">▶</button>
+<div class="ml-preview-content" id="ml-preview-content"></div>
+<div class="ml-preview-info" id="ml-preview-info"></div>
+<div class="ml-preview-actions">
+<button class="btn btn-sm btn-primary" id="ml-preview-download" onclick="downloadMediaItem()">📥 下载</button>
+<button class="btn btn-sm btn-accent" id="ml-preview-copy" onclick="copyMediaToClipboard()">📋 复制</button>
+<button class="btn btn-sm btn-danger" id="ml-preview-delete" onclick="deleteMediaItem()">🗑 删除</button>
+</div>
+</div>
+
 <!-- PAGE: DEVICE -->
 <div class="content-page" id="page-device">
 <div class="page-tabs"><button class="page-tab active" onclick="switchDeviceMode('b2c')">B2C 消费者模式</button><button class="page-tab" onclick="switchDeviceMode('b2b')">B2B 门店模式</button></div>
+<!-- 连接面板：蓝牙 + WiFi -->
+<div class="connection-panel" id="connection-panel">
+  <!-- 蓝牙卡片 -->
+  <div class="conn-card bt-card">
+    <div class="conn-card-header">
+      <div class="conn-card-icon bt-icon">📶</div>
+      <div>
+        <div class="conn-card-title">蓝牙连接</div>
+        <div class="conn-card-status" id="bt-status-text">未连接</div>
+      </div>
+      <div style="margin-left:auto">
+        <label class="toggle-switch" style="transform:scale(0.85)">
+          <input type="checkbox" id="bt-toggle" onchange="toggleBluetooth(this.checked)">
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+    </div>
+    <div id="bt-scan-area" class="conn-scan-area hidden">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;font-size:12px;color:var(--text-secondary)">
+        <div class="spinner" style="width:16px;height:16px;border-width:2px"></div> 正在扫描设备...
+      </div>
+      <div id="bt-device-list"></div>
+    </div>
+    <div id="bt-connected-info" class="conn-connected-info hidden">
+      <div class="dev-icon">🦞</div>
+      <div class="dev-detail">
+        <div class="dev-name" id="bt-dev-name">AI NAILS Pro #001</div>
+        <div class="dev-meta" id="bt-dev-meta">信号: 强 | 已配对</div>
+      </div>
+    </div>
+    <div class="conn-btn-row">
+      <button class="btn btn-secondary btn-xs" id="bt-scan-btn" onclick="scanBluetooth()">🔍 扫描设备</button>
+      <button class="btn btn-danger btn-xs hidden" id="bt-disconnect-btn" onclick="disconnectBluetooth()">断开连接</button>
+    </div>
+  </div>
+  <!-- WiFi 卡片 -->
+  <div class="conn-card wifi-card">
+    <div class="conn-card-header">
+      <div class="conn-card-icon wifi-icon">📡</div>
+      <div>
+        <div class="conn-card-title">WiFi 连接</div>
+        <div class="conn-card-status" id="wifi-status-text">未连接</div>
+      </div>
+      <div style="margin-left:auto">
+        <label class="toggle-switch" style="transform:scale(0.85)">
+          <input type="checkbox" id="wifi-toggle" onchange="toggleWifi(this.checked)">
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+    </div>
+    <div id="wifi-scan-area" class="conn-scan-area hidden">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;font-size:12px;color:var(--text-secondary)">
+        <div class="spinner" style="width:16px;height:16px;border-width:2px"></div> 正在扫描 WiFi...
+      </div>
+      <div id="wifi-device-list"></div>
+    </div>
+    <div id="wifi-connected-info" class="conn-connected-info hidden">
+      <div class="dev-icon">🦞</div>
+      <div class="dev-detail">
+        <div class="dev-name" id="wifi-dev-name">AI NAILS Pro #001</div>
+        <div class="dev-meta" id="wifi-dev-meta">IP: 192.168.1.100 | 信号: 优</div>
+      </div>
+    </div>
+    <div class="conn-btn-row">
+      <button class="btn btn-secondary btn-xs" id="wifi-scan-btn" onclick="scanWifiDevices()">🔍 扫描设备</button>
+      <button class="btn btn-danger btn-xs hidden" id="wifi-disconnect-btn" onclick="disconnectWifi()">断开连接</button>
+    </div>
+  </div>
+</div>
+<!-- WiFi 配置弹窗 -->
+<div class="wifi-config-overlay hidden" id="wifi-config-overlay">
+  <div class="wifi-config-card">
+    <h3>⚙️ 配置设备 WiFi</h3>
+    <div class="wifi-sub" id="wifi-config-device-name">为 AI NAILS Pro #001 配置网络</div>
+    <div class="wifi-networks" id="wifi-networks-list">
+      <div class="wifi-network-item" onclick="selectWifiNetwork(this,'AI_NAILS_Office_5G')">
+        <span class="wifi-ssid">🔒 AI_NAILS_Office_5G</span>
+        <span class="wifi-secure">WPA2</span>
+      </div>
+      <div class="wifi-network-item" onclick="selectWifiNetwork(this,'AI_NAILS_Guest')">
+        <span class="wifi-ssid">📶 AI_NAILS_Guest</span>
+        <span class="wifi-secure">开放</span>
+      </div>
+      <div class="wifi-network-item" onclick="selectWifiNetwork(this,'NailStudio_WiFi')">
+        <span class="wifi-ssid">🔒 NailStudio_WiFi</span>
+        <span class="wifi-secure">WPA3</span>
+      </div>
+    </div>
+    <div class="wifi-pass-input" id="wifi-pass-input">
+      <div class="form-group">
+        <label>WiFi 密码</label>
+        <div class="wifi-pass-row">
+          <input class="form-input" id="wifi-password" type="password" placeholder="输入 WiFi 密码...">
+          <button class="btn btn-xs btn-secondary" onclick="toggleWifiPassVisibility()">👁</button>
+        </div>
+      </div>
+    </div>
+    <div class="conn-btn-row" style="justify-content:flex-end;margin-top:12px">
+      <button class="btn btn-secondary btn-xs" onclick="closeWifiConfig()">取消</button>
+      <button class="btn btn-primary btn-xs" onclick="connectWifiNetwork()">连接</button>
+    </div>
+  </div>
+</div>
 <div id="device-b2c">
 <div class="stat-grid" style="margin-bottom:20px">
 <div class="stat-card"><div class="stat-label">在线设备</div><div class="stat-value">12</div><div class="stat-change up">▲ 2台新增</div></div>
@@ -487,23 +871,32 @@ html[dir="rtl"] .lang-dropdown {
 <div class="device-card">
 <div class="device-name"><span class="status-dot status-online"></span>AI NAILS Pro #001</div>
 <div style="font-size:11px;color:var(--text-secondary);margin-top:4px">SN: ANP-2026-0001 · 固件 v3.2.1</div>
+<div style="font-size:10px;margin-top:4px;display:flex;gap:6px;flex-wrap:wrap">
+  <span class="tag tag-accent">📡 WiFi</span><span class="tag tag-info">📶 蓝牙</span>
+</div>
 <div class="ink-bars"><div class="ink-bar ink-c" style="width:80%"></div><div class="ink-bar ink-m" style="width:65%"></div><div class="ink-bar ink-y" style="width:90%"></div><div class="ink-bar ink-k" style="width:55%"></div></div>
 <div style="font-size:10px;color:var(--text-tertiary);margin-top:4px;display:flex;gap:12px"><span>C:80%</span><span>M:65%</span><span>Y:90%</span><span>K:55%</span></div>
-<div class="device-actions"><button class="btn btn-secondary btn-xs">测试打印</button><button class="btn btn-secondary btn-xs">清洁喷头</button><button class="btn btn-accent btn-xs">校准</button></div>
+<div class="device-actions"><button class="btn btn-secondary btn-xs">测试打印</button><button class="btn btn-secondary btn-xs">清洁喷头</button><button class="btn btn-accent btn-xs">校准</button><button class="btn btn-success btn-xs" onclick="quickConnectDevice('ANP-2026-0001','AI NAILS Pro #001')">🔗 快速连接</button></div>
 </div>
 <div class="device-card">
 <div class="device-name"><span class="status-dot status-online"></span>AI NAILS Pro #002</div>
 <div style="font-size:11px;color:var(--text-secondary);margin-top:4px">SN: ANP-2026-0002 · 固件 v3.2.1</div>
+<div style="font-size:10px;margin-top:4px;display:flex;gap:6px;flex-wrap:wrap">
+  <span class="tag tag-info">📶 蓝牙</span>
+</div>
 <div class="ink-bars"><div class="ink-bar ink-c" style="width:45%"></div><div class="ink-bar ink-m" style="width:70%"></div><div class="ink-bar ink-y" style="width:60%"></div><div class="ink-bar ink-k" style="width:80%"></div></div>
 <div style="font-size:10px;color:var(--text-tertiary);margin-top:4px;display:flex;gap:12px"><span>C:45%</span><span>M:70%</span><span>Y:60%</span><span>K:80%</span></div>
-<div class="device-actions"><button class="btn btn-secondary btn-xs">测试打印</button><button class="btn btn-secondary btn-xs">清洁喷头</button><button class="btn btn-accent btn-xs">校准</button></div>
+<div class="device-actions"><button class="btn btn-secondary btn-xs">测试打印</button><button class="btn btn-secondary btn-xs">清洁喷头</button><button class="btn btn-accent btn-xs">校准</button><button class="btn btn-success btn-xs" onclick="quickConnectDevice('ANP-2026-0002','AI NAILS Pro #002')">🔗 快速连接</button></div>
 </div>
 <div class="device-card">
 <div class="device-name"><span class="status-dot status-idle"></span>AI NAILS Pro #003</div>
 <div style="font-size:11px;color:var(--text-secondary);margin-top:4px">SN: ANP-2026-0003 · 固件 v3.2.0</div>
+<div style="font-size:10px;margin-top:4px;display:flex;gap:6px;flex-wrap:wrap">
+  <span class="tag tag-accent">📡 WiFi</span>
+</div>
 <div class="ink-bars"><div class="ink-bar ink-c" style="width:15%"></div><div class="ink-bar ink-m" style="width:20%"></div><div class="ink-bar ink-y" style="width:30%"></div><div class="ink-bar ink-k" style="width:25%"></div></div>
 <div style="font-size:10px;color:var(--text-tertiary);margin-top:4px;display:flex;gap:12px"><span>C:15%</span><span>M:20%</span><span>Y:30%</span><span>K:25%</span></div>
-<div class="device-actions"><button class="btn btn-secondary btn-xs">测试打印</button><button class="btn btn-warning btn-xs" style="background:rgba(255,171,0,0.15);color:var(--warning)">更换墨盒</button><button class="btn btn-accent btn-xs">校准</button></div>
+<div class="device-actions"><button class="btn btn-secondary btn-xs">测试打印</button><button class="btn btn-warning btn-xs" style="background:rgba(255,171,0,0.15);color:var(--warning)">更换墨盒</button><button class="btn btn-accent btn-xs">校准</button><button class="btn btn-success btn-xs" onclick="quickConnectDevice('ANP-2026-0003','AI NAILS Pro #003')">🔗 快速连接</button></div>
 </div>
 </div>
 </div>
@@ -1024,6 +1417,8 @@ let nanobananaRatio = localStorage.getItem('nanobanana_ratio') || '1:1';
 async function generateNailArt(){
   const prompt=document.getElementById('create-prompt').value;
   if(!prompt){showToast('请先描述你想要的甲面设计','error');return}
+  window._lastCanvasImages = [];
+  window._lastGeneratedImages = null;
   
   const resultGrid=document.getElementById('result-grid');
   resultGrid.style.display='grid';
@@ -1054,13 +1449,22 @@ async function generateNailArt(){
         imageSize: nanobananaResolution
       });
       
-      // 渲染真实图片
+      window._lastGeneratedImages = images;
+      window._lastGeneratedPrompt = prompt;
+      window._lastGeneratedProvider = 'NanoBanana';
+      
+      // 渲染真实图片 + 一键保存按钮
       resultGrid.innerHTML = images.map((img, i) => `
         <div class="result-item" style="position:relative">
           <img src="data:${img.mimeType};base64,${img.base64}" alt="AI Nail Design ${i+1}" loading="lazy">
           <div class="download-overlay" onclick="downloadNailImage('${img.base64}','${img.mimeType}','nail-design-${i+1}')">⬇ 下载</div>
         </div>
-      `).join('');
+      `).join('') + `
+        <div class="result-item" style="background:linear-gradient(135deg,rgba(0,240,255,0.1),rgba(180,76,255,0.1));border:1px dashed var(--accent);cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-size:11px;color:var(--accent)" onclick="saveAllGeneratedToLibrary(window._lastGeneratedImages, window._lastGeneratedPrompt, window._lastGeneratedProvider);showToast('✅ 已保存全部生成结果到资源库','success')">
+          <span style="font-size:24px">💾</span>
+          <span>一键保存</span>
+          <span style="font-size:10px;opacity:0.7">全部到资源库</span>
+        </div>`;
       
       showToast(`✅ 成功生成 ${images.length} 张美甲设计！`,'success');
       document.getElementById('prompt-tags').innerHTML='<span class="tag tag-accent">🍌 Nano Banana Pro</span><span class="tag tag-success">真实AI生图</span><span class="tag tag-accent2">'+images.length+'张</span>';
