@@ -76,7 +76,7 @@
     "extraResources": []
   },
   "devDependencies": {
-    "electron": "28.0.0",
+    "electron": "^37.10.3",
     "electron-builder": "^24.13.3"
   }
 }
