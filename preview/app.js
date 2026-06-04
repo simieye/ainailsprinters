@@ -842,81 +842,110 @@ function downloadNailImage(base64, mimeType, filename) {
   showToast('📥 图片已下载','success');
 }
 
-// ====== 语音输入 (Web Speech API + ElevenLabs) ======
+// ====== 语音输入 (Web Speech API + ElevenLabs TTS) ======
 let voiceRecognition = null;
 let isVoiceListening = false;
+let voiceTarget = 'prompt'; // 'prompt' | 'chat' — 识别结果填入创作输入框或AI对话框
 
+const ELEVENLABS_API_KEY = '7536957d31333c76024911ef47932af9382188547101ffcabf1e33a106e21525';
+const ELEVENLABS_VOICE_ID = '21m00Tcm4TlvDq8ikWAM'; // Rachel - 默认女声
+
+// 创作舱输入框下方的语音按钮
 function startVoiceInput() {
-  const btn = document.querySelector('[onclick="startVoiceInput()"]');
-  
+  voiceTarget = 'prompt';
+  _startVoiceRecognition();
+}
+
+// AI对话框输入栏的语音按钮
+function startChatVoiceInput() {
+  voiceTarget = 'chat';
+  _startVoiceRecognition();
+}
+
+function _startVoiceRecognition() {
   if (isVoiceListening) {
     stopVoiceInput();
     return;
   }
-  
-  // 检查 Web Speech API 支持
+
   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if (SpeechRecognition) {
-    voiceRecognition = new SpeechRecognition();
-    voiceRecognition.lang = 'zh-CN';
-    voiceRecognition.interimResults = true;
-    voiceRecognition.continuous = false;
-    voiceRecognition.maxAlternatives = 1;
-    
-    voiceRecognition.onstart = () => {
-      isVoiceListening = true;
-      if (btn) { btn.textContent = '🔴 录音中...'; btn.style.background = 'rgba(255,82,82,0.2)'; btn.style.color = 'var(--danger)'; }
-      showToast('🎤 正在聆听...请说话','info');
-    };
-    
-    voiceRecognition.onresult = (event) => {
-      const transcript = event.results[0][0].transcript;
-      const promptEl = document.getElementById('create-prompt');
-      promptEl.value = transcript;
-      // 实时更新
-      const interim = Array.from(event.results).map(r => r[0].transcript).join('');
-      if (event.results[0].isFinal) {
-        promptEl.value = interim;
-      }
-    };
-    
-    voiceRecognition.onerror = (event) => {
-      console.warn('[Voice] 语音识别错误:', event.error);
-      stopVoiceInput();
-      if (event.error === 'not-allowed') {
-        showToast('⚠️ 请允许麦克风权限后重试','error');
-      } else if (event.error === 'no-speech') {
-        showToast('⚠️ 未检测到语音，请重试','warning');
-      } else {
-        showToast('⚠️ 语音识别失败: ' + event.error,'error');
-      }
-    };
-    
-    voiceRecognition.onend = () => {
-      const promptEl = document.getElementById('create-prompt');
-      if (promptEl.value) {
-        showToast('✅ 语音识别完成！已填入输入框','success');
-        // 自动发送到AI对话框
-        setTimeout(() => {
-          const chatInput = document.getElementById('create-chat-input');
-          if (chatInput) {
-            chatInput.value = promptEl.value;
-            sendCreateChat();
-          }
-        }, 500);
-      }
-      resetVoiceButton();
-    };
-    
-    voiceRecognition.start();
-  } else {
-    // 降级：使用模拟演示
+  if (!SpeechRecognition) {
+    // 降级：模拟演示
     showToast('🎤 浏览器不支持语音识别，使用模拟模式...','info');
+    const demoText = '赛博朋克风格，深蓝色微光渐变，蝴蝶翅膀纹理，金属质感';
+    _fillVoiceResult(demoText);
+    return;
+  }
+
+  voiceRecognition = new SpeechRecognition();
+  voiceRecognition.lang = 'zh-CN';
+  voiceRecognition.interimResults = true;
+  voiceRecognition.continuous = false;
+  voiceRecognition.maxAlternatives = 1;
+
+  voiceRecognition.onstart = () => {
+    isVoiceListening = true;
+    _setVoiceBtnState(true);
+    showToast('🎤 正在聆听...请说话','info');
+  };
+
+  voiceRecognition.onresult = (event) => {
+    const interim = Array.from(event.results).map(r => r[0].transcript).join('');
+    // 实时显示到目标输入框
+    if (voiceTarget === 'chat') {
+      const el = document.getElementById('create-chat-input');
+      if (el) el.value = interim;
+    } else {
+      const el = document.getElementById('create-prompt');
+      if (el) el.value = interim;
+    }
+    if (event.results[0].isFinal) {
+      _fillVoiceResult(interim);
+    }
+  };
+
+  voiceRecognition.onerror = (event) => {
+    console.warn('[Voice] 语音识别错误:', event.error);
+    stopVoiceInput();
+    if (event.error === 'not-allowed') {
+      showToast('⚠️ 请允许麦克风权限后重试','error');
+    } else if (event.error === 'no-speech') {
+      showToast('⚠️ 未检测到语音，请重试','warning');
+    } else {
+      showToast('⚠️ 语音识别失败: ' + event.error,'error');
+    }
+  };
+
+  voiceRecognition.onend = () => {
+    resetVoiceButton();
+  };
+
+  voiceRecognition.start();
+}
+
+function _fillVoiceResult(text) {
+  if (!text) return;
+
+  if (voiceTarget === 'chat') {
+    // AI对话框模式：填入并自动发送
+    const chatInput = document.getElementById('create-chat-input');
+    if (chatInput) {
+      chatInput.value = text;
+      showToast('✅ 语音识别完成！已发送到AI对话框','success');
+      setTimeout(() => sendCreateChat(), 300);
+    }
+  } else {
+    // 创作输入框模式：填入输入框并自动发送到AI对话框
+    const promptEl = document.getElementById('create-prompt');
+    if (promptEl) promptEl.value = text;
+    showToast('✅ 语音识别完成！已填入输入框','success');
     setTimeout(() => {
-      document.getElementById('create-prompt').value = '赛博朋克风格，深蓝色微光渐变，蝴蝶翅膀纹理，金属质感';
-      showToast('✅ 语音识别完成（模拟）！','success');
-      resetVoiceButton();
-    }, 2000);
+      const chatInput = document.getElementById('create-chat-input');
+      if (chatInput) {
+        chatInput.value = text;
+        sendCreateChat();
+      }
+    }, 500);
   }
 }
 
@@ -932,20 +961,65 @@ function stopVoiceInput() {
 function resetVoiceButton() {
   isVoiceListening = false;
   voiceRecognition = null;
-  const btn = document.querySelector('[onclick="startVoiceInput()"]');
-  if (btn) { btn.textContent = '🎤 语音输入'; btn.style.background = ''; btn.style.color = ''; }
+  _setVoiceBtnState(false);
 }
 
-// ElevenLabs TTS（文本转语音朗读）
-async function speakWithElevenLabs(text, voiceId) {
-  const apiKey = localStorage.getItem('elevenlabs_api_key') || '7536957d31333c76024911ef47932af9382188547101ffcabf1e33a106e21525';
-  if (!apiKey) {
-    showToast('⚠️ 请先配置 ElevenLabs API Key','warning');
-    return;
+function _setVoiceBtnState(listening) {
+  const promptBtn = document.getElementById('voice-input-btn');
+  const chatBtn = document.getElementById('chat-voice-btn');
+
+  if (listening) {
+    if (promptBtn) {
+      promptBtn.textContent = '🔴 录音中...';
+      promptBtn.style.background = 'rgba(255,82,82,0.2)';
+      promptBtn.style.color = 'var(--danger)';
+      promptBtn.classList.add('listening');
+    }
+    if (chatBtn) {
+      chatBtn.textContent = '🔴';
+      chatBtn.style.background = 'rgba(255,82,82,0.2)';
+      chatBtn.style.color = 'var(--danger)';
+      chatBtn.classList.add('listening');
+    }
+  } else {
+    if (promptBtn) {
+      promptBtn.textContent = '🎤 语音输入';
+      promptBtn.style.background = '';
+      promptBtn.style.color = '';
+      promptBtn.classList.remove('listening');
+    }
+    if (chatBtn) {
+      chatBtn.textContent = '🎤';
+      chatBtn.style.background = '';
+      chatBtn.style.color = '';
+      chatBtn.classList.remove('listening');
+    }
   }
-  
+}
+
+// ====== ElevenLabs TTS（文本转语音朗读） ======
+let currentTtsAudio = null;
+
+function stopTtsAudio() {
+  if (currentTtsAudio) {
+    try { currentTtsAudio.pause(); currentTtsAudio = null; } catch(e) {}
+  }
+}
+
+async function speakWithElevenLabs(text, voiceId) {
+  stopTtsAudio();
+
+  const apiKey = ELEVENLABS_API_KEY;
+  const vid = voiceId || ELEVENLABS_VOICE_ID;
+
+  // 清理文本（去除HTML标签等）
+  const cleanText = text.replace(/<[^>]*>/g, '').replace(/&[^;]+;/g, '').trim();
+  if (!cleanText) return;
+
+  showToast('🔊 正在生成语音...','info');
+
   try {
-    const resp = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId || '21m00Tcm4TlvDq8ikWAM'}`, {
+    const resp = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${vid}`, {
       method: 'POST',
       headers: {
         'Accept': 'audio/mpeg',
@@ -953,21 +1027,37 @@ async function speakWithElevenLabs(text, voiceId) {
         'xi-api-key': apiKey
       },
       body: JSON.stringify({
-        text: text,
+        text: cleanText,
         model_id: 'eleven_multilingual_v2',
         voice_settings: { stability: 0.5, similarity_boost: 0.75 }
       })
     });
-    
-    if (!resp.ok) throw new Error('TTS API error: ' + resp.status);
-    
+
+    if (!resp.ok) {
+      const errBody = await resp.text();
+      throw new Error(`HTTP ${resp.status}: ${errBody.substring(0, 100)}`);
+    }
+
     const blob = await resp.blob();
     const url = URL.createObjectURL(blob);
-    const audio = new Audio(url);
-    audio.play();
+    currentTtsAudio = new Audio(url);
+
+    currentTtsAudio.onended = () => {
+      currentTtsAudio = null;
+      URL.revokeObjectURL(url);
+    };
+
+    currentTtsAudio.onerror = () => {
+      currentTtsAudio = null;
+      URL.revokeObjectURL(url);
+      showToast('⚠️ 音频播放失败','error');
+    };
+
+    await currentTtsAudio.play();
     showToast('🔊 正在朗读...','info');
   } catch(e) {
     console.warn('[ElevenLabs TTS] 失败:', e.message);
+    currentTtsAudio = null;
     showToast('⚠️ ElevenLabs 朗读失败: ' + e.message,'error');
   }
 }
@@ -1035,7 +1125,10 @@ function sendCreateChat(){
   const msg=input.value.trim();
   if(!msg)return;
   const msgs=document.getElementById('create-chat-msgs');
-  msgs.innerHTML+=`<div class="chat-msg user"><div class="msg-avatar user-av">👤</div><div class="msg-bubble">${escHtml(msg)}</div></div>`;
+
+  // 用户消息
+  const userMsgId = 'umsg-' + Date.now();
+  msgs.innerHTML+=`<div class="chat-msg user" id="${userMsgId}"><div class="msg-avatar user-av">👤</div><div class="msg-bubble">${escHtml(msg)}<div class="msg-actions"><button class="btn btn-xs btn-ghost" onclick="speakWithElevenLabs('${escJs(msg)}')" title="朗读此消息">🔊</button></div></div></div>`;
   input.value='';msgs.scrollTop=msgs.scrollHeight;
   
   // 智能风格识别
@@ -1059,12 +1152,20 @@ function sendCreateChat(){
   
   setTimeout(()=>{
     document.getElementById('create-prompt').value=msg;
-    msgs.innerHTML+=`<div class="chat-msg agent"><div class="msg-avatar agent-av">🤖</div><div class="msg-bubble">已理解！为你优化提示词并准备生成...<br>风格识别: ${detectedStyle} · 甲型: 通用适配<br>
+    const agentText = `已理解！为你优化提示词并准备生成...\n风格识别: ${detectedStyle} · 甲型: 通用适配`;
+    const agentMsgId = 'amsg-' + Date.now();
+    msgs.innerHTML+=`<div class="chat-msg agent" id="${agentMsgId}"><div class="msg-avatar agent-av">🤖</div><div class="msg-bubble">已理解！为你优化提示词并准备生成...<br>风格识别: ${detectedStyle} · 甲型: 通用适配<br>
     <button class="btn btn-xs btn-primary" style="margin-top:8px;margin-right:4px" onclick="generateNailArt()">✨ 立即生成</button>
-    <button class="btn btn-xs btn-accent" style="margin-top:8px" onclick="speakWithElevenLabs('${escHtml(msg.replace(/'/g,"\\'"))}')">🔊 朗读</button>
+    <button class="btn btn-xs btn-accent" style="margin-top:8px;margin-right:4px" onclick="speakWithElevenLabs('${escJs(agentText)}')">🔊 朗读回复</button>
+    <button class="btn btn-xs btn-ghost" style="margin-top:8px" onclick="stopTtsAudio()">⏹ 停止</button>
     </div></div>`;
     msgs.scrollTop=msgs.scrollHeight;
   },800)
+}
+
+// JS字符串安全转义（用于onclick属性中嵌入字符串）
+function escJs(str) {
+  return str.replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/\n/g, '\\n').replace(/\r/g, '');
 }
 
 // MODALS
