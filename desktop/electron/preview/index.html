@@ -1929,6 +1929,96 @@ html[dir="rtl"] .lang-dropdown {
   </div>
 </div>
 
+<!-- ============ Agent Reach · 全网搜索弹窗 ============ -->
+<div id="agent-reach-panel" class="hidden" style="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.7);z-index:1000;align-items:center;justify-content:center">
+  <div style="background:var(--bg-secondary);border-radius:var(--radius-lg);padding:24px;width:680px;max-height:90vh;overflow-y:auto;border:2px solid #10B981">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <h3 style="margin:0;display:flex;align-items:center;gap:8px"><span style="font-size:24px">🌐</span> Agent Reach · 全网搜索</h3>
+      <button class="btn btn-xs btn-secondary" onclick="closeAgentReachPanel()">✕</button>
+    </div>
+    <div style="padding:10px;background:rgba(16,185,129,0.06);border-radius:8px;margin-bottom:16px;font-size:12px;color:var(--text-secondary);line-height:1.6">
+      AI 驱动的多平台内容搜索，覆盖 Twitter/X、Reddit、YouTube、B站、GitHub、小红书、LinkedIn。<br>
+      <span style="color:var(--text-tertiary)">无需 API 费用 · 开源工具驱动 · </span>
+      <a href="https://github.com/Panniantong/Agent-Reach" target="_blank" style="color:#10B981">GitHub ↗</a>
+    </div>
+    <!-- 搜索输入 -->
+    <div style="margin-bottom:12px">
+      <label style="font-size:12px;color:var(--text-secondary);display:block;margin-bottom:4px">搜索关键词</label>
+      <div style="display:flex;gap:8px">
+        <input class="form-input" id="ar-search-query" placeholder="输入搜索内容，如: AI 美甲行业趋势、竞品分析..." style="flex:1;font-size:13px" onkeydown="if(event.key==='Enter')executeAgentReachSearch()">
+        <button class="btn btn-accent btn-sm" id="ar-search-btn" onclick="executeAgentReachSearch()" style="background:linear-gradient(135deg,#10B981,#059669);color:#fff;border:none;white-space:nowrap">🔍 开始搜索</button>
+      </div>
+    </div>
+    <!-- 渠道选择 -->
+    <div style="margin-bottom:12px">
+      <label style="font-size:12px;color:var(--text-secondary);display:block;margin-bottom:4px">搜索渠道
+        <button class="btn btn-xs btn-secondary" onclick="toggleAllAgentReachChannels(true)" style="margin-left:8px;font-size:10px">全选</button>
+        <button class="btn btn-xs btn-secondary" onclick="toggleAllAgentReachChannels(false)" style="margin-left:4px;font-size:10px">取消</button>
+      </label>
+      <div style="display:flex;flex-wrap:wrap;gap:8px">
+        <label style="display:flex;align-items:center;gap:4px;font-size:12px;cursor:pointer;padding:4px 8px;background:var(--bg);border-radius:6px;border:1px solid var(--border)">
+          <input type="checkbox" class="ar-channel-cb" value="twitter" checked> 🐦 Twitter/X
+        </label>
+        <label style="display:flex;align-items:center;gap:4px;font-size:12px;cursor:pointer;padding:4px 8px;background:var(--bg);border-radius:6px;border:1px solid var(--border)">
+          <input type="checkbox" class="ar-channel-cb" value="reddit" checked> 📖 Reddit
+        </label>
+        <label style="display:flex;align-items:center;gap:4px;font-size:12px;cursor:pointer;padding:4px 8px;background:var(--bg);border-radius:6px;border:1px solid var(--border)">
+          <input type="checkbox" class="ar-channel-cb" value="web" checked> 🌐 全网
+        </label>
+        <label style="display:flex;align-items:center;gap:4px;font-size:12px;cursor:pointer;padding:4px 8px;background:var(--bg);border-radius:6px;border:1px solid var(--border)">
+          <input type="checkbox" class="ar-channel-cb" value="youtube"> ▶️ YouTube
+        </label>
+        <label style="display:flex;align-items:center;gap:4px;font-size:12px;cursor:pointer;padding:4px 8px;background:var(--bg);border-radius:6px;border:1px solid var(--border)">
+          <input type="checkbox" class="ar-channel-cb" value="bilibili"> 📺 B站
+        </label>
+        <label style="display:flex;align-items:center;gap:4px;font-size:12px;cursor:pointer;padding:4px 8px;background:var(--bg);border-radius:6px;border:1px solid var(--border)">
+          <input type="checkbox" class="ar-channel-cb" value="github"> 📦 GitHub
+        </label>
+        <label style="display:flex;align-items:center;gap:4px;font-size:12px;cursor:pointer;padding:4px 8px;background:var(--bg);border-radius:6px;border:1px solid var(--border)">
+          <input type="checkbox" class="ar-channel-cb" value="xiaohongshu"> 📕 小红书
+        </label>
+        <label style="display:flex;align-items:center;gap:4px;font-size:12px;cursor:pointer;padding:4px 8px;background:var(--bg);border-radius:6px;border:1px solid var(--border)">
+          <input type="checkbox" class="ar-channel-cb" value="linkedin"> 💼 LinkedIn
+        </label>
+      </div>
+    </div>
+    <!-- 搜索结果 -->
+    <div id="ar-search-results" style="background:var(--bg-tertiary);border-radius:8px;min-height:60px;max-height:50vh;overflow-y:auto;padding:12px;font-size:12px">
+      <div style="color:var(--text-tertiary);text-align:center;padding:20px">选择搜索渠道并输入关键词开始搜索</div>
+    </div>
+  </div>
+</div>
+
+<!-- Agent Reach 配置弹窗 -->
+<div id="agent-reach-config-modal" class="skill-config-modal hidden" style="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.7);z-index:1100;align-items:center;justify-content:center">
+  <div style="background:var(--bg-secondary);border-radius:var(--radius-lg);padding:24px;width:520px;max-height:80vh;overflow-y:auto;border:2px solid #10B981">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <h3 style="margin:0;display:flex;align-items:center;gap:8px"><span style="font-size:24px">🌐</span> Agent Reach 配置</h3>
+      <button class="btn btn-xs btn-secondary" onclick="closeAgentReachConfig()">✕</button>
+    </div>
+    <div style="margin-bottom:12px">
+      <span style="font-size:12px;color:var(--text-secondary)">安装状态: </span>
+      <span id="ar-config-status" style="font-weight:600;font-size:13px">检测中...</span>
+    </div>
+    <div style="padding:10px;background:rgba(16,185,129,0.06);border-radius:8px;margin-bottom:12px;font-size:12px;color:var(--text-secondary);line-height:1.6">
+      <strong>安装指令:</strong><br>
+      <code style="background:var(--bg);padding:2px 6px;border-radius:4px;font-size:11px;word-break:break-all">pip install agent-reach && agent-reach install --env=auto</code><br>
+      <span style="color:var(--text-tertiary);font-size:10px">无需 API Key · 开源免费 · MIT 协议</span>
+    </div>
+    <div style="margin-bottom:12px">
+      <label style="font-size:12px;color:var(--text-secondary);display:block;margin-bottom:6px">渠道状态</label>
+      <div id="ar-channel-status" style="background:var(--bg);border-radius:8px;padding:10px;font-size:11px">
+        <div style="color:var(--text-tertiary)">加载中...</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;justify-content:flex-end">
+      <button class="btn btn-sm btn-secondary" onclick="closeAgentReachConfig()">关闭</button>
+      <button class="btn btn-sm btn-primary" onclick="markAgentReachInstalled()">✅ 标记已安装</button>
+      <button class="btn btn-sm btn-secondary" onclick="markAgentReachUninstalled()">标记未安装</button>
+    </div>
+  </div>
+</div>
+
 <!-- ===== 订单管理面板 ===== -->
 <div id="admin-orders-panel" style="display:none">
   <div class="card" style="margin-bottom:16px">
@@ -3711,6 +3801,7 @@ const OllamaService = {
 <script src="clipcat_service.js"></script>
 <script src="gptimage_service.js"></script>
 <script src="revor_service.js"></script>
+<script src="agent_reach_service.js"></script>
 <script src="skill_integration.js"></script>
 
 </body>

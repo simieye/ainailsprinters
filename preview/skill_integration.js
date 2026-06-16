@@ -377,6 +377,19 @@ const PRESET_SKILLS = [
     apiKeyEnv: 'REVOR_API_KEY',
     enabled: true,
   },
+
+  // === Agent Reach Skills (AI Agent 互联网能力层) ===
+  {
+    id: 'agent-reach-search',
+    name: 'Agent Reach · 全网搜索',
+    version: 'v1.0.0',
+    icon: '🌐',
+    desc: 'AI 驱动的多平台内容搜索：Twitter/X、Reddit、YouTube、B站、GitHub、小红书、LinkedIn — 无需 API 费用',
+    tags: ['Agent Reach', '搜索', '互联网'],
+    provider: 'agent-reach',
+    operation: 'search',
+    enabled: true,
+  },
 ];
 
 // 加载自定义 Skills（从 localStorage）
@@ -446,6 +459,7 @@ function renderInstalledSkills() {
       else if (s.provider === 'creatok') cls = 'tag-accent3';
       else if (s.provider === 'clipcat') cls = 'tag-info';
       else if (s.provider === 'revor') cls = 'tag-warning';
+      else if (s.provider === 'agent-reach') cls = 'tag-accent';
       else if (s.provider === 'nanobanana') cls = 'tag-accent2';
       else if (s.provider === 'clawhub') cls = 'tag-accent';
       else if (t === '自定义') cls = 'tag-accent2';
@@ -464,6 +478,7 @@ function renderInstalledSkills() {
       if (s.provider === 'revor' && s.operation === 'due_diligence') return `<button class="btn btn-xs btn-primary" onclick="openCustomerDueDiligencePanel()">▶ 使用</button>`;
       if (s.provider === 'revor' && s.operation === 'customer_outreach') return `<button class="btn btn-xs btn-primary" onclick="openCustomerOutreachPanel()">▶ 使用</button>`;
       if (s.provider === 'revor') return `<button class="btn btn-xs btn-primary" onclick="openRevorUsePanel()">▶ 使用</button>`;
+      if (s.provider === 'agent-reach') return `<button class="btn btn-xs btn-primary" onclick="openAgentReachPanel()">▶ 使用</button>`;
       if (s.provider === 'nanobanana') return `<button class="btn btn-xs btn-primary" onclick="navigateTo('create')">▶ 使用</button>`;
       if (s.provider === 'clawhub' && s.type === 'image') return `<button class="btn btn-xs btn-primary" onclick="executeClawHubImage()">▶ 生图</button>`;
       if (s.provider === 'clawhub' && s.type === 'video') return `<button class="btn btn-xs btn-primary" onclick="executeClawHubVideo()">▶ 生视频</button>`;
@@ -497,7 +512,7 @@ function renderInstalledSkills() {
 
 // Skill 开关处理
 function handleSkillToggle(skillId, checked) {
-  const presetPrefixes = ['anygen-', 'heygen-', 'creatok-', 'clipcat-', 'revor-', 'nanobanana-', 'clawhub-'];
+  const presetPrefixes = ['anygen-', 'heygen-', 'creatok-', 'clipcat-', 'revor-', 'agent-reach-', 'nanobanana-', 'clawhub-'];
   if (presetPrefixes.some(p => skillId.startsWith(p))) {
     togglePresetSkill(skillId, checked);
   }
@@ -660,6 +675,7 @@ function openSkillConfig(skillId) {
   else if (skill.provider === 'creatok') openCreatOKConfig();
   else if (skill.provider === 'clipcat') openClipcatConfig();
   else if (skill.provider === 'revor') openRevorConfig();
+  else if (skill.provider === 'agent-reach') openAgentReachConfig();
   else if (skill.provider === 'nanobanana') { if (typeof openNanoBananaSettings === 'function') openNanoBananaSettings(); }
 }
 
@@ -1462,3 +1478,197 @@ document.addEventListener('DOMContentLoaded', () => {
     refreshQuickAddChips();
   }
 });
+
+// ============ Agent Reach 面板函数 ============
+
+function openAgentReachPanel() {
+  const panel = document.getElementById('agent-reach-panel');
+  if (!panel) return;
+  panel.classList.remove('hidden');
+  panel.style.display = 'flex';
+  document.getElementById('ar-search-query').value = '';
+  document.getElementById('ar-search-results').innerHTML = '<div style="color:var(--text-tertiary);text-align:center;padding:20px">选择搜索渠道并输入关键词开始搜索</div>';
+  document.getElementById('ar-channel-twitter').checked = true;
+  document.getElementById('ar-channel-reddit').checked = true;
+  document.getElementById('ar-channel-web').checked = true;
+}
+
+function closeAgentReachPanel() {
+  const panel = document.getElementById('agent-reach-panel');
+  if (!panel) return;
+  panel.classList.add('hidden');
+  panel.style.display = 'none';
+}
+
+function toggleAllAgentReachChannels(checked) {
+  const checkboxes = document.querySelectorAll('.ar-channel-cb');
+  checkboxes.forEach(cb => { cb.checked = checked; });
+}
+
+function getSelectedAgentReachChannels() {
+  const checkboxes = document.querySelectorAll('.ar-channel-cb:checked');
+  return Array.from(checkboxes).map(cb => cb.value);
+}
+
+async function executeAgentReachSearch() {
+  const query = document.getElementById('ar-search-query').value.trim();
+  if (!query) { showToast('请输入搜索关键词', 'error'); return; }
+
+  const selectedChannels = getSelectedAgentReachChannels();
+  if (selectedChannels.length === 0) { showToast('请至少选择一个搜索渠道', 'error'); return; }
+
+  const resultDiv = document.getElementById('ar-search-results');
+  const searchBtn = document.getElementById('ar-search-btn');
+
+  // 显示加载状态
+  resultDiv.innerHTML = `<div style="text-align:center;padding:20px">
+    <div class="spinner" style="width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--primary);border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 12px"></div>
+    <div style="color:var(--text-secondary)">正在从 ${selectedChannels.length} 个渠道搜索 "${query}"...</div>
+  </div>`;
+  searchBtn.disabled = true;
+  searchBtn.textContent = '搜索中...';
+
+  try {
+    const result = await AgentReachService.searchAll(query, selectedChannels);
+    renderAgentReachResults(result);
+  } catch (err) {
+    resultDiv.innerHTML = `<div style="color:var(--danger);text-align:center;padding:20px">搜索失败: ${err.message}</div>`;
+  } finally {
+    searchBtn.disabled = false;
+    searchBtn.textContent = '🔍 开始搜索';
+  }
+}
+
+function renderAgentReachResults(data) {
+  const resultDiv = document.getElementById('ar-search-results');
+  if (!data) return;
+
+  const channelColors = {
+    'twitter': '#1DA1F2', 'reddit': '#FF4500', 'youtube': '#FF0000',
+    'bilibili': '#FB7299', 'github': '#333', 'web': '#10B981',
+    'xiaohongshu': '#FF2442', 'linkedin': '#0A66C2',
+  };
+
+  let html = `<div style="background:rgba(16,185,129,0.08);padding:10px 12px;border-radius:8px;margin-bottom:12px;font-size:12px;color:var(--text-secondary)">
+    ${data.summary || '搜索完成'}
+  </div>`;
+
+  for (const [cid, channelData] of Object.entries(data.channels || {})) {
+    const color = channelColors[cid] || '#666';
+    if (!channelData.success) {
+      html += `<div style="margin-bottom:8px;padding:10px;background:var(--bg);border-radius:8px;border-left:3px solid var(--danger)">
+        <div style="font-weight:600;font-size:13px;color:var(--danger)">❌ ${channelData.platform || cid}</div>
+        <div style="font-size:11px;color:var(--text-tertiary)">${channelData.error || '搜索失败'}</div>
+      </div>`;
+      continue;
+    }
+
+    html += `<div style="margin-bottom:10px;padding:12px;background:var(--bg);border-radius:8px;border-left:3px solid ${color}">
+      <div style="font-weight:600;font-size:13px;margin-bottom:8px;color:${color}">
+        ${AgentReachService.channels[cid]?.icon || '🔍'} ${channelData.platform || cid}
+        <span style="font-weight:400;font-size:10px;color:var(--text-tertiary);margin-left:8px">${channelData.results?.length || 0} 条结果</span>
+      </div>`;
+
+    if (channelData.results) {
+      channelData.results.forEach((r, i) => {
+        html += `<div style="padding:6px 0;border-bottom:1px solid var(--border);font-size:12px;line-height:1.5">`;
+        if (cid === 'twitter') {
+          html += `<div style="font-weight:500">${r.author} <span style="color:var(--text-tertiary);font-weight:400;font-size:10px">${r.time}</span></div>`;
+          html += `<div style="color:var(--text-secondary)">${r.content}</div>`;
+          html += `<div style="font-size:10px;color:var(--text-tertiary)">❤ ${r.likes} · 🔄 ${r.retweets}</div>`;
+        } else if (cid === 'reddit') {
+          html += `<div style="font-weight:500">${r.title}</div>`;
+          html += `<div style="font-size:10px;color:var(--text-tertiary)">${r.subreddit} · ⬆ ${r.upvotes} · 💬 ${r.comments} · ${r.time}</div>`;
+        } else if (cid === 'youtube') {
+          html += `<div style="font-weight:500">${r.title}</div>`;
+          html += `<div style="font-size:10px;color:var(--text-tertiary)">${r.channel} · 👁 ${r.views} · ⏱ ${r.duration} · ${r.time}</div>`;
+        } else if (cid === 'bilibili') {
+          html += `<div style="font-weight:500">${r.title}</div>`;
+          html += `<div style="font-size:10px;color:var(--text-tertiary)">UP: ${r.up} · 👁 ${r.views} · 💬 ${r.danmaku}弹幕 · ${r.time}</div>`;
+        } else if (cid === 'github') {
+          html += `<div style="font-weight:500">${r.owner}/${r.name} ⭐ ${r.stars}</div>`;
+          html += `<div style="font-size:10px;color:var(--text-tertiary)">${r.desc} · ${r.lang} · ${r.time}</div>`;
+        } else if (cid === 'web') {
+          html += `<div style="font-weight:500">${r.title}</div>`;
+          html += `<div style="font-size:10px;color:var(--text-tertiary)">相关性: ${(r.relevance*100).toFixed(0)}%</div>`;
+          html += `<div style="color:var(--text-secondary);font-size:11px">${r.snippet}</div>`;
+        } else if (cid === 'xiaohongshu') {
+          html += `<div style="font-weight:500">${r.title}</div>`;
+          html += `<div style="font-size:10px;color:var(--text-tertiary)">${r.author} · ❤ ${r.likes} · ⭐ ${r.collects} · ${r.time}</div>`;
+        } else if (cid === 'linkedin') {
+          html += `<div style="font-weight:500">${r.author} <span style="color:var(--text-tertiary);font-weight:400;font-size:10px">${r.time}</span></div>`;
+          html += `<div style="color:var(--text-secondary)">${r.content}</div>`;
+          html += `<div style="font-size:10px;color:var(--text-tertiary)">👍 ${r.likes}</div>`;
+        }
+        html += `</div>`;
+      });
+    }
+    html += `</div>`;
+  }
+
+  html += `<div style="font-size:10px;color:var(--text-tertiary);text-align:center;margin-top:8px">
+    ${data.channels?.web?.source || 'Agent Reach · AI 模拟搜索'} · 
+    <a href="https://github.com/Panniantong/Agent-Reach" target="_blank" style="color:var(--primary)">安装 CLI 获取实时结果</a>
+  </div>`;
+
+  resultDiv.innerHTML = html;
+}
+
+// Agent Reach 配置面板
+function openAgentReachConfig() {
+  const modal = document.getElementById('agent-reach-config-modal');
+  if (!modal) return;
+  modal.classList.remove('hidden');
+  modal.style.display = 'flex';
+
+  const isInstalled = AgentReachService.isInstalled();
+  document.getElementById('ar-config-status').textContent = isInstalled ? '已安装' : '未安装';
+  document.getElementById('ar-config-status').style.color = isInstalled ? 'var(--success)' : 'var(--text-tertiary)';
+
+  // 刷新渠道状态
+  refreshAgentReachChannelStatus();
+}
+
+function closeAgentReachConfig() {
+  const modal = document.getElementById('agent-reach-config-modal');
+  if (!modal) return;
+  modal.classList.add('hidden');
+  modal.style.display = 'none';
+}
+
+async function refreshAgentReachChannelStatus() {
+  const statusDiv = document.getElementById('ar-channel-status');
+  if (!statusDiv) return;
+
+  statusDiv.innerHTML = '<div style="color:var(--text-tertiary);font-size:11px">检测中...</div>';
+
+  const channels = AgentReachService.channels;
+  let html = '';
+  for (const [cid, ch] of Object.entries(channels)) {
+    const status = await AgentReachService.getChannelStatus(cid);
+    const icon = status.available ? '✅' : (ch.needsAuth ? '🔒' : '⚠️');
+    html += `<div style="display:flex;align-items:center;gap:6px;padding:4px 0;font-size:11px">
+      <span>${ch.icon}</span>
+      <span style="font-weight:500;min-width:70px">${ch.name}</span>
+      <span>${icon}</span>
+      <span style="color:var(--text-tertiary);flex:1">${status.available ? '可用' : (ch.needsAuth ? '需登录配置' : '需安装')}</span>
+    </div>`;
+  }
+  statusDiv.innerHTML = html;
+}
+
+function markAgentReachInstalled() {
+  AgentReachService.setInstalled(true);
+  document.getElementById('ar-config-status').textContent = '已安装';
+  document.getElementById('ar-config-status').style.color = 'var(--success)';
+  refreshAgentReachChannelStatus();
+  showToast('Agent Reach 已标记为已安装', 'success');
+}
+
+function markAgentReachUninstalled() {
+  AgentReachService.setInstalled(false);
+  document.getElementById('ar-config-status').textContent = '未安装';
+  document.getElementById('ar-config-status').style.color = 'var(--text-tertiary)';
+  refreshAgentReachChannelStatus();
+  showToast('Agent Reach 已标记为未安装', 'info');
+}

@@ -2630,6 +2630,7 @@ function addCustomSkillV2(){
     'creatok': 'CreatOK',
     'clipcat': 'Clipcat',
     'revor': 'Revor',
+    'agent-reach': 'Agent Reach',
     'nanobanana': 'NanoBanana'
   };
   
@@ -2642,6 +2643,7 @@ function addCustomSkillV2(){
     'creatok': '🖼️',
     'clipcat': '🖌️',
     'revor': '📈',
+    'agent-reach': '🌐',
     'nanobanana': '🍌'
   };
   
@@ -2654,6 +2656,7 @@ function addCustomSkillV2(){
     'creatok': 'tag-accent',
     'clipcat': 'tag-accent',
     'revor': 'tag-accent',
+    'agent-reach': 'tag-accent',
     'nanobanana': 'tag-accent'
   };
   
