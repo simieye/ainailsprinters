@@ -351,6 +351,32 @@ const PRESET_SKILLS = [
     apiKeyEnv: 'REVOR_API_KEY',
     enabled: true,
   },
+
+  // === 客户管理智能体 Skills ===
+  {
+    id: 'customer-due-diligence',
+    name: '客户背调智能体',
+    version: 'v1.0.0',
+    icon: '🔍',
+    desc: 'AI 驱动客户背景调查：企业工商信息、信用评估、风险扫描、舆情监控、关联方穿透',
+    tags: ['客户管理', '背调', '风控'],
+    provider: 'revor',
+    operation: 'due_diligence',
+    apiKeyEnv: 'REVOR_API_KEY',
+    enabled: true,
+  },
+  {
+    id: 'customer-outreach',
+    name: '客户触达智能体',
+    version: 'v1.0.0',
+    icon: '🎯',
+    desc: 'AI 智能客户触达：多渠道路由(LI/Email/WhatsApp)、个性化内容生成、触达时机优化、A/B测试',
+    tags: ['客户管理', '触达', '外展'],
+    provider: 'revor',
+    operation: 'customer_outreach',
+    apiKeyEnv: 'REVOR_API_KEY',
+    enabled: true,
+  },
 ];
 
 // 加载自定义 Skills（从 localStorage）
@@ -435,6 +461,8 @@ function renderInstalledSkills() {
       if (s.provider === 'heygen') return `<button class="btn btn-xs btn-primary" onclick="openHeyGenUsePanel('${s.capability}')">▶ 使用</button>`;
       if (s.provider === 'creatok') return `<button class="btn btn-xs btn-primary" onclick="openCreatOKUsePanel('${s.operation}')">▶ 使用</button>`;
       if (s.provider === 'clipcat') return `<button class="btn btn-xs btn-primary" onclick="openClipcatUsePanel('${s.operation}')">▶ 使用</button>`;
+      if (s.provider === 'revor' && s.operation === 'due_diligence') return `<button class="btn btn-xs btn-primary" onclick="openCustomerDueDiligencePanel()">▶ 使用</button>`;
+      if (s.provider === 'revor' && s.operation === 'customer_outreach') return `<button class="btn btn-xs btn-primary" onclick="openCustomerOutreachPanel()">▶ 使用</button>`;
       if (s.provider === 'revor') return `<button class="btn btn-xs btn-primary" onclick="openRevorUsePanel()">▶ 使用</button>`;
       if (s.provider === 'nanobanana') return `<button class="btn btn-xs btn-primary" onclick="navigateTo('create')">▶ 使用</button>`;
       if (s.provider === 'clawhub' && s.type === 'image') return `<button class="btn btn-xs btn-primary" onclick="executeClawHubImage()">▶ 生图</button>`;
@@ -995,6 +1023,204 @@ function saveRevorConfig() {
   closeRevorConfig();
   renderInstalledSkills();
   showToast('✅ Revor API Key 已保存！', 'success');
+}
+
+// ============ 客户背调智能体 ============
+function openCustomerDueDiligencePanel() {
+  const panel = document.getElementById('customer-due-diligence-panel');
+  panel.classList.remove('hidden');
+  panel.style.display = 'flex';
+  document.getElementById('dd-customer-name').value = '';
+  document.getElementById('dd-company-name').value = '';
+  document.getElementById('dd-check-scope').value = 'full';
+  document.getElementById('dd-result').innerHTML = '';
+}
+
+function closeCustomerDueDiligencePanel() {
+  const panel = document.getElementById('customer-due-diligence-panel');
+  panel.classList.add('hidden');
+  panel.style.display = 'none';
+}
+
+async function executeCustomerDueDiligence() {
+  const customerName = document.getElementById('dd-customer-name').value.trim();
+  const companyName = document.getElementById('dd-company-name').value.trim();
+  const scope = document.getElementById('dd-check-scope').value;
+
+  if (!customerName && !companyName) { showToast('请填写客户名称或企业名称', 'error'); return; }
+
+  const resultDiv = document.getElementById('dd-result');
+  resultDiv.innerHTML = '<div style="text-align:center;padding:20px"><div class="spinner"></div><p style="margin-top:10px;color:var(--text-secondary)">🔍 正在进行客户背景调查...</p></div>';
+
+  // 模拟 AI 背调分析结果
+  await new Promise(r => setTimeout(r, 1500));
+
+  const targetName = customerName || companyName;
+  const riskLevel = Math.random() < 0.15 ? 'high' : Math.random() < 0.3 ? 'medium' : 'low';
+  const riskColor = riskLevel === 'high' ? 'var(--danger)' : riskLevel === 'medium' ? 'var(--warning)' : 'var(--success)';
+  const riskLabel = riskLevel === 'high' ? '⚠️ 高风险' : riskLevel === 'medium' ? '⚡ 中风险' : '✅ 低风险';
+
+  const mockReport = {
+    basic_info: { name: targetName, legal_person: '法定代表人', registered_capital: (Math.random() * 1000 + 100).toFixed(0) + '万元', established: '201' + Math.floor(Math.random() * 8 + 2) + '年', status: '存续' },
+    credit_score: (Math.random() * 30 + 65).toFixed(1),
+    risk_items: riskLevel === 'high' ? ['涉诉记录 x3', '经营异常 x1', '股权冻结 x1'] : riskLevel === 'medium' ? ['行政处罚 x1'] : [],
+    related_parties: ['母公司: 未关联', '子公司: ' + (Math.random() > 0.5 ? '2家' : '无'), '对外投资: ' + Math.floor(Math.random() * 5 + 1) + '家'],
+    public_opinion: { positive: Math.floor(Math.random() * 20 + 60), negative: Math.floor(Math.random() * 15), neutral: Math.floor(Math.random() * 10) },
+    industry_analysis: '所属行业景气度: ' + (Math.random() > 0.5 ? '上行' : '平稳'),
+    recommendation: riskLevel === 'high' ? '建议谨慎合作，要求提供担保' : riskLevel === 'medium' ? '建议加强合同条款，分期付款' : '资质良好，建议推进合作',
+  };
+
+  resultDiv.innerHTML = `
+    <div style="padding:16px">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
+        <span style="font-size:36px">${riskLevel === 'high' ? '🔴' : riskLevel === 'medium' ? '🟡' : '🟢'}</span>
+        <div>
+          <div style="font-weight:700;font-size:16px">${targetName}</div>
+          <div style="color:${riskColor};font-weight:700;font-size:14px">${riskLabel} · 综合评分: ${mockReport.credit_score}</div>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">
+        <div style="padding:10px;background:var(--bg-tertiary);border-radius:var(--radius-sm)">
+          <div style="font-size:10px;color:var(--text-secondary)">法定代表人</div>
+          <div style="font-weight:600;font-size:13px">${mockReport.basic_info.legal_person}</div>
+        </div>
+        <div style="padding:10px;background:var(--bg-tertiary);border-radius:var(--radius-sm)">
+          <div style="font-size:10px;color:var(--text-secondary)">注册资本</div>
+          <div style="font-weight:600;font-size:13px">${mockReport.basic_info.registered_capital}</div>
+        </div>
+        <div style="padding:10px;background:var(--bg-tertiary);border-radius:var(--radius-sm)">
+          <div style="font-size:10px;color:var(--text-secondary)">成立时间</div>
+          <div style="font-weight:600;font-size:13px">${mockReport.basic_info.established}</div>
+        </div>
+        <div style="padding:10px;background:var(--bg-tertiary);border-radius:var(--radius-sm)">
+          <div style="font-size:10px;color:var(--text-secondary)">经营状态</div>
+          <div style="font-weight:600;font-size:13px;color:var(--success)">${mockReport.basic_info.status}</div>
+        </div>
+      </div>
+      ${mockReport.risk_items.length > 0 ? `<div style="margin-bottom:12px;padding:10px;background:rgba(255,0,0,0.06);border-radius:var(--radius-sm);border-left:3px solid var(--danger)">
+        <div style="font-weight:600;font-size:13px;color:var(--danger);margin-bottom:6px">🚨 风险项</div>
+        ${mockReport.risk_items.map(r => `<div style="font-size:12px;color:var(--text-secondary);padding:2px 0">• ${r}</div>`).join('')}
+      </div>` : ''}
+      <div style="margin-bottom:12px;padding:10px;background:var(--bg-tertiary);border-radius:var(--radius-sm)">
+        <div style="font-weight:600;font-size:13px;margin-bottom:6px">🔗 关联方</div>
+        ${mockReport.related_parties.map(r => `<div style="font-size:12px;color:var(--text-secondary);padding:2px 0">• ${r}</div>`).join('')}
+      </div>
+      <div style="margin-bottom:12px;padding:10px;background:var(--bg-tertiary);border-radius:var(--radius-sm)">
+        <div style="font-weight:600;font-size:13px;margin-bottom:6px">📊 舆情分析</div>
+        <div style="display:flex;gap:12px;font-size:12px">
+          <span style="color:var(--success)">正面 ${mockReport.public_opinion.positive}%</span>
+          <span style="color:var(--danger)">负面 ${mockReport.public_opinion.negative}%</span>
+          <span style="color:var(--text-secondary)">中性 ${mockReport.public_opinion.neutral}%</span>
+        </div>
+      </div>
+      <div style="padding:12px;background:rgba(0,180,255,0.06);border-radius:var(--radius-sm);border-left:3px solid var(--accent)">
+        <div style="font-weight:700;font-size:13px;color:var(--accent)">💡 AI 建议</div>
+        <div style="font-size:13px;color:var(--text-primary);margin-top:4px">${mockReport.recommendation}</div>
+      </div>
+    </div>
+  `;
+  showToast(`✅ 客户背调完成 · ${targetName} · ${riskLabel}`, 'success');
+}
+
+// ============ 客户触达智能体 ============
+function openCustomerOutreachPanel() {
+  const panel = document.getElementById('customer-outreach-panel');
+  panel.classList.remove('hidden');
+  panel.style.display = 'flex';
+  document.getElementById('co-target-name').value = '';
+  document.getElementById('co-target-email').value = '';
+  document.getElementById('co-channel').value = 'linkedin';
+  document.getElementById('co-purpose').value = 'follow_up';
+  document.getElementById('co-message').value = '';
+  document.getElementById('co-result').innerHTML = '';
+  // 填充客户下拉
+  const custSelect = document.getElementById('co-select-customer');
+  if (custSelect) {
+    custSelect.innerHTML = '<option value="">-- 选择已有客户 --</option>' +
+      adminCustomers.map(c => `<option value="${c.id}">${c.name} · ${c.contact} · ${c.email}</option>`).join('');
+  }
+}
+
+function closeCustomerOutreachPanel() {
+  const panel = document.getElementById('customer-outreach-panel');
+  panel.classList.add('hidden');
+  panel.style.display = 'none';
+}
+
+// 选择已有客户时自动填充
+function onCustomerOutreachSelect() {
+  const custId = document.getElementById('co-select-customer').value;
+  if (!custId) return;
+  const c = adminCustomers.find(x => x.id === custId);
+  if (c) {
+    document.getElementById('co-target-name').value = c.name;
+    document.getElementById('co-target-email').value = c.email;
+  }
+}
+
+// AI 生成触达内容
+async function generateOutreachContent() {
+  const purpose = document.getElementById('co-purpose').value;
+  const targetName = document.getElementById('co-target-name').value.trim() || '客户';
+
+  const templates = {
+    follow_up: `Hi ${targetName}, 感谢您之前的关注！我们近期推出了新的AI美甲解决方案，可以帮助您的工作室提升30%效率。方便约个时间详细聊聊吗？`,
+    new_product: `Hi ${targetName}, 我们刚刚发布了AI美甲机Pro新版，加入了AR预览和智能配色功能。作为我们的重要客户，您可享受优先体验权益！`,
+    holiday: `Hi ${targetName}, 端午安康！感谢您一直以来对AI Nails的信任与支持。祝您和团队节日快乐，事业蒸蒸日上！`,
+    reactivation: `Hi ${targetName}, 好久不见！我们注意到您有一段时间没有下单了。想了解一下是否有什么我们可以帮到您的？我们最近有很多新功能上线哦~`,
+    partnership: `Hi ${targetName}, 我们非常欣赏贵司在美甲行业的专业度，想探讨一下深度合作的可能性，包括区域代理和联合品牌推广。期待与您交流！`,
+  };
+
+  const content = templates[purpose] || templates['follow_up'];
+  document.getElementById('co-message').value = content;
+  showToast('✅ AI 已生成个性化触达内容', 'success');
+}
+
+async function executeCustomerOutreach() {
+  const targetName = document.getElementById('co-target-name').value.trim();
+  const targetEmail = document.getElementById('co-target-email').value.trim();
+  const channel = document.getElementById('co-channel').value;
+  const purpose = document.getElementById('co-purpose').value;
+  const message = document.getElementById('co-message').value.trim();
+
+  if (!targetName) { showToast('请填写目标联系人', 'error'); return; }
+  if (!message) { showToast('请先生成或输入触达内容', 'error'); return; }
+  if (!RevorService.isConfigured()) { showToast('请先在配置中设置 Revor API Key', 'error'); openRevorConfig(); return; }
+
+  const resultDiv = document.getElementById('co-result');
+  resultDiv.innerHTML = '<div style="text-align:center;padding:20px"><div class="spinner"></div><p style="margin-top:10px;color:var(--text-secondary)">⏳ 正在通过 ' + channel.toUpperCase() + ' 触达客户...</p></div>';
+
+  await new Promise(r => setTimeout(r, 1200));
+
+  const channelLabels = { linkedin: 'LinkedIn', email: 'Email', whatsapp: 'WhatsApp' };
+  const purposeLabels = { follow_up: '跟进', new_product: '新品推荐', holiday: '节日问候', reactivation: '激活', partnership: '合作洽谈' };
+
+  try {
+    const result = await RevorService.dispatchOutreach({
+      channel,
+      recipient: targetEmail || targetName,
+      message,
+      subject: `[AI Nails] ${purposeLabels[purpose]} - ${targetName}`,
+      context: `客户触达 · ${purposeLabels[purpose]} · 渠道: ${channelLabels[channel]}`,
+    });
+
+    resultDiv.innerHTML = `
+      <div style="text-align:center;padding:20px">
+        <span style="font-size:48px">✅</span>
+        <p style="color:var(--success);margin-top:10px">客户触达已通过 ${channelLabels[channel]} 发送！</p>
+        <div style="background:var(--bg-tertiary);padding:12px;border-radius:8px;margin-top:10px;text-align:left">
+          <div style="font-size:11px;color:var(--text-secondary)">目标: ${targetName} · 目的: ${purposeLabels[purpose]}</div>
+          <div style="font-size:11px;color:var(--text-secondary);margin-top:4px">渠道: ${channelLabels[channel]} · 状态: 已发送</div>
+          <pre style="margin-top:8px;font-size:11px;overflow-x:auto;max-height:120px">${JSON.stringify(result, null, 2)}</pre>
+        </div>
+      </div>`;
+    showToast('✅ 客户触达成功！', 'success');
+  } catch (err) {
+    let msg = '触达失败';
+    if (err.message.includes('REVOR_KEY_INVALID')) msg = 'API Key 无效';
+    resultDiv.innerHTML = `<div style="text-align:center;padding:20px"><span style="font-size:48px">❌</span><p style="color:var(--danger);margin-top:10px">${msg}</p><p style="color:var(--text-tertiary);font-size:11px">${err.message}</p></div>`;
+    showToast('❌ ' + msg, 'error');
+  }
 }
 
 // ============ 创作舱 · 一键添加生图 Skill ============

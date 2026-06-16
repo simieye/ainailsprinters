@@ -1771,23 +1771,83 @@ html[dir="rtl"] .lang-dropdown {
 <div class="content-page" id="page-admin">
 <div style="margin-bottom:16px">
   <h2 style="font-size:22px;margin:0 0 4px">⚙ 管理后台</h2>
-  <p style="color:var(--text-secondary);margin:0">订单管理 · 物流管理 · 库存管理</p>
+  <p style="color:var(--text-secondary);margin:0">客户管理 · 订单管理 · 物流管理 · 库存管理</p>
 </div>
 <div class="stat-grid" style="margin-bottom:20px">
-<div class="stat-card"><div class="stat-label">总用户数</div><div class="stat-value">12,847</div><div class="stat-change up">▲ 8%</div></div>
-<div class="stat-card"><div class="stat-label">今日订单</div><div class="stat-value">384</div><div class="stat-change up">▲ 15%</div></div>
+<div class="stat-card"><div class="stat-label">总客户数</div><div class="stat-value" id="admin-total-customers">12,847</div><div class="stat-change up">▲ 8%</div></div>
+<div class="stat-card"><div class="stat-label">今日订单</div><div class="stat-value" id="admin-today-orders">384</div><div class="stat-change up">▲ 15%</div></div>
 <div class="stat-card"><div class="stat-label">营收 (本月)</div><div class="stat-value">¥847K</div><div class="stat-change up">▲ 22%</div></div>
-<div class="stat-card"><div class="stat-label">待发货</div><div class="stat-value">56</div><div class="stat-change down">▼ 3%</div></div>
-<div class="stat-card"><div class="stat-label">库存预警</div><div class="stat-value">12</div><div class="stat-change down">⚠ 需关注</div></div>
+<div class="stat-card"><div class="stat-label">待发货</div><div class="stat-value" id="admin-pending-ship">56</div><div class="stat-change down">▼ 3%</div></div>
+<div class="stat-card"><div class="stat-label">库存预警</div><div class="stat-value" id="admin-stock-alert">12</div><div class="stat-change down">⚠ 需关注</div></div>
 </div>
 <!-- 管理后台 Tab 切换 -->
-<div class="admin-tabs" style="display:flex;gap:0;margin-bottom:16px;border-bottom:2px solid var(--border)">
-  <button class="admin-tab active" onclick="switchAdminTab('orders',this)" style="padding:10px 20px;border:none;background:none;cursor:pointer;font-size:14px;color:var(--accent);border-bottom:2px solid var(--accent);margin-bottom:-2px;font-weight:700">📦 订单管理</button>
-  <button class="admin-tab" onclick="switchAdminTab('logistics',this)" style="padding:10px 20px;border:none;background:none;cursor:pointer;font-size:14px;color:var(--text-secondary)">🚚 物流管理</button>
-  <button class="admin-tab" onclick="switchAdminTab('inventory',this)" style="padding:10px 20px;border:none;background:none;cursor:pointer;font-size:14px;color:var(--text-secondary)">📊 库存管理</button>
+<div class="admin-tabs" style="display:flex;gap:0;margin-bottom:16px;border-bottom:2px solid var(--border);overflow-x:auto">
+  <button class="admin-tab active" onclick="switchAdminTab('customers',this)" style="padding:10px 20px;border:none;background:none;cursor:pointer;font-size:14px;color:var(--accent);border-bottom:2px solid var(--accent);margin-bottom:-2px;font-weight:700;white-space:nowrap">👥 客户管理</button>
+  <button class="admin-tab" onclick="switchAdminTab('orders',this)" style="padding:10px 20px;border:none;background:none;cursor:pointer;font-size:14px;color:var(--text-secondary);white-space:nowrap">📦 订单管理</button>
+  <button class="admin-tab" onclick="switchAdminTab('logistics',this)" style="padding:10px 20px;border:none;background:none;cursor:pointer;font-size:14px;color:var(--text-secondary);white-space:nowrap">🚚 物流管理</button>
+  <button class="admin-tab" onclick="switchAdminTab('inventory',this)" style="padding:10px 20px;border:none;background:none;cursor:pointer;font-size:14px;color:var(--text-secondary);white-space:nowrap">📊 库存管理</button>
 </div>
-<!-- 订单管理面板 -->
-<div id="admin-orders-panel">
+
+<!-- ===== 客户管理面板 ===== -->
+<div id="admin-customers-panel">
+  <div class="card" style="margin-bottom:16px">
+    <div class="card-header">
+      <div class="card-title">👥 客户管理</div>
+      <div style="display:flex;gap:8px">
+        <select class="form-input" style="width:auto;padding:4px 8px;font-size:12px" onchange="filterAdminCustomers(this.value)">
+          <option value="all">全部类型</option>
+          <option value="企业">企业客户</option>
+          <option value="个人">个人客户</option>
+          <option value="VIP">VIP客户</option>
+        </select>
+        <input class="form-input" style="width:180px;padding:4px 8px;font-size:12px" placeholder="🔍 搜索客户名称/手机..." oninput="searchAdminCustomers(this.value)">
+        <button class="btn btn-sm btn-accent" onclick="showCustomerForm()">+ 添加客户</button>
+      </div>
+    </div>
+    <div style="overflow-x:auto">
+    <table class="admin-table"><thead><tr><th>客户ID</th><th>客户名称</th><th>类型</th><th>联系人</th><th>手机号</th><th>邮箱</th><th>地址</th><th>累计消费</th><th>注册时间</th><th>操作</th></tr></thead><tbody id="admin-customers-tbody">
+    </tbody></table>
+    </div>
+    <div style="padding:12px;display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--text-secondary)">
+      <span id="admin-customers-count">共 0 位客户</span>
+      <div style="display:flex;gap:4px">
+        <button class="btn btn-xs btn-secondary" onclick="adminCustomerPage(-1)">◀ 上一页</button>
+        <span style="padding:4px 8px" id="admin-customers-page">第 1/1 页</span>
+        <button class="btn btn-xs btn-secondary" onclick="adminCustomerPage(1)">下一页 ▶</button>
+      </div>
+    </div>
+  </div>
+  <!-- 客户表单弹窗 -->
+  <div id="customer-form-overlay" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.7);z-index:1000;display:none;align-items:center;justify-content:center">
+    <div style="background:var(--bg-secondary);border-radius:var(--radius-lg);padding:24px;width:520px;max-height:80vh;overflow-y:auto;border:1px solid var(--border)">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+        <h3 style="margin:0" id="customer-form-title">添加客户</h3>
+        <button class="btn btn-xs btn-secondary" onclick="hideCustomerForm()">✕</button>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <div><label style="font-size:12px;color:var(--text-secondary)">客户名称 *</label><input class="form-input" id="cf-name" placeholder="公司/个人名称" style="width:100%;box-sizing:border-box"></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <div><label style="font-size:12px;color:var(--text-secondary)">客户类型 *</label><select class="form-input" id="cf-type" style="width:100%"><option value="企业">企业客户</option><option value="个人">个人客户</option><option value="VIP">VIP客户</option></select></div>
+          <div><label style="font-size:12px;color:var(--text-secondary)">联系人 *</label><input class="form-input" id="cf-contact" placeholder="联系人姓名" style="width:100%;box-sizing:border-box"></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <div><label style="font-size:12px;color:var(--text-secondary)">手机号 *</label><input class="form-input" id="cf-phone" placeholder="11位手机号" style="width:100%;box-sizing:border-box"></div>
+          <div><label style="font-size:12px;color:var(--text-secondary)">邮箱</label><input class="form-input" id="cf-email" placeholder="email@example.com" style="width:100%;box-sizing:border-box"></div>
+        </div>
+        <div><label style="font-size:12px;color:var(--text-secondary)">地址</label><input class="form-input" id="cf-address" placeholder="详细地址" style="width:100%;box-sizing:border-box"></div>
+        <div><label style="font-size:12px;color:var(--text-secondary)">备注</label><textarea class="form-input" id="cf-note" rows="2" placeholder="备注信息" style="width:100%;box-sizing:border-box;resize:vertical"></textarea></div>
+        <input type="hidden" id="cf-edit-id" value="">
+      </div>
+      <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px">
+        <button class="btn btn-secondary btn-sm" onclick="hideCustomerForm()">取消</button>
+        <button class="btn btn-accent btn-sm" onclick="saveCustomer()">保存</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 订单管理面板 ===== -->
+<div id="admin-orders-panel" style="display:none">
   <div class="card" style="margin-bottom:16px">
     <div class="card-header">
       <div class="card-title">📦 订单管理</div>
@@ -1801,123 +1861,568 @@ html[dir="rtl"] .lang-dropdown {
           <option value="cancelled">已取消</option>
         </select>
         <input class="form-input" style="width:180px;padding:4px 8px;font-size:12px" placeholder="🔍 搜索订单号/用户..." oninput="searchAdminOrders(this.value)">
+        <button class="btn btn-sm btn-accent" onclick="showOrderForm()">+ 新建订单</button>
       </div>
     </div>
     <div style="overflow-x:auto">
-    <table class="admin-table"><thead><tr><th>订单号</th><th>用户</th><th>商品</th><th>金额</th><th>类型</th><th>时间</th><th>状态</th><th>操作</th></tr></thead><tbody>
-    <tr><td>#AN20260616-001</td><td>蝶变美甲</td><td>AI美甲机 Pro</td><td>¥29,900</td><td>设备</td><td>10分钟前</td><td><span class="tag tag-success">已完成</span></td><td><button class="btn btn-xs btn-secondary" onclick="showToast('订单详情: 蝶变美甲 · AI美甲机 Pro · ¥29,900')">详情</button></td></tr>
-    <tr><td>#AN20260616-002</td><td>花漾工作室</td><td>AI美甲机 Pro x2</td><td>¥59,800</td><td>设备</td><td>1小时前</td><td><span class="tag tag-warning">待发货</span></td><td><button class="btn btn-xs btn-primary" onclick="showToast('已生成发货单，待仓库确认','success')">发货</button><button class="btn btn-xs btn-secondary" style="margin-left:4px">详情</button></td></tr>
-    <tr><td>#AN20260616-003</td><td>极简美学</td><td>企业订阅年费</td><td>¥3,588</td><td>订阅</td><td>2小时前</td><td><span class="tag tag-success">已完成</span></td><td><button class="btn btn-xs btn-secondary">详情</button></td></tr>
-    <tr><td>#AN20260616-004</td><td>指尖艺术</td><td>墨水套装 x5</td><td>¥1,495</td><td>耗材</td><td>3小时前</td><td><span class="tag tag-info">运输中</span></td><td><button class="btn btn-xs btn-secondary">物流</button><button class="btn btn-xs btn-secondary" style="margin-left:4px">详情</button></td></tr>
-    <tr><td>#AN20260616-005</td><td>臻美坊</td><td>AI美甲机 Lite</td><td>¥19,900</td><td>设备</td><td>5小时前</td><td><span class="tag tag-danger">风控中</span></td><td><button class="btn btn-xs btn-success" onclick="showToast('风控已释放','success')">释放</button><button class="btn btn-xs btn-danger" style="margin-left:4px">拒绝</button></td></tr>
-    <tr><td>#AN20260616-006</td><td>user_8f3a2</td><td>个人订阅月费</td><td>¥299</td><td>订阅</td><td>6小时前</td><td><span class="tag tag-muted">已取消</span></td><td><button class="btn btn-xs btn-secondary">详情</button></td></tr>
+    <table class="admin-table"><thead><tr><th>订单号</th><th>客户</th><th>商品</th><th>金额</th><th>类型</th><th>时间</th><th>状态</th><th>同步</th><th>操作</th></tr></thead><tbody id="admin-orders-tbody">
     </tbody></table>
     </div>
     <div style="padding:12px;display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--text-secondary)">
-      <span>共 186 条订单 · 第 1/32 页</span>
+      <span id="admin-orders-count">共 0 条订单</span>
       <div style="display:flex;gap:4px">
-        <button class="btn btn-xs btn-secondary" disabled>◀ 上一页</button>
-        <button class="btn btn-xs btn-accent">1</button>
-        <button class="btn btn-xs btn-secondary">2</button>
-        <button class="btn btn-xs btn-secondary">3</button>
-        <button class="btn btn-xs btn-secondary">下一页 ▶</button>
+        <button class="btn btn-xs btn-secondary" onclick="adminOrderPage(-1)">◀ 上一页</button>
+        <span style="padding:4px 8px" id="admin-orders-page-num">第 1/1 页</span>
+        <button class="btn btn-xs btn-secondary" onclick="adminOrderPage(1)">下一页 ▶</button>
+      </div>
+    </div>
+  </div>
+  <!-- 实时同步状态 -->
+  <div class="card" style="margin-bottom:16px">
+    <div class="card-header"><div class="card-title">🔄 网站订单同步</div></div>
+    <div style="padding:16px;display:flex;align-items:center;gap:12px">
+      <div style="width:12px;height:12px;border-radius:50%;background:var(--success);animation:pulse 2s infinite" id="sync-indicator"></div>
+      <div>
+        <div style="font-weight:600;font-size:14px">实时同步运行中</div>
+        <div style="font-size:12px;color:var(--text-secondary)">最后同步: <span id="last-sync-time">刚刚</span> · 已同步 <span id="synced-orders-count">186</span> 条网站订单</div>
+      </div>
+      <button class="btn btn-sm btn-accent" style="margin-left:auto" onclick="syncOrdersNow()">🔄 立即同步</button>
+      <button class="btn btn-sm btn-secondary" onclick="showToast('同步间隔: 30秒 · 同步来源: ainailsprinter.lovable.app','info')">⚙ 配置</button>
+    </div>
+  </div>
+  <!-- 订单表单弹窗 -->
+  <div id="order-form-overlay" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.7);z-index:1000;align-items:center;justify-content:center">
+    <div style="background:var(--bg-secondary);border-radius:var(--radius-lg);padding:24px;width:520px;max-height:80vh;overflow-y:auto;border:1px solid var(--border)">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+        <h3 style="margin:0" id="order-form-title">新建订单</h3>
+        <button class="btn btn-xs btn-secondary" onclick="hideOrderForm()">✕</button>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <div><label style="font-size:12px;color:var(--text-secondary)">选择客户 *</label><select class="form-input" id="of-customer" style="width:100%"><option value="">请选择客户</option></select></div>
+        <div><label style="font-size:12px;color:var(--text-secondary)">商品名称 *</label><input class="form-input" id="of-product" placeholder="如: AI美甲机 Pro" style="width:100%;box-sizing:border-box"></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <div><label style="font-size:12px;color:var(--text-secondary)">金额 *</label><input class="form-input" id="of-amount" type="number" placeholder="¥" style="width:100%;box-sizing:border-box"></div>
+          <div><label style="font-size:12px;color:var(--text-secondary)">订单类型</label><select class="form-input" id="of-type" style="width:100%"><option value="设备">设备</option><option value="耗材">耗材</option><option value="订阅">订阅</option><option value="配件">配件</option></select></div>
+        </div>
+        <div><label style="font-size:12px;color:var(--text-secondary)">订单状态</label><select class="form-input" id="of-status" style="width:100%"><option value="pending">待发货</option><option value="completed">已完成</option><option value="shipped">运输中</option><option value="risk">风控中</option><option value="cancelled">已取消</option></select></div>
+        <div><label style="font-size:12px;color:var(--text-secondary)">备注</label><textarea class="form-input" id="of-note" rows="2" placeholder="订单备注" style="width:100%;box-sizing:border-box;resize:vertical"></textarea></div>
+        <input type="hidden" id="of-edit-id" value="">
+      </div>
+      <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px">
+        <button class="btn btn-secondary btn-sm" onclick="hideOrderForm()">取消</button>
+        <button class="btn btn-accent btn-sm" onclick="saveOrder()">保存订单</button>
       </div>
     </div>
   </div>
 </div>
-<!-- 物流管理面板 -->
+
+<!-- ===== 物流管理面板 ===== -->
 <div id="admin-logistics-panel" style="display:none">
+  <!-- 运单跟踪列表 -->
   <div class="card" style="margin-bottom:16px">
     <div class="card-header">
       <div class="card-title">🚚 物流管理</div>
       <div style="display:flex;gap:8px">
-        <select class="form-input" style="width:auto;padding:4px 8px;font-size:12px">
-          <option>全部状态</option>
-          <option>待揽件</option>
-          <option>运输中</option>
-          <option>已签收</option>
-          <option>异常</option>
+        <select class="form-input" style="width:auto;padding:4px 8px;font-size:12px" onchange="filterAdminLogistics(this.value)">
+          <option value="all">全部状态</option>
+          <option value="待揽件">待揽件</option>
+          <option value="运输中">运输中</option>
+          <option value="已签收">已签收</option>
+          <option value="异常">异常</option>
         </select>
-        <input class="form-input" style="width:180px;padding:4px 8px;font-size:12px" placeholder="🔍 搜索运单号...">
+        <input class="form-input" style="width:180px;padding:4px 8px;font-size:12px" placeholder="🔍 搜索运单号..." oninput="searchAdminLogistics(this.value)">
       </div>
     </div>
     <div style="overflow-x:auto">
-    <table class="admin-table"><thead><tr><th>运单号</th><th>关联订单</th><th>收件人</th><th>承运商</th><th>发出时间</th><th>预计到达</th><th>状态</th><th>操作</th></tr></thead><tbody>
-    <tr><td>SF20260616001</td><td>#AN20260615-008</td><td>蝶变美甲 · 张女士</td><td>顺丰速运</td><td>2026-06-15</td><td>2026-06-17</td><td><span class="tag tag-success">已签收</span></td><td><button class="btn btn-xs btn-secondary">轨迹</button></td></tr>
-    <tr><td>JD20260616002</td><td>#AN20260616-002</td><td>花漾工作室 · 李经理</td><td>京东物流</td><td>—</td><td>—</td><td><span class="tag tag-warning">待揽件</span></td><td><button class="btn btn-xs btn-primary">打印面单</button></td></tr>
-    <tr><td>SF20260616003</td><td>#AN20260616-004</td><td>指尖艺术 · 王店长</td><td>顺丰速运</td><td>2026-06-16</td><td>2026-06-18</td><td><span class="tag tag-info">运输中</span></td><td><button class="btn btn-xs btn-secondary">轨迹</button></td></tr>
-    <tr><td>YT20260615004</td><td>#AN20260614-012</td><td>臻美坊 · 赵总</td><td>圆通速递</td><td>2026-06-14</td><td>2026-06-16</td><td><span class="tag tag-danger">异常</span></td><td><button class="btn btn-xs btn-warning">处理</button><button class="btn btn-xs btn-secondary" style="margin-left:4px">轨迹</button></td></tr>
+    <table class="admin-table"><thead><tr><th>运单号</th><th>关联订单</th><th>收件人</th><th>承运商</th><th>发出时间</th><th>预计到达</th><th>状态</th><th>操作</th></tr></thead><tbody id="admin-logistics-tbody">
     </tbody></table>
     </div>
     <div style="padding:12px;font-size:12px;color:var(--text-secondary)">
-      <span>共 47 条物流记录 · 异常运单 3 条需处理</span>
+      <span id="admin-logistics-count">共 0 条物流记录</span>
     </div>
   </div>
+
+  <!-- ===== Shippo 跨境物流比价与面单平台 ===== -->
+  <div class="card" style="margin-bottom:16px;border:2px solid var(--accent);background:linear-gradient(135deg, rgba(0,180,255,0.03), rgba(0,220,180,0.04))">
+    <div class="card-header" style="border-bottom:1px solid var(--accent)">
+      <div style="display:flex;align-items:center;gap:10px">
+        <span style="font-size:24px">🌐</span>
+        <div>
+          <div class="card-title" style="font-size:16px;color:var(--accent)">Shippo 跨境物流比价 & 面单平台</div>
+          <div style="font-size:11px;color:var(--text-secondary)">Powered by goshippo.com · 全球 40+ 承运商 · 统一 API 集成</div>
+        </div>
+        <span class="tag tag-accent" style="margin-left:auto;font-size:11px;padding:4px 10px">⚡ 已集成</span>
+      </div>
+    </div>
+    <div style="padding:16px;display:flex;flex-direction:column;gap:16px">
+
+      <!-- Shippo MCP 连接状态 -->
+      <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--bg-tertiary);border-radius:var(--radius-sm)">
+        <div style="width:10px;height:10px;border-radius:50%;background:var(--success);animation:pulse 2s infinite" id="shippo-status-dot"></div>
+        <div>
+          <div style="font-weight:600;font-size:13px">Shippo MCP Server 已连接</div>
+          <div style="font-size:11px;color:var(--text-secondary)">端点: mcp.shippo.com · 模式: <span id="shippo-mode-badge">测试模式</span> · API版本: 2018-02-08</div>
+        </div>
+        <div style="margin-left:auto;display:flex;gap:6px">
+          <button class="btn btn-xs btn-accent" onclick="configureShippoMCP()">⚙ MCP 配置</button>
+          <button class="btn btn-xs btn-secondary" onclick="window.open('https://apps.goshippo.com/orders','_blank')">↗ 打开 Shippo 面板</button>
+        </div>
+      </div>
+
+      <!-- Shippo 功能卡片 -->
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px">
+        <!-- 比价 -->
+        <div style="padding:14px;background:var(--bg-tertiary);border-radius:var(--radius-sm);border-left:3px solid var(--accent);cursor:pointer" onclick="showShippoRateForm()">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+            <span style="font-size:22px">💰</span>
+            <div style="font-weight:700;font-size:14px">跨境比价</div>
+          </div>
+          <div style="font-size:11px;color:var(--text-secondary);line-height:1.5">40+ 国际承运商实时比价<br>DHL / FedEx / UPS / USPS</div>
+          <button class="btn btn-xs btn-accent" style="margin-top:10px;width:100%">📊 开始比价</button>
+        </div>
+        <!-- 面单 -->
+        <div style="padding:14px;background:var(--bg-tertiary);border-radius:var(--radius-sm);border-left:3px solid var(--success);cursor:pointer" onclick="showShippoLabelForm()">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+            <span style="font-size:22px">🏷️</span>
+            <div style="font-weight:700;font-size:14px">生成面单</div>
+          </div>
+          <div style="font-size:11px;color:var(--text-secondary);line-height:1.5">电子面单即时生成<br>PDF / PNG / ZPL 格式</div>
+          <button class="btn btn-xs btn-accent" style="margin-top:10px;width:100%">🖨️ 生成面单</button>
+        </div>
+        <!-- 追踪 -->
+        <div style="padding:14px;background:var(--bg-tertiary);border-radius:var(--radius-sm);border-left:3px solid var(--info);cursor:pointer" onclick="showShippoTracking()">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+            <span style="font-size:22px">📍</span>
+            <div style="font-weight:700;font-size:14px">包裹追踪</div>
+          </div>
+          <div style="font-size:11px;color:var(--text-secondary);line-height:1.5">实时国际包裹追踪<br>多承运商统一查询</div>
+          <button class="btn btn-xs btn-accent" style="margin-top:10px;width:100%">🔍 追踪包裹</button>
+        </div>
+        <!-- 清关 -->
+        <div style="padding:14px;background:var(--bg-tertiary);border-radius:var(--radius-sm);border-left:3px solid var(--warning);cursor:pointer" onclick="showShippoCustoms()">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+            <span style="font-size:22px">📋</span>
+            <div style="font-weight:700;font-size:14px">海关申报</div>
+          </div>
+          <div style="font-size:11px;color:var(--text-secondary);line-height:1.5">国际运输海关文件<br>HS编码/原产地/价值</div>
+          <button class="btn btn-xs btn-accent" style="margin-top:10px;width:100%">📝 创建申报</button>
+        </div>
+      </div>
+
+      <!-- 最近比价结果 -->
+      <div style="padding:12px;background:var(--bg-tertiary);border-radius:var(--radius-sm)">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+          <div style="font-weight:700;font-size:13px">📊 最近比价结果</div>
+          <span style="font-size:11px;color:var(--text-secondary)" id="shippo-last-rate-time">尚未比价</span>
+        </div>
+        <div id="shippo-rate-results" style="display:flex;flex-direction:column;gap:8px">
+          <div style="text-align:center;padding:20px;color:var(--text-tertiary);font-size:13px">
+            👆 点击「跨境比价」输入起运地和目的地，获取多家承运商实时报价
+          </div>
+        </div>
+      </div>
+
+      <!-- 支持的国际承运商 -->
+      <div>
+        <div style="font-weight:700;font-size:13px;margin-bottom:10px">🌍 支持的国际承运商</div>
+        <div style="display:flex;flex-wrap:wrap;gap:8px" id="shippo-carrier-badges">
+          <span class="tag tag-accent">DHL Express</span>
+          <span class="tag tag-accent">FedEx</span>
+          <span class="tag tag-accent">UPS</span>
+          <span class="tag tag-accent">USPS</span>
+          <span class="tag tag-success">DHL eCommerce</span>
+          <span class="tag tag-success">APC Postal</span>
+          <span class="tag tag-success">Asendia</span>
+          <span class="tag tag-info">Deutsche Post</span>
+          <span class="tag tag-info">Canada Post</span>
+          <span class="tag tag-info">Australia Post</span>
+          <span class="tag tag-info">Royal Mail</span>
+          <span class="tag tag-info">La Poste</span>
+          <span class="tag tag-secondary">Sendle</span>
+          <span class="tag tag-secondary">Ontrac</span>
+          <span class="tag tag-secondary">+30+ 更多</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 国内快递服务商 API/MCP 接口设置 ===== -->
+  <div class="card" style="margin-bottom:16px">
+    <div class="card-header"><div class="card-title">🔌 国内快递服务商 API / MCP 接口设置</div></div>
+    <div style="padding:16px;display:flex;flex-direction:column;gap:12px">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div style="padding:12px;background:var(--bg-tertiary);border-radius:var(--radius-sm);border-left:3px solid var(--accent)">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+            <span style="font-size:20px">📦</span>
+            <div><div style="font-weight:700;font-size:14px">顺丰速运</div><div style="font-size:11px;color:var(--text-secondary)">SF Express</div></div>
+            <span class="tag tag-success" style="margin-left:auto;font-size:11px">已连接</span>
+          </div>
+          <div style="font-size:12px;color:var(--text-secondary);margin-bottom:8px">API Key: sf_****a1b2 · MCP端点: mcp.sf-express.com</div>
+          <div style="display:flex;gap:4px">
+            <button class="btn btn-xs btn-secondary" onclick="showToast('顺丰API配置面板','info')">⚙ API设置</button>
+            <button class="btn btn-xs btn-accent" onclick="showToast('顺丰MCP接口已激活 · 支持实时轨迹查询/电子面单/运费预估','success')">🔗 MCP配置</button>
+          </div>
+        </div>
+        <div style="padding:12px;background:var(--bg-tertiary);border-radius:var(--radius-sm);border-left:3px solid var(--accent)">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+            <span style="font-size:20px">🚛</span>
+            <div><div style="font-weight:700;font-size:14px">京东物流</div><div style="font-size:11px;color:var(--text-secondary)">JD Logistics</div></div>
+            <span class="tag tag-success" style="margin-left:auto;font-size:11px">已连接</span>
+          </div>
+          <div style="font-size:12px;color:var(--text-secondary);margin-bottom:8px">API Key: jd_****c3d4 · MCP端点: mcp.jdl.com</div>
+          <div style="display:flex;gap:4px">
+            <button class="btn btn-xs btn-secondary" onclick="showToast('京东物流API配置面板','info')">⚙ API设置</button>
+            <button class="btn btn-xs btn-accent" onclick="showToast('京东MCP接口已激活','success')">🔗 MCP配置</button>
+          </div>
+        </div>
+        <div style="padding:12px;background:var(--bg-tertiary);border-radius:var(--radius-sm);border-left:3px solid var(--warning)">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+            <span style="font-size:20px">📬</span>
+            <div><div style="font-weight:700;font-size:14px">圆通速递</div><div style="font-size:11px;color:var(--text-secondary)">YTO Express</div></div>
+            <span class="tag tag-warning" style="margin-left:auto;font-size:11px">待配置</span>
+          </div>
+          <div style="font-size:12px;color:var(--text-secondary);margin-bottom:8px">API Key: 未设置 · MCP端点: 未配置</div>
+          <div style="display:flex;gap:4px">
+            <button class="btn btn-xs btn-accent" onclick="showToast('请输入圆通快递API Key','info')">⚙ 配置API</button>
+            <button class="btn btn-xs btn-accent" onclick="showToast('请输入圆通MCP服务端点URL','info')">🔗 配置MCP</button>
+          </div>
+        </div>
+        <div style="padding:12px;background:var(--bg-tertiary);border-radius:var(--radius-sm);border-left:3px solid var(--warning)">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+            <span style="font-size:20px">📮</span>
+            <div><div style="font-weight:700;font-size:14px">中通快递</div><div style="font-size:11px;color:var(--text-secondary)">ZTO Express</div></div>
+            <span class="tag tag-warning" style="margin-left:auto;font-size:11px">待配置</span>
+          </div>
+          <div style="font-size:12px;color:var(--text-secondary);margin-bottom:8px">API Key: 未设置 · MCP端点: 未配置</div>
+          <div style="display:flex;gap:4px">
+            <button class="btn btn-xs btn-accent" onclick="showToast('请输入中通快递API Key','info')">⚙ 配置API</button>
+            <button class="btn btn-xs btn-accent" onclick="showToast('请输入中通MCP服务端点URL','info')">🔗 配置MCP</button>
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;padding:10px 14px;background:rgba(0,200,200,0.06);border-radius:var(--radius-sm)">
+        <span style="font-size:14px">➕</span>
+        <span style="font-size:13px;color:var(--text-secondary)">添加自定义快递服务商</span>
+        <input class="form-input" id="custom-carrier-name" placeholder="服务商名称" style="width:140px;padding:4px 8px;font-size:12px;margin-left:8px">
+        <input class="form-input" id="custom-carrier-apikey" placeholder="API Key" style="width:140px;padding:4px 8px;font-size:12px">
+        <input class="form-input" id="custom-carrier-mcp" placeholder="MCP端点URL" style="width:180px;padding:4px 8px;font-size:12px">
+        <button class="btn btn-xs btn-accent" onclick="addCustomCarrier()">添加</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 待发货清单 -->
   <div class="card">
     <div class="card-header"><div class="card-title">📋 待发货清单</div></div>
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;padding:16px">
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;padding:16px" id="pending-shipment-grid">
       <div style="padding:12px;background:var(--bg-tertiary);border-radius:var(--radius-sm);border-left:3px solid var(--warning)">
         <div style="font-weight:700;font-size:14px">花漾工作室</div>
         <div style="font-size:12px;color:var(--text-secondary)">AI美甲机 Pro x2 · ¥59,800</div>
         <div style="font-size:11px;color:var(--text-tertiary);margin-top:4px">仓库: 深圳 · 优先级: 高</div>
-        <button class="btn btn-xs btn-accent" style="margin-top:8px">立即发货</button>
+        <button class="btn btn-xs btn-accent" style="margin-top:8px" onclick="showShippoLabelForm()">🌐 Shippo发货</button>
       </div>
       <div style="padding:12px;background:var(--bg-tertiary);border-radius:var(--radius-sm);border-left:3px solid var(--warning)">
         <div style="font-weight:700;font-size:14px">璀璨美甲</div>
         <div style="font-size:12px;color:var(--text-secondary)">墨水套装 x10 · ¥2,990</div>
         <div style="font-size:11px;color:var(--text-tertiary);margin-top:4px">仓库: 上海 · 优先级: 中</div>
-        <button class="btn btn-xs btn-accent" style="margin-top:8px">立即发货</button>
+        <button class="btn btn-xs btn-accent" style="margin-top:8px" onclick="showShippoRateForm()">💰 比价发货</button>
       </div>
       <div style="padding:12px;background:var(--bg-tertiary);border-radius:var(--radius-sm);border-left:3px solid var(--warning)">
         <div style="font-weight:700;font-size:14px">指尖艺术</div>
         <div style="font-size:12px;color:var(--text-secondary)">AI美甲机 Lite · ¥19,900</div>
         <div style="font-size:11px;color:var(--text-tertiary);margin-top:4px">仓库: 成都 · 优先级: 中</div>
-        <button class="btn btn-xs btn-accent" style="margin-top:8px">立即发货</button>
+        <button class="btn btn-xs btn-accent" style="margin-top:8px" onclick="showShippoLabelForm()">🌐 Shippo发货</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Shippo 跨境比价弹窗 -->
+  <div id="shippo-rate-overlay" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.7);z-index:1000;align-items:center;justify-content:center">
+    <div style="background:var(--bg-secondary);border-radius:var(--radius-lg);padding:24px;width:620px;max-height:85vh;overflow-y:auto;border:2px solid var(--accent)">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+        <h3 style="margin:0;display:flex;align-items:center;gap:8px"><span>💰</span> Shippo 跨境运费比价</h3>
+        <button class="btn btn-xs btn-secondary" onclick="hideShippoRateForm()">✕</button>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <div style="padding:10px;background:rgba(0,180,255,0.06);border-radius:var(--radius-sm);font-size:12px;color:var(--text-secondary)">
+          💡 Shippo 支持 40+ 国际承运商实时比价，输入起运地和目的地自动获取所有可用运费报价
+        </div>
+        <div style="font-weight:600;font-size:13px;color:var(--accent)">📮 起运地 (From)</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+          <div><label style="font-size:11px;color:var(--text-secondary)">国家/地区 *</label>
+          <select class="form-input" id="shippo-from-country" style="width:100%;box-sizing:border-box" onchange="updateShippoFromCountry()">
+            <option value="CN">🇨🇳 中国 China</option><option value="US">🇺🇸 美国 USA</option><option value="GB">🇬🇧 英国 UK</option><option value="DE">🇩🇪 德国 Germany</option><option value="FR">🇫🇷 法国 France</option><option value="JP">🇯🇵 日本 Japan</option><option value="KR">🇰🇷 韩国 South Korea</option><option value="AU">🇦🇺 澳大利亚 Australia</option><option value="CA">🇨🇦 加拿大 Canada</option><option value="SG">🇸🇬 新加坡 Singapore</option>
+          </select></div>
+          <div><label style="font-size:11px;color:var(--text-secondary)">城市</label><input class="form-input" id="shippo-from-city" placeholder="如: 深圳" value="深圳" style="width:100%;box-sizing:border-box"></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+          <div><label style="font-size:11px;color:var(--text-secondary)">地址</label><input class="form-input" id="shippo-from-street" placeholder="街道地址" value="南山区科技园" style="width:100%;box-sizing:border-box"></div>
+          <div><label style="font-size:11px;color:var(--text-secondary)">邮编</label><input class="form-input" id="shippo-from-zip" placeholder="邮编" value="518000" style="width:100%;box-sizing:border-box"></div>
+          <div><label style="font-size:11px;color:var(--text-secondary)">省/州</label><input class="form-input" id="shippo-from-state" placeholder="如: Guangdong" value="Guangdong" style="width:100%;box-sizing:border-box"></div>
+        </div>
+        <div style="font-weight:600;font-size:13px;color:var(--accent);margin-top:4px">📬 目的地 (To)</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+          <div><label style="font-size:11px;color:var(--text-secondary)">国家/地区 *</label>
+          <select class="form-input" id="shippo-to-country" style="width:100%;box-sizing:border-box">
+            <option value="US">🇺🇸 美国 USA</option><option value="GB">🇬🇧 英国 UK</option><option value="DE">🇩🇪 德国 Germany</option><option value="FR">🇫🇷 法国 France</option><option value="JP">🇯🇵 日本 Japan</option><option value="KR">🇰🇷 韩国 South Korea</option><option value="AU">🇦🇺 澳大利亚 Australia</option><option value="CA">🇨🇦 加拿大 Canada</option><option value="SG">🇸🇬 新加坡 Singapore</option><option value="CN">🇨🇳 中国 China</option>
+          </select></div>
+          <div><label style="font-size:11px;color:var(--text-secondary)">城市 *</label><input class="form-input" id="shippo-to-city" placeholder="如: Los Angeles" value="Los Angeles" style="width:100%;box-sizing:border-box"></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+          <div><label style="font-size:11px;color:var(--text-secondary)">地址 *</label><input class="form-input" id="shippo-to-street" placeholder="街道地址" value="123 Main St" style="width:100%;box-sizing:border-box"></div>
+          <div><label style="font-size:11px;color:var(--text-secondary)">邮编 *</label><input class="form-input" id="shippo-to-zip" placeholder="邮编" value="90001" style="width:100%;box-sizing:border-box"></div>
+          <div><label style="font-size:11px;color:var(--text-secondary)">省/州 *</label><input class="form-input" id="shippo-to-state" placeholder="如: CA" value="CA" style="width:100%;box-sizing:border-box"></div>
+        </div>
+        <div style="font-weight:600;font-size:13px;color:var(--accent);margin-top:4px">📦 包裹信息</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px">
+          <div><label style="font-size:11px;color:var(--text-secondary)">长(cm)</label><input class="form-input" id="shippo-length" type="number" value="30" style="width:100%;box-sizing:border-box"></div>
+          <div><label style="font-size:11px;color:var(--text-secondary)">宽(cm)</label><input class="form-input" id="shippo-width" type="number" value="25" style="width:100%;box-sizing:border-box"></div>
+          <div><label style="font-size:11px;color:var(--text-secondary)">高(cm)</label><input class="form-input" id="shippo-height" type="number" value="15" style="width:100%;box-sizing:border-box"></div>
+          <div><label style="font-size:11px;color:var(--text-secondary)">重量(kg)</label><input class="form-input" id="shippo-weight" type="number" step="0.1" value="2.5" style="width:100%;box-sizing:border-box"></div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <label style="font-size:11px;color:var(--text-secondary)">商品描述</label>
+          <input class="form-input" id="shippo-desc" placeholder="如: AI美甲机 Pro" value="AI Nail Printer Pro" style="flex:1;box-sizing:border-box">
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px">
+        <button class="btn btn-secondary btn-sm" onclick="hideShippoRateForm()">取消</button>
+        <button class="btn btn-accent btn-sm" onclick="executeShippoRateCompare()">🔍 开始比价</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Shippo 生成面单弹窗 -->
+  <div id="shippo-label-overlay" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.7);z-index:1000;align-items:center;justify-content:center">
+    <div style="background:var(--bg-secondary);border-radius:var(--radius-lg);padding:24px;width:580px;max-height:85vh;overflow-y:auto;border:2px solid var(--success)">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+        <h3 style="margin:0;display:flex;align-items:center;gap:8px"><span>🏷️</span> Shippo 生成电子面单</h3>
+        <button class="btn btn-xs btn-secondary" onclick="hideShippoLabelForm()">✕</button>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <div style="padding:10px;background:rgba(0,200,100,0.06);border-radius:var(--radius-sm);font-size:12px;color:var(--text-secondary)">
+          💡 选择之前比价的最优承运商，一键购买并生成国际运输面单（支持 PDF / PNG / ZPL 格式）
+        </div>
+        <div><label style="font-size:11px;color:var(--text-secondary)">选择承运商 *</label>
+        <select class="form-input" id="shippo-label-carrier" style="width:100%">
+          <option value="">-- 请先执行比价，然后选择承运商 --</option>
+          <option value="dhl_express">DHL Express</option>
+          <option value="fedex">FedEx International Priority</option>
+          <option value="ups">UPS Worldwide Express</option>
+          <option value="usps">USPS Priority Mail International</option>
+        </select></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+          <div><label style="font-size:11px;color:var(--text-secondary)">面单格式</label>
+          <select class="form-input" id="shippo-label-format" style="width:100%">
+            <option value="PDF">PDF (标准)</option><option value="PNG">PNG (图片)</option><option value="ZPL">ZPL (热敏打印)</option>
+          </select></div>
+          <div><label style="font-size:11px;color:var(--text-secondary)">面单尺寸</label>
+          <select class="form-input" id="shippo-label-size" style="width:100%">
+            <option value="4x6">4"x6" (标准)</option><option value="8.5x11">Letter 8.5"x11"</option><option value="A4">A4</option>
+          </select></div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <label style="font-size:11px;color:var(--text-secondary)">关联订单</label>
+          <select class="form-input" id="shippo-label-order" style="flex:1">
+            <option value="">-- 选择关联订单 --</option>
+          </select>
+        </div>
+        <div><label style="font-size:11px;color:var(--text-secondary)">备注/内部参考</label><input class="form-input" id="shippo-label-ref" placeholder="订单号或备注" style="width:100%;box-sizing:border-box"></div>
+      </div>
+      <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px">
+        <button class="btn btn-secondary btn-sm" onclick="hideShippoLabelForm()">取消</button>
+        <button class="btn btn-accent btn-sm" onclick="executeShippoCreateLabel()">🖨️ 购买并生成面单</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Shippo 包裹追踪弹窗 -->
+  <div id="shippo-tracking-overlay" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.7);z-index:1000;align-items:center;justify-content:center">
+    <div style="background:var(--bg-secondary);border-radius:var(--radius-lg);padding:24px;width:540px;max-height:85vh;overflow-y:auto;border:2px solid var(--info)">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+        <h3 style="margin:0;display:flex;align-items:center;gap:8px"><span>📍</span> Shippo 包裹追踪</h3>
+        <button class="btn btn-xs btn-secondary" onclick="hideShippoTracking()">✕</button>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <div style="padding:10px;background:rgba(0,150,255,0.06);border-radius:var(--radius-sm);font-size:12px;color:var(--text-secondary)">
+          💡 Shippo 支持统一追踪查询，输入任意支持承运商的运单号即可获取实时物流轨迹
+        </div>
+        <div><label style="font-size:11px;color:var(--text-secondary)">承运商</label>
+        <select class="form-input" id="shippo-track-carrier" style="width:100%">
+          <option value="shippo">Shippo (自动识别)</option><option value="dhl">DHL</option><option value="fedex">FedEx</option><option value="ups">UPS</option><option value="usps">USPS</option>
+        </select></div>
+        <div><label style="font-size:11px;color:var(--text-secondary)">运单号 / 追踪号 *</label>
+        <input class="form-input" id="shippo-track-number" placeholder="输入运单号，如: 1Z999AA10123456784" style="width:100%;box-sizing:border-box"></div>
+        <div id="shippo-track-result" style="display:none;padding:12px;background:var(--bg-tertiary);border-radius:var(--radius-sm)">
+          <div style="font-weight:600;font-size:13px;margin-bottom:8px">📋 追踪结果</div>
+          <div id="shippo-track-detail" style="font-size:12px"></div>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px">
+        <button class="btn btn-secondary btn-sm" onclick="hideShippoTracking()">取消</button>
+        <button class="btn btn-accent btn-sm" onclick="executeShippoTracking()">🔍 查询</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Shippo 海关申报弹窗 -->
+  <div id="shippo-customs-overlay" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.7);z-index:1000;align-items:center;justify-content:center">
+    <div style="background:var(--bg-secondary);border-radius:var(--radius-lg);padding:24px;width:580px;max-height:85vh;overflow-y:auto;border:2px solid var(--warning)">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+        <h3 style="margin:0;display:flex;align-items:center;gap:8px"><span>📋</span> Shippo 海关申报</h3>
+        <button class="btn btn-xs btn-secondary" onclick="hideShippoCustoms()">✕</button>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <div style="padding:10px;background:rgba(255,180,0,0.06);border-radius:var(--radius-sm);font-size:12px;color:var(--text-secondary)">
+          💡 国际运输必须提交海关申报，填写物品信息、HS编码、原产地和申报价值
+        </div>
+        <div style="font-weight:600;font-size:13px">📦 海关物品明细</div>
+        <div id="shippo-customs-items" style="display:flex;flex-direction:column;gap:8px">
+          <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1fr;gap:6px;align-items:end;padding:8px;background:var(--bg-tertiary);border-radius:var(--radius-sm)">
+            <div><label style="font-size:10px;color:var(--text-secondary)">物品描述</label><input class="form-input" placeholder="如: AI美甲机" value="AI Nail Printer Pro" style="width:100%;box-sizing:border-box;padding:4px 6px;font-size:11px"></div>
+            <div><label style="font-size:10px;color:var(--text-secondary)">数量</label><input class="form-input" type="number" value="1" style="width:100%;box-sizing:border-box;padding:4px 6px;font-size:11px"></div>
+            <div><label style="font-size:10px;color:var(--text-secondary)">单价(USD)</label><input class="form-input" type="number" value="2999" style="width:100%;box-sizing:border-box;padding:4px 6px;font-size:11px"></div>
+            <div><label style="font-size:10px;color:var(--text-secondary)">HS编码</label><input class="form-input" placeholder="如: 8471.41" value="8471.41" style="width:100%;box-sizing:border-box;padding:4px 6px;font-size:11px"></div>
+            <div><label style="font-size:10px;color:var(--text-secondary)">原产地</label>
+            <select class="form-input" style="width:100%;padding:4px 6px;font-size:11px"><option value="CN">🇨🇳 CN</option><option value="US">🇺🇸 US</option></select></div>
+          </div>
+        </div>
+        <button class="btn btn-xs btn-secondary" style="align-self:flex-start" onclick="addShippoCustomsItem()">+ 添加物品</button>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+          <div><label style="font-size:11px;color:var(--text-secondary)">申报类型</label>
+          <select class="form-input" id="shippo-customs-type" style="width:100%">
+            <option value="MERCHANDISE">商品 (Merchandise)</option><option value="GIFT">礼品 (Gift)</option><option value="SAMPLE">样品 (Sample)</option><option value="DOCUMENT">文件 (Document)</option><option value="RETURN">退货 (Return)</option>
+          </select></div>
+          <div><label style="font-size:11px;color:var(--text-secondary)">EEL/PFC</label>
+          <select class="form-input" id="shippo-customs-eel" style="width:100%">
+            <option value="NOEEI_30_36">NOEEI 30.36 (≤$2500)</option><option value="NOEEI_30_37a">NOEEI 30.37(a)</option><option value="ITN">ITN (需填写)</option>
+          </select></div>
+        </div>
+        <div><label style="font-size:11px;color:var(--text-secondary)">认证信息 (certify)</label>
+        <div style="display:flex;gap:8px;align-items:center;margin-top:4px">
+          <label style="font-size:12px;display:flex;align-items:center;gap:4px"><input type="checkbox" id="shippo-customs-certify" checked> 我证明信息真实准确</label>
+          <input class="form-input" id="shippo-customs-signer" placeholder="签署人姓名" value="AI TAICHI Logistics" style="flex:1;box-sizing:border-box;padding:4px 8px;font-size:11px">
+        </div></div>
+      </div>
+      <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px">
+        <button class="btn btn-secondary btn-sm" onclick="hideShippoCustoms()">取消</button>
+        <button class="btn btn-accent btn-sm" onclick="executeShippoCustoms()">📝 创建海关申报</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Shippo MCP 配置弹窗 -->
+  <div id="shippo-mcp-overlay" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.7);z-index:1000;align-items:center;justify-content:center">
+    <div style="background:var(--bg-secondary);border-radius:var(--radius-lg);padding:24px;width:520px;max-height:80vh;overflow-y:auto;border:2px solid var(--accent)">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+        <h3 style="margin:0;display:flex;align-items:center;gap:8px"><span>⚙</span> Shippo MCP 配置</h3>
+        <button class="btn btn-xs btn-secondary" onclick="hideShippoMCPConfig()">✕</button>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <div style="padding:10px;background:rgba(0,180,255,0.06);border-radius:var(--radius-sm);font-size:12px;color:var(--text-secondary)">
+          Shippo MCP Server 让 AI 助手通过自然语言与 Shippo API 交互，支持比价、购买运单、追踪包裹等功能。
+        </div>
+        <div><label style="font-size:11px;color:var(--text-secondary)">连接方式</label>
+        <select class="form-input" id="shippo-mcp-mode" style="width:100%" onchange="toggleShippoMCPFields()">
+          <option value="hosted">托管服务器 (推荐) - mcp.shippo.com</option>
+          <option value="local">本地服务器 - @shippo/shippo-mcp (npm)</option>
+        </select></div>
+        <div id="shippo-mcp-hosted-info" style="padding:12px;background:var(--bg-tertiary);border-radius:var(--radius-sm)">
+          <div style="font-weight:600;font-size:12px;margin-bottom:6px">托管服务器配置</div>
+          <div style="font-size:11px;color:var(--text-secondary);line-height:1.6">
+            服务器 URL: <code style="background:var(--bg);padding:2px 6px;border-radius:4px">https://mcp.shippo.com</code><br>
+            传输方式: 远程 MCP over HTTPS<br>
+            认证方式: Shippo OAuth 登录<br>
+            <span style="color:var(--warning)">⚠ 仅支持生产模式，购买标签会实际扣费</span>
+          </div>
+        </div>
+        <div id="shippo-mcp-local-info" style="display:none;padding:12px;background:var(--bg-tertiary);border-radius:var(--radius-sm)">
+          <div style="font-weight:600;font-size:12px;margin-bottom:6px">本地服务器配置</div>
+          <div style="font-size:11px;color:var(--text-secondary);line-height:1.6">
+            包名: <code style="background:var(--bg);padding:2px 6px;border-radius:4px">@shippo/shippo-mcp</code><br>
+            要求: Node.js v18+<br>
+          </div>
+          <div style="margin-top:8px"><label style="font-size:11px;color:var(--text-secondary)">Shippo API Token</label>
+          <input class="form-input" id="shippo-api-token" placeholder="ShippoToken shippo_test_... 或 shippo_live_..." style="width:100%;box-sizing:border-box;margin-top:4px"></div>
+        </div>
+        <div style="font-size:12px;color:var(--text-secondary);line-height:1.6">
+          <strong>Cursor 配置示例:</strong>
+          <pre style="background:var(--bg);padding:8px;border-radius:4px;font-size:11px;overflow-x:auto;margin-top:4px">{
+  "mcpServers": {
+    "shippo": {
+      "url": "https://mcp.shippo.com"
+    }
+  }
+}</pre>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px">
+        <button class="btn btn-secondary btn-sm" onclick="hideShippoMCPConfig()">取消</button>
+        <button class="btn btn-accent btn-sm" onclick="saveShippoMCPConfig()">💾 保存配置</button>
       </div>
     </div>
   </div>
 </div>
-<!-- 库存管理面板 -->
+
+<!-- ===== 库存管理面板 ===== -->
 <div id="admin-inventory-panel" style="display:none">
   <div class="stat-grid" style="margin-bottom:16px">
-    <div class="stat-card"><div class="stat-label">设备库存</div><div class="stat-value">238</div><div style="font-size:11px;color:var(--success)">库存充足</div></div>
-    <div class="stat-card"><div class="stat-label">墨水库存</div><div class="stat-value">1,250</div><div style="font-size:11px;color:var(--success)">库存充足</div></div>
-    <div class="stat-card"><div class="stat-label">配件库存</div><div class="stat-value">89</div><div style="font-size:11px;color:var(--warning)">需补货</div></div>
+    <div class="stat-card"><div class="stat-label">设备库存</div><div class="stat-value" id="inv-device-count">238</div><div style="font-size:11px;color:var(--success)">库存充足</div></div>
+    <div class="stat-card"><div class="stat-label">墨水库存</div><div class="stat-value" id="inv-ink-count">1,250</div><div style="font-size:11px;color:var(--success)">库存充足</div></div>
+    <div class="stat-card"><div class="stat-label">配件库存</div><div class="stat-value" id="inv-part-count">89</div><div style="font-size:11px;color:var(--warning)">需补货</div></div>
     <div class="stat-card"><div class="stat-label">打印纸库存</div><div class="stat-value">3,600</div><div style="font-size:11px;color:var(--success)">库存充足</div></div>
   </div>
   <div class="card" style="margin-bottom:16px">
     <div class="card-header">
       <div class="card-title">📊 库存管理</div>
       <div style="display:flex;gap:8px">
-        <select class="form-input" style="width:auto;padding:4px 8px;font-size:12px">
-          <option>全部类别</option>
-          <option>设备</option>
-          <option>墨水</option>
-          <option>配件</option>
-          <option>耗材</option>
+        <select class="form-input" style="width:auto;padding:4px 8px;font-size:12px" onchange="filterAdminInventory(this.value)">
+          <option value="all">全部类别</option>
+          <option value="设备">设备</option>
+          <option value="墨水">墨水</option>
+          <option value="配件">配件</option>
+          <option value="耗材">耗材</option>
         </select>
-        <input class="form-input" style="width:180px;padding:4px 8px;font-size:12px" placeholder="🔍 搜索商品...">
-        <button class="btn btn-sm btn-accent">+ 入库</button>
+        <input class="form-input" style="width:180px;padding:4px 8px;font-size:12px" placeholder="🔍 搜索商品..." oninput="searchAdminInventory(this.value)">
+        <button class="btn btn-sm btn-accent" onclick="showInventoryForm()">+ 添加库存</button>
       </div>
     </div>
     <div style="overflow-x:auto">
-    <table class="admin-table"><thead><tr><th>SKU</th><th>商品名称</th><th>类别</th><th>库存数量</th><th>安全库存</th><th>状态</th><th>最近入库</th><th>操作</th></tr></thead><tbody>
-    <tr><td>AN-PRO-001</td><td>AI美甲机 Pro</td><td><span class="tag tag-accent">设备</span></td><td>128</td><td>50</td><td><span class="tag tag-success">正常</span></td><td>2026-06-15</td><td><button class="btn btn-xs btn-secondary">调整</button></td></tr>
-    <tr><td>AN-LITE-001</td><td>AI美甲机 Lite</td><td><span class="tag tag-accent">设备</span></td><td>110</td><td>30</td><td><span class="tag tag-success">正常</span></td><td>2026-06-10</td><td><button class="btn btn-xs btn-secondary">调整</button></td></tr>
-    <tr><td>INK-CMYK-001</td><td>CMYK 四色墨水套装</td><td><span class="tag tag-info">墨水</span></td><td>850</td><td>200</td><td><span class="tag tag-success">正常</span></td><td>2026-06-14</td><td><button class="btn btn-xs btn-secondary">调整</button></td></tr>
-    <tr><td>INK-WHITE-001</td><td>白色底胶墨水</td><td><span class="tag tag-info">墨水</span></td><td>400</td><td>150</td><td><span class="tag tag-success">正常</span></td><td>2026-06-12</td><td><button class="btn btn-xs btn-secondary">调整</button></td></tr>
-    <tr><td>PART-NOZZLE</td><td>打印喷头</td><td><span class="tag tag-warning">配件</span></td><td><span style="color:var(--danger);font-weight:700">35</span></td><td>50</td><td><span class="tag tag-danger">库存不足</span></td><td>2026-05-20</td><td><button class="btn btn-xs btn-accent">补货</button></td></tr>
-    <tr><td>PART-BELT</td><td>传动皮带</td><td><span class="tag tag-warning">配件</span></td><td>54</td><td>30</td><td><span class="tag tag-success">正常</span></td><td>2026-06-08</td><td><button class="btn btn-xs btn-secondary">调整</button></td></tr>
+    <table class="admin-table"><thead><tr><th>SKU</th><th>商品名称</th><th>类别</th><th>库存数量</th><th>安全库存</th><th>状态</th><th>最近入库</th><th>操作</th></tr></thead><tbody id="admin-inventory-tbody">
     </tbody></table>
     </div>
     <div style="padding:12px;display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--text-secondary)">
-      <span>共 28 个 SKU · <span style="color:var(--danger)">2 个库存预警</span></span>
+      <span id="admin-inventory-count">共 0 个 SKU</span>
       <button class="btn btn-sm btn-secondary">📥 导出库存报表</button>
     </div>
   </div>
+  <!-- 库存表单弹窗 -->
+  <div id="inventory-form-overlay" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.7);z-index:1000;align-items:center;justify-content:center">
+    <div style="background:var(--bg-secondary);border-radius:var(--radius-lg);padding:24px;width:480px;max-height:80vh;overflow-y:auto;border:1px solid var(--border)">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+        <h3 style="margin:0" id="inventory-form-title">添加库存</h3>
+        <button class="btn btn-xs btn-secondary" onclick="hideInventoryForm()">✕</button>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <div><label style="font-size:12px;color:var(--text-secondary)">SKU编码 *</label><input class="form-input" id="if-sku" placeholder="如: AN-PRO-001" style="width:100%;box-sizing:border-box"></div>
+        <div><label style="font-size:12px;color:var(--text-secondary)">商品名称 *</label><input class="form-input" id="if-name" placeholder="商品名称" style="width:100%;box-sizing:border-box"></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <div><label style="font-size:12px;color:var(--text-secondary)">类别 *</label><select class="form-input" id="if-category" style="width:100%"><option value="设备">设备</option><option value="墨水">墨水</option><option value="配件">配件</option><option value="耗材">耗材</option></select></div>
+          <div><label style="font-size:12px;color:var(--text-secondary)">库存数量 *</label><input class="form-input" id="if-qty" type="number" placeholder="0" style="width:100%;box-sizing:border-box"></div>
+        </div>
+        <div><label style="font-size:12px;color:var(--text-secondary)">安全库存</label><input class="form-input" id="if-safe" type="number" placeholder="预警阈值" style="width:100%;box-sizing:border-box"></div>
+        <input type="hidden" id="if-edit-id" value="">
+      </div>
+      <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px">
+        <button class="btn btn-secondary btn-sm" onclick="hideInventoryForm()">取消</button>
+        <button class="btn btn-accent btn-sm" onclick="saveInventory()">保存</button>
+      </div>
+    </div>
+  </div>
+  <!-- 库存预警 -->
   <div class="card">
     <div class="card-header"><div class="card-title">⚠ 库存预警</div></div>
-    <div style="padding:16px;display:flex;flex-direction:column;gap:8px">
+    <div style="padding:16px;display:flex;flex-direction:column;gap:8px" id="inventory-alert-list">
       <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:rgba(255,77,77,0.08);border-radius:var(--radius-sm)">
         <div><span style="font-weight:700">打印喷头</span><span style="margin-left:8px;font-size:12px;color:var(--text-secondary)">当前 35 / 安全库存 50</span></div>
         <button class="btn btn-xs btn-accent">生成采购单</button>
@@ -1942,7 +2447,7 @@ html[dir="rtl"] .lang-dropdown {
 <div class="setting-row"><div><div class="setting-label">侧边栏自动收起</div><div class="setting-desc">鼠标离开时自动折叠侧边栏</div></div><label class="toggle-switch"><input type="checkbox"><span class="toggle-slider"></span></label></div>
 </div>
 <div class="settings-section"><h3>关于</h3>
-<div class="setting-row"><div><div class="setting-label">版本</div><div class="setting-desc">AI NAILS Desktop v4.3.0</div></div><span style="color:var(--accent);font-size:12px">已是最新</span></div>
+<div class="setting-row"><div><div class="setting-label">版本</div><div class="setting-desc">AI NAILS Desktop v4.5.0</div></div><span style="color:var(--accent);font-size:12px">已是最新</span></div>
 <div class="setting-row"><div><div class="setting-label">OpenClaw 引擎</div><div class="setting-desc">智能体编排核心</div></div><span style="font-size:12px;color:var(--text-secondary)">v2.0</span></div>
 </div>
 <div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--border)">

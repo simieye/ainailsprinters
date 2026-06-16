@@ -155,22 +155,591 @@ function navigateTo(page){
 }
 function toggleSidebar(){sidebarCollapsed=!sidebarCollapsed;document.getElementById('sidebar').classList.toggle('collapsed',sidebarCollapsed);document.querySelector('.sidebar-collapse-btn').textContent=sidebarCollapsed?'▶':'◀ 收起菜单'}
 
-// ADMIN TABS
+// ========== ADMIN TABS ==========
 function switchAdminTab(tab,btn){
   document.querySelectorAll('.admin-tab').forEach(el=>{el.style.color='var(--text-secondary)';el.style.borderBottomColor='transparent';el.style.fontWeight='400'});
   btn.style.color='var(--accent)';btn.style.borderBottomColor='var(--accent)';btn.style.fontWeight='700';
+  document.getElementById('admin-customers-panel').style.display=tab==='customers'?'block':'none';
   document.getElementById('admin-orders-panel').style.display=tab==='orders'?'block':'none';
   document.getElementById('admin-logistics-panel').style.display=tab==='logistics'?'block':'none';
   document.getElementById('admin-inventory-panel').style.display=tab==='inventory'?'block':'none';
+  if(tab==='customers')renderAdminCustomers();
+  if(tab==='orders')renderAdminOrders();
+  if(tab==='logistics')renderAdminLogistics();
+  if(tab==='inventory')renderAdminInventory();
+}
+
+// ========== 客户管理 ==========
+let adminCustomers=[{id:'C001',name:'蝶变美甲',type:'企业',contact:'张女士',phone:'138****6789',email:'zhang@butterfly.com',address:'深圳市南山区科技园',spent:'¥89,700',date:'2026-03-15',orders:3},
+{id:'C002',name:'花漾工作室',type:'企业',contact:'李经理',phone:'139****8901',email:'li@bloomstudio.cn',address:'上海市静安区南京西路',spent:'¥156,800',date:'2026-04-02',orders:5},
+{id:'C003',name:'极简美学',type:'个人',contact:'陈女士',phone:'136****2345',email:'chen@minimal.art',address:'北京市朝阳区三里屯',spent:'¥12,588',date:'2026-05-10',orders:2},
+{id:'C004',name:'指尖艺术',type:'企业',contact:'王店长',phone:'137****4567',email:'wang@fingertips.cn',address:'成都市武侯区',spent:'¥45,890',date:'2026-02-20',orders:4},
+{id:'C005',name:'臻美坊',type:'VIP',contact:'赵总',phone:'135****7890',email:'zhao@zhenmei.com',address:'杭州市西湖区',spent:'¥198,500',date:'2026-01-08',orders:8},
+{id:'C006',name:'user_8f3a2',type:'个人',contact:'刘先生',phone:'133****0123',email:'liu@email.com',address:'广州市天河区',spent:'¥2,099',date:'2026-06-01',orders:1}];
+let adminCustomerPageIdx=0;const CUSTOMER_PAGE_SIZE=5;
+
+function renderAdminCustomers(){
+  const tbody=document.getElementById('admin-customers-tbody');
+  const start=adminCustomerPageIdx*CUSTOMER_PAGE_SIZE;
+  const page=adminCustomers.slice(start,start+CUSTOMER_PAGE_SIZE);
+  tbody.innerHTML=page.map(c=>`<tr><td>${c.id}</td><td><strong>${c.name}</strong></td><td><span class="tag ${c.type==='VIP'?'tag-accent':c.type==='企业'?'tag-info':'tag-secondary'}">${c.type}</span></td><td>${c.contact}</td><td>${c.phone}</td><td>${c.email}</td><td style="max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${c.address}</td><td>${c.spent}</td><td>${c.date}</td><td style="display:flex;gap:4px"><button class="btn btn-xs btn-secondary" onclick="editCustomer('${c.id}')">✏️</button><button class="btn btn-xs btn-danger" onclick="deleteCustomer('${c.id}')">🗑</button></td></tr>`).join('');
+  document.getElementById('admin-customers-count').textContent=`共 ${adminCustomers.length} 位客户`;
+  document.getElementById('admin-customers-page').textContent=`第 ${adminCustomerPageIdx+1}/${Math.ceil(adminCustomers.length/CUSTOMER_PAGE_SIZE)} 页`;
+  document.getElementById('admin-total-customers').textContent=adminCustomers.length;
+}
+function adminCustomerPage(dir){
+  adminCustomerPageIdx=Math.max(0,Math.min(adminCustomerPageIdx+dir,Math.ceil(adminCustomers.length/CUSTOMER_PAGE_SIZE)-1));
+  renderAdminCustomers();
+}
+function filterAdminCustomers(type){
+  const rows=document.querySelectorAll('#admin-customers-tbody tr');
+  rows.forEach(r=>{const t=r.querySelector('.tag');if(!t)return;r.style.display=(type==='all'||t.textContent===type)?'':'none'});
+}
+function searchAdminCustomers(q){
+  const rows=document.querySelectorAll('#admin-customers-tbody tr');
+  rows.forEach(r=>{r.style.display=r.textContent.toLowerCase().includes(q.toLowerCase())?'':'none'});
+}
+function showCustomerForm(editId){
+  const overlay=document.getElementById('customer-form-overlay');
+  if(editId){
+    const c=adminCustomers.find(x=>x.id===editId);
+    if(c){document.getElementById('cf-edit-id').value=c.id;document.getElementById('cf-name').value=c.name;document.getElementById('cf-type').value=c.type;document.getElementById('cf-contact').value=c.contact;document.getElementById('cf-phone').value=c.phone;document.getElementById('cf-email').value=c.email;document.getElementById('cf-address').value=c.address;document.getElementById('cf-note').value='';document.getElementById('customer-form-title').textContent='编辑客户';}
+  }else{
+    document.getElementById('cf-edit-id').value='';document.getElementById('cf-name').value='';document.getElementById('cf-type').value='企业';document.getElementById('cf-contact').value='';document.getElementById('cf-phone').value='';document.getElementById('cf-email').value='';document.getElementById('cf-address').value='';document.getElementById('cf-note').value='';document.getElementById('customer-form-title').textContent='添加客户';
+  }
+  overlay.style.display='flex';
+}
+function hideCustomerForm(){document.getElementById('customer-form-overlay').style.display='none';}
+function saveCustomer(){
+  const id=document.getElementById('cf-edit-id').value;
+  const name=document.getElementById('cf-name').value.trim();
+  const type=document.getElementById('cf-type').value;
+  const contact=document.getElementById('cf-contact').value.trim();
+  const phone=document.getElementById('cf-phone').value.trim();
+  const email=document.getElementById('cf-email').value.trim();
+  const address=document.getElementById('cf-address').value.trim();
+  if(!name||!contact||!phone){showToast('请填写客户名称、联系人和手机号','error');return;}
+  if(id){
+    const c=adminCustomers.find(x=>x.id===id);
+    if(c){c.name=name;c.type=type;c.contact=contact;c.phone=phone;c.email=email;c.address=address;showToast('客户信息已更新','success');}
+  }else{
+    adminCustomers.push({id:'C'+(adminCustomers.length+1).toString().padStart(3,'0'),name,type,contact,phone,email,address,spent:'¥0',date:new Date().toISOString().slice(0,10),orders:0});
+    showToast('客户添加成功','success');
+  }
+  hideCustomerForm();
+  renderAdminCustomers();
+  updateCustomerSelect();
+  updateAdminStats();
+}
+function editCustomer(id){showCustomerForm(id);}
+function deleteCustomer(id){
+  if(!confirm('确定删除该客户？关联订单将保留。'))return;
+  adminCustomers=adminCustomers.filter(x=>x.id!==id);
+  renderAdminCustomers();
+  updateCustomerSelect();
+  updateAdminStats();
+  showToast('客户已删除','info');
+}
+function updateCustomerSelect(){
+  const sel=document.getElementById('of-customer');
+  if(!sel)return;
+  sel.innerHTML='<option value="">请选择客户</option>'+adminCustomers.map(c=>`<option value="${c.id}">${c.name} (${c.contact})</option>`).join('');
+}
+
+// ========== 订单管理（自定义添加 + 网站同步） ==========
+let adminOrders=[{id:'#AN20260616-001',customer:'蝶变美甲',product:'AI美甲机 Pro',amount:'¥29,900',type:'设备',time:'10分钟前',status:'已完成',synced:true},
+{id:'#AN20260616-002',customer:'花漾工作室',product:'AI美甲机 Pro x2',amount:'¥59,800',type:'设备',time:'1小时前',status:'待发货',synced:true},
+{id:'#AN20260616-003',customer:'极简美学',product:'企业订阅年费',amount:'¥3,588',type:'订阅',time:'2小时前',status:'已完成',synced:true},
+{id:'#AN20260616-004',customer:'指尖艺术',product:'墨水套装 x5',amount:'¥1,495',type:'耗材',time:'3小时前',status:'运输中',synced:true},
+{id:'#AN20260616-005',customer:'臻美坊',product:'AI美甲机 Lite',amount:'¥19,900',type:'设备',time:'5小时前',status:'风控中',synced:false},
+{id:'#AN20260616-006',customer:'user_8f3a2',product:'个人订阅月费',amount:'¥299',type:'订阅',time:'6小时前',status:'已取消',synced:true}];
+let adminOrderPageIdx=0;const ORDER_PAGE_SIZE=5;
+let syncTimer=null;
+
+function renderAdminOrders(filterStatus){
+  const tbody=document.getElementById('admin-orders-tbody');
+  let list=filterStatus?adminOrders.filter(o=>o.status===filterStatus):adminOrders;
+  const start=adminOrderPageIdx*ORDER_PAGE_SIZE;
+  const page=list.slice(start,start+ORDER_PAGE_SIZE);
+  const statusClass={已完成:'tag-success',待发货:'tag-warning',运输中:'tag-info',风控中:'tag-danger',已取消:'tag-muted'};
+  tbody.innerHTML=page.map(o=>`<tr><td>${o.id}</td><td>${o.customer}</td><td>${o.product}</td><td>${o.amount}</td><td>${o.type}</td><td>${o.time}</td><td><span class="tag ${statusClass[o.status]||'tag-secondary'}">${o.status}</span></td><td>${o.synced?'<span style="color:var(--success);font-size:11px">🔄 已同步</span>':'<span style="color:var(--warning);font-size:11px">⚠ 待同步</span>'}</td><td style="display:flex;gap:4px"><button class="btn btn-xs btn-secondary" onclick="showToast('订单详情: ${o.customer} · ${o.product} · ${o.amount}')">详情</button><button class="btn btn-xs btn-danger" onclick="deleteOrder('${o.id}')">删除</button></td></tr>`).join('');
+  document.getElementById('admin-orders-count').textContent=`共 ${adminOrders.length} 条订单`;
+  document.getElementById('admin-orders-page-num').textContent=`第 ${adminOrderPageIdx+1}/${Math.ceil(list.length/ORDER_PAGE_SIZE)} 页`;
+}
+function adminOrderPage(dir){
+  adminOrderPageIdx=Math.max(0,Math.min(adminOrderPageIdx+dir,Math.ceil(adminOrders.length/ORDER_PAGE_SIZE)-1));
+  renderAdminOrders();
 }
 function filterAdminOrders(status){
-  const rows=document.querySelectorAll('#admin-orders-panel tbody tr');
-  rows.forEach(r=>{const s=r.querySelector('.tag');if(!s)return;const st=s.textContent;r.style.display=(status==='all'||st.includes({completed:'已完成',pending:'待发货',shipped:'运输中',risk:'风控中',cancelled:'已取消'}[status]))?'':'none'});
+  adminOrderPageIdx=0;
+  renderAdminOrders(status==='all'?null:({completed:'已完成',pending:'待发货',shipped:'运输中',risk:'风控中',cancelled:'已取消'}[status]));
 }
 function searchAdminOrders(q){
-  const rows=document.querySelectorAll('#admin-orders-panel tbody tr');
-  rows.forEach(r=>{const t=r.textContent.toLowerCase();r.style.display=t.includes(q.toLowerCase())?'':'none'});
+  const rows=document.querySelectorAll('#admin-orders-tbody tr');
+  rows.forEach(r=>{r.style.display=r.textContent.toLowerCase().includes(q.toLowerCase())?'':'none'});
 }
+function showOrderForm(editId){
+  updateCustomerSelect();
+  const overlay=document.getElementById('order-form-overlay');
+  if(editId){
+    const o=adminOrders.find(x=>x.id===editId);
+    if(o){document.getElementById('of-edit-id').value=o.id;document.getElementById('of-product').value=o.product;document.getElementById('of-amount').value=o.amount.replace('¥','');document.getElementById('of-type').value=o.type;document.getElementById('of-status').value({已完成:'completed',待发货:'pending',运输中:'shipped',风控中:'risk',已取消:'cancelled'}[o.status]||'pending');document.getElementById('order-form-title').textContent='编辑订单';}
+  }else{
+    document.getElementById('of-edit-id').value='';document.getElementById('of-product').value='';document.getElementById('of-amount').value='';document.getElementById('of-type').value='设备';document.getElementById('of-status').value='pending';document.getElementById('of-note').value='';document.getElementById('order-form-title').textContent='新建订单';
+  }
+  overlay.style.display='flex';
+}
+function hideOrderForm(){document.getElementById('order-form-overlay').style.display='none';}
+function saveOrder(){
+  const editId=document.getElementById('of-edit-id').value;
+  const customerId=document.getElementById('of-customer').value;
+  const product=document.getElementById('of-product').value.trim();
+  const amount=document.getElementById('of-amount').value.trim();
+  const type=document.getElementById('of-type').value;
+  const statusVal=document.getElementById('of-status').value;
+  if(!customerId||!product||!amount){showToast('请选择客户并填写商品和金额','error');return;}
+  const customer=adminCustomers.find(c=>c.id===customerId);
+  const customerName=customer?customer.name:'未知客户';
+  const statusMap={completed:'已完成',pending:'待发货',shipped:'运输中',risk:'风控中',cancelled:'已取消'};
+  if(editId){
+    const o=adminOrders.find(x=>x.id===editId);
+    if(o){o.customer=customerName;o.product=product;o.amount='¥'+parseFloat(amount).toLocaleString();o.type=type;o.status=statusMap[statusVal];o.time='刚刚';o.synced=false;showToast('订单已更新','success');}
+  }else{
+    const newId='#AN'+new Date().toISOString().slice(0,10).replace(/-/g,'')+'-'+(adminOrders.length+1).toString().padStart(3,'0');
+    adminOrders.unshift({id:newId,customer:customerName,product,amount:'¥'+parseFloat(amount).toLocaleString(),type,time:'刚刚',status:statusMap[statusVal],synced:false});
+    if(customer){customer.orders=(customer.orders||0)+1;customer.spent='¥'+(parseInt((customer.spent||'¥0').replace(/[¥,]/g,''))+parseFloat(amount)).toLocaleString();}
+    showToast('订单创建成功 · 待同步至网站','success');
+  }
+  hideOrderForm();
+  renderAdminOrders();
+  updateAdminStats();
+  syncOrderToWebsite();
+}
+function deleteOrder(id){
+  if(!confirm('确定删除该订单？'))return;
+  adminOrders=adminOrders.filter(x=>x.id!==id);
+  renderAdminOrders();
+  updateAdminStats();
+  showToast('订单已删除','info');
+}
+// 网站订单实时同步
+function startOrderSync(){
+  if(syncTimer)clearInterval(syncTimer);
+  syncTimer=setInterval(()=>{
+    const unsynced=adminOrders.filter(o=>!o.synced);
+    if(unsynced.length>0){
+      unsynced.forEach(o=>{o.synced=true;});
+      document.getElementById('last-sync-time').textContent='刚刚';
+      document.getElementById('synced-orders-count').textContent=adminOrders.length;
+      renderAdminOrders();
+    }
+  },30000);
+}
+function syncOrdersNow(){
+  adminOrders.forEach(o=>{o.synced=true;});
+  document.getElementById('last-sync-time').textContent='刚刚';
+  document.getElementById('synced-orders-count').textContent=adminOrders.length;
+  renderAdminOrders();
+  showToast('已同步 '+adminOrders.length+' 条订单至网站','success');
+}
+function syncOrderToWebsite(){
+  setTimeout(()=>{
+    const unsynced=adminOrders.filter(o=>!o.synced);
+    if(unsynced.length>0){
+      unsynced.forEach(o=>{o.synced=true;});
+      document.getElementById('last-sync-time').textContent='刚刚';
+      document.getElementById('synced-orders-count').textContent=adminOrders.length;
+      renderAdminOrders();
+    }
+  },2000);
+}
+function updateAdminStats(){
+  document.getElementById('admin-total-customers').textContent=adminCustomers.length;
+  document.getElementById('admin-today-orders').textContent=adminOrders.length;
+  document.getElementById('admin-pending-ship').textContent=adminOrders.filter(o=>o.status==='待发货').length;
+  document.getElementById('admin-stock-alert').textContent=adminInventory.filter(i=>i.qty<i.safe).length;
+}
+
+// ========== 物流管理 ==========
+let adminLogistics=[{id:'SF20260616001',orderId:'#AN20260615-008',receiver:'蝶变美甲 · 张女士',carrier:'顺丰速运',sendDate:'2026-06-15',eta:'2026-06-17',status:'已签收'},
+{id:'JD20260616002',orderId:'#AN20260616-002',receiver:'花漾工作室 · 李经理',carrier:'京东物流',sendDate:'—',eta:'—',status:'待揽件'},
+{id:'SF20260616003',orderId:'#AN20260616-004',receiver:'指尖艺术 · 王店长',carrier:'顺丰速运',sendDate:'2026-06-16',eta:'2026-06-18',status:'运输中'},
+{id:'YT20260615004',orderId:'#AN20260614-012',receiver:'臻美坊 · 赵总',carrier:'圆通速递',sendDate:'2026-06-14',eta:'2026-06-16',status:'异常'},
+{id:'DHL20260617001',orderId:'#AN20260616-005',receiver:'NailArt Studio · Sarah',carrier:'DHL Express',sendDate:'2026-06-17',eta:'2026-06-22',status:'运输中'},
+{id:'FX20260617002',orderId:'#AN20260617-001',receiver:'BeautyLabs Inc · John',carrier:'FedEx',sendDate:'2026-06-17',eta:'2026-06-21',status:'待揽件'}];
+
+function renderAdminLogistics(){
+  const tbody=document.getElementById('admin-logistics-tbody');
+  const statusClass={已签收:'tag-success',待揽件:'tag-warning',运输中:'tag-info',异常:'tag-danger'};
+  tbody.innerHTML=adminLogistics.map(l=>`<tr><td>${l.id}</td><td>${l.orderId}</td><td>${l.receiver}</td><td>${l.carrier}</td><td>${l.sendDate}</td><td>${l.eta}</td><td><span class="tag ${statusClass[l.status]||'tag-secondary'}">${l.status}</span></td><td style="display:flex;gap:4px"><button class="btn btn-xs btn-secondary" onclick="showToast('物流轨迹: ${l.id} · ${l.carrier}','info')">轨迹</button>${l.status==='待揽件'?`<button class="btn btn-xs btn-accent" onclick="showShippoLabelForm()">🌐 面单</button>`:''}</td></tr>`).join('');
+  document.getElementById('admin-logistics-count').textContent=`共 ${adminLogistics.length} 条物流记录 · 异常运单 ${adminLogistics.filter(l=>l.status==='异常').length} 条需处理`;
+}
+function filterAdminLogistics(status){
+  const rows=document.querySelectorAll('#admin-logistics-tbody tr');
+  rows.forEach(r=>{const t=r.querySelector('.tag');if(!t)return;r.style.display=(status==='all'||t.textContent===status)?'':'none'});
+}
+function searchAdminLogistics(q){
+  const rows=document.querySelectorAll('#admin-logistics-tbody tr');
+  rows.forEach(r=>{r.style.display=r.textContent.toLowerCase().includes(q.toLowerCase())?'':'none'});
+}
+let customCarriers=[];
+function addCustomCarrier(){
+  const name=document.getElementById('custom-carrier-name').value.trim();
+  const apikey=document.getElementById('custom-carrier-apikey').value.trim();
+  const mcp=document.getElementById('custom-carrier-mcp').value.trim();
+  if(!name){showToast('请输入服务商名称','error');return;}
+  customCarriers.push({name,apikey,mcp});
+  document.getElementById('custom-carrier-name').value='';
+  document.getElementById('custom-carrier-apikey').value='';
+  document.getElementById('custom-carrier-mcp').value='';
+  showToast(`快递服务商 "${name}" 已添加 · API/MCP接口已配置`,'success');
+}
+
+// ========== Shippo 跨境物流比价 & 面单平台 ==========
+let shippoRates=[];
+let shippoLabels=[];
+let shippoCustomsItems=[];
+
+// Shippo 跨境比价弹窗
+function showShippoRateForm(){
+  const overlay=document.getElementById('shippo-rate-overlay');
+  overlay.style.display='flex';
+}
+function hideShippoRateForm(){
+  document.getElementById('shippo-rate-overlay').style.display='none';
+}
+
+// Shippo 面单弹窗
+function showShippoLabelForm(){
+  const overlay=document.getElementById('shippo-label-overlay');
+  // 填充关联订单下拉
+  const orderSelect=document.getElementById('shippo-label-order');
+  const pendingOrders=adminOrders.filter(o=>o.status==='pending'||o.status==='shipped');
+  orderSelect.innerHTML='<option value="">-- 选择关联订单 --</option>'+pendingOrders.map(o=>`<option value="${o.id}">${o.id} · ${o.customer} · ${o.product}</option>`).join('');
+  overlay.style.display='flex';
+}
+function hideShippoLabelForm(){
+  document.getElementById('shippo-label-overlay').style.display='none';
+}
+
+// Shippo 追踪弹窗
+function showShippoTracking(){
+  document.getElementById('shippo-tracking-overlay').style.display='flex';
+}
+function hideShippoTracking(){
+  document.getElementById('shippo-tracking-overlay').style.display='none';
+  document.getElementById('shippo-track-result').style.display='none';
+}
+
+// Shippo 海关申报弹窗
+function showShippoCustoms(){
+  document.getElementById('shippo-customs-overlay').style.display='flex';
+}
+function hideShippoCustoms(){
+  document.getElementById('shippo-customs-overlay').style.display='none';
+}
+
+// Shippo MCP 配置弹窗
+function configureShippoMCP(){
+  document.getElementById('shippo-mcp-overlay').style.display='flex';
+}
+function hideShippoMCPConfig(){
+  document.getElementById('shippo-mcp-overlay').style.display='none';
+}
+function toggleShippoMCPFields(){
+  const mode=document.getElementById('shippo-mcp-mode').value;
+  document.getElementById('shippo-mcp-hosted-info').style.display=mode==='hosted'?'block':'none';
+  document.getElementById('shippo-mcp-local-info').style.display=mode==='local'?'block':'none';
+}
+function saveShippoMCPConfig(){
+  const mode=document.getElementById('shippo-mcp-mode').value;
+  const token=document.getElementById('shippo-api-token')?.value||'';
+  if(mode==='local'&&!token){showToast('请输入 Shippo API Token','error');return;}
+  showToast(`Shippo MCP 配置已保存 · 模式: ${mode==='hosted'?'托管服务器':'本地服务器'}`,'success');
+  document.getElementById('shippo-mode-badge').textContent=mode==='hosted'?'生产模式':'测试模式';
+  hideShippoMCPConfig();
+}
+
+// 更新起运地国家
+function updateShippoFromCountry(){
+  const country=document.getElementById('shippo-from-country').value;
+  const cityMap={CN:'深圳',US:'San Francisco',GB:'London',DE:'Berlin',FR:'Paris',JP:'Tokyo',KR:'Seoul',AU:'Sydney',CA:'Toronto',SG:'Singapore'};
+  const stateMap={CN:'Guangdong',US:'CA',GB:'England',DE:'Berlin',FR:'Île-de-France',JP:'Tokyo',KR:'Seoul',AU:'NSW',CA:'ON',SG:'Singapore'};
+  document.getElementById('shippo-from-city').value=cityMap[country]||'';
+  document.getElementById('shippo-from-state').value=stateMap[country]||'';
+}
+
+// 执行跨境比价
+function executeShippoRateCompare(){
+  const from={country:document.getElementById('shippo-from-country').value,city:document.getElementById('shippo-from-city').value.trim(),street:document.getElementById('shippo-from-street').value.trim(),zip:document.getElementById('shippo-from-zip').value.trim(),state:document.getElementById('shippo-from-state').value.trim()};
+  const to={country:document.getElementById('shippo-to-country').value,city:document.getElementById('shippo-to-city').value.trim(),street:document.getElementById('shippo-to-street').value.trim(),zip:document.getElementById('shippo-to-zip').value.trim(),state:document.getElementById('shippo-to-state').value.trim()};
+  const parcel={length:document.getElementById('shippo-length').value,width:document.getElementById('shippo-width').value,height:document.getElementById('shippo-height').value,weight:document.getElementById('shippo-weight').value};
+  const desc=document.getElementById('shippo-desc').value.trim();
+
+  if(!to.city||!to.street||!to.zip||!to.state){showToast('请填写完整的目的地信息','error');return;}
+  if(!from.city||!from.street){showToast('请填写完整的起运地信息','error');return;}
+
+  // 模拟 Shippo API 比价结果（实际调用 POST /shipments）
+  const carriers=[
+    {name:'DHL Express',service:'Express Worldwide',days:'3-5',base:285},
+    {name:'FedEx',service:'International Priority',days:'3-7',base:248},
+    {name:'UPS',service:'Worldwide Express',days:'3-6',base:265},
+    {name:'USPS',service:'Priority Mail International',days:'6-10',base:156},
+    {name:'DHL eCommerce',service:'Packet Plus',days:'7-14',base:98},
+    {name:'Asendia',service:'e-PAQ Plus',days:'8-15',base:112},
+    {name:'APC Postal',service:'ePacket',days:'10-20',base:72},
+    {name:'Deutsche Post',service:'Warenpost International',days:'8-14',base:89}
+  ];
+
+  const weight=parseFloat(parcel.weight)||1;
+  const volWeight=(parseFloat(parcel.length)*parseFloat(parcel.width)*parseFloat(parcel.height))/5000;
+  const chargeWeight=Math.max(weight,volWeight);
+
+  shippoRates=carriers.map(c=>{
+    const total=(c.base*chargeWeight*0.8+Math.random()*50).toFixed(2);
+    return {...c,total:parseFloat(total),currency:'USD',chargeWeight:chargeWeight.toFixed(2)};
+  }).sort((a,b)=>a.total-b.total);
+
+  // 渲染比价结果
+  const container=document.getElementById('shippo-rate-results');
+  const now=new Date().toLocaleString('zh-CN');
+  document.getElementById('shippo-last-rate-time').textContent=`比价时间: ${now} · ${from.city} → ${to.city} · ${chargeWeight.toFixed(2)}kg`;
+
+  container.innerHTML=shippoRates.map((r,i)=>{
+    const cls=i===0?'accent':i<3?'success':'secondary';
+    const badge=i===0?'🏆 最低价':i<4?'✅ 推荐':'';
+    return `<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--bg-tertiary);border-radius:var(--radius-sm);border-left:3px solid var(--${cls})">
+      <div style="display:flex;align-items:center;gap:10px">
+        <span style="font-weight:700;font-size:14px;min-width:100px">${r.name}</span>
+        <span style="font-size:11px;color:var(--text-secondary)">${r.service} · ${r.days}天</span>
+        ${badge?`<span class="tag tag-${cls}" style="font-size:10px">${badge}</span>`:''}
+      </div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <span style="font-weight:700;font-size:16px;color:var(--accent)">$${r.total}</span>
+        <button class="btn btn-xs btn-accent" onclick="selectShippoRate(${i})">选择</button>
+      </div>
+    </div>`;
+  }).join('');
+
+  showToast(`Shippo 比价完成 · ${shippoRates.length} 家承运商报价 · 最低 $${shippoRates[0].total} (${shippoRates[0].name})`,'success');
+  hideShippoRateForm();
+}
+
+// 选择比价结果
+function selectShippoRate(index){
+  const rate=shippoRates[index];
+  document.getElementById('shippo-label-carrier').value=rate.name.toLowerCase().replace(/\s+/g,'_');
+  showToast(`已选择 ${rate.name} · $${rate.total} · 预计 ${rate.days} 天送达`,'success');
+  showShippoLabelForm();
+}
+
+// 执行生成面单
+function executeShippoCreateLabel(){
+  const carrier=document.getElementById('shippo-label-carrier').value;
+  const format=document.getElementById('shippo-label-format').value;
+  const size=document.getElementById('shippo-label-size').value;
+  const orderId=document.getElementById('shippo-label-order').value;
+  const ref=document.getElementById('shippo-label-ref').value.trim();
+
+  if(!carrier){showToast('请选择承运商（先执行跨境比价）','error');return;}
+
+  // 模拟 Shippo API 生成面单（实际调用 POST /transactions）
+  const labelId='SHIPPO-LBL-'+Date.now().toString(36).toUpperCase();
+  const trackingNum='1Z'+Math.random().toString(36).substring(2,10).toUpperCase();
+  const carrierName=carrier.replace(/_/g,' ').replace(/\b\w/g,c=>c.toUpperCase());
+
+  shippoLabels.push({id:labelId,carrier:carrierName,tracking:trackingNum,format,size,orderId,ref,created:new Date().toISOString()});
+
+  // 如果有关联订单，更新订单状态
+  if(orderId){
+    const order=adminOrders.find(o=>o.id===orderId);
+    if(order){order.status='shipped';renderAdminOrders();}
+  }
+
+  // 添加物流记录
+  const orderRef=orderId||ref||'国际运单';
+  adminLogistics.unshift({
+    id:labelId,orderId:`#${orderRef}`,receiver:ref||'国际客户',carrier:carrierName,sendDate:new Date().toISOString().split('T')[0],eta:'—',status:'待揽件'
+  });
+  renderAdminLogistics();
+
+  showToast(`✅ 面单已生成 · ${carrierName} · 运单号: ${trackingNum} · 格式: ${format}/${size}`,'success');
+  document.getElementById('shippo-label-ref').value='';
+  hideShippoLabelForm();
+}
+
+// 执行包裹追踪
+function executeShippoTracking(){
+  const carrier=document.getElementById('shippo-track-carrier').value;
+  const number=document.getElementById('shippo-track-number').value.trim();
+  if(!number){showToast('请输入运单号/追踪号','error');return;}
+
+  // 模拟 Shippo API 追踪结果（实际调用 GET /tracks/{carrier}/{tracking_number}）
+  const statuses=['已揽件','已发出','到达中转站','海关放行','运输中','到达目的地','派送中','已签收'];
+  const locations=['深圳, CN','香港, HK','Los Angeles, US','Chicago, US','New York, US'];
+  const trackingEvents=[];
+
+  for(let i=0;i<Math.min(statuses.length,2+Math.floor(Math.random()*5));i++){
+    const d=new Date();d.setHours(d.getHours()-Math.random()*72);
+    trackingEvents.push({status:statuses[i],location:locations[Math.min(i,locations.length-1)],time:d.toLocaleString('zh-CN')});
+  }
+
+  document.getElementById('shippo-track-result').style.display='block';
+  document.getElementById('shippo-track-detail').innerHTML=`
+    <div style="font-weight:600;margin-bottom:8px">运单号: ${number} · 承运商: ${carrier.toUpperCase()}</div>
+    <div style="display:flex;flex-direction:column;gap:6px">
+      ${trackingEvents.map((e,i)=>`
+        <div style="display:flex;gap:10px;align-items:flex-start;padding:6px 0;border-bottom:1px solid var(--border)">
+          <div style="width:8px;height:8px;border-radius:50%;background:${i===0?'var(--accent)':'var(--text-tertiary)'};margin-top:4px;flex-shrink:0"></div>
+          <div>
+            <div style="font-size:12px;font-weight:600">${e.status}</div>
+            <div style="font-size:11px;color:var(--text-secondary)">${e.location} · ${e.time}</div>
+          </div>
+        </div>
+      `).join('')}
+    </div>
+  `;
+  showToast(`追踪查询完成 · ${trackingEvents.length} 条物流轨迹`,'success');
+}
+
+// 添加海关物品行
+function addShippoCustomsItem(){
+  const container=document.getElementById('shippo-customs-items');
+  const row=document.createElement('div');
+  row.style.cssText='display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1fr;gap:6px;align-items:end;padding:8px;background:var(--bg-tertiary);border-radius:var(--radius-sm)';
+  row.innerHTML=`
+    <div><label style="font-size:10px;color:var(--text-secondary)">物品描述</label><input class="form-input" placeholder="如: 墨水套装" value="Ink Cartridge Set" style="width:100%;box-sizing:border-box;padding:4px 6px;font-size:11px"></div>
+    <div><label style="font-size:10px;color:var(--text-secondary)">数量</label><input class="form-input" type="number" value="10" style="width:100%;box-sizing:border-box;padding:4px 6px;font-size:11px"></div>
+    <div><label style="font-size:10px;color:var(--text-secondary)">单价(USD)</label><input class="form-input" type="number" value="29.9" style="width:100%;box-sizing:border-box;padding:4px 6px;font-size:11px"></div>
+    <div><label style="font-size:10px;color:var(--text-secondary)">HS编码</label><input class="form-input" placeholder="如: 3215.90" value="3215.90" style="width:100%;box-sizing:border-box;padding:4px 6px;font-size:11px"></div>
+    <div style="display:flex;gap:4px;align-items:center"><div style="flex:1"><label style="font-size:10px;color:var(--text-secondary)">原产地</label><select class="form-input" style="width:100%;padding:4px 6px;font-size:11px"><option value="CN">🇨🇳 CN</option><option value="US">🇺🇸 US</option></select></div><button class="btn btn-xs btn-secondary" style="margin-bottom:2px" onclick="this.parentElement.parentElement.remove()">✕</button></div>
+  `;
+  container.appendChild(row);
+}
+
+// 执行海关申报
+function executeShippoCustoms(){
+  const type=document.getElementById('shippo-customs-type').value;
+  const eel=document.getElementById('shippo-customs-eel').value;
+  const certify=document.getElementById('shippo-customs-certify').checked;
+  const signer=document.getElementById('shippo-customs-signer').value.trim();
+
+  if(!certify){showToast('请勾选认证声明','error');return;}
+  if(!signer){showToast('请填写签署人姓名','error');return;}
+
+  // 收集物品明细
+  const itemRows=document.querySelectorAll('#shippo-customs-items > div');
+  const items=[];
+  itemRows.forEach(row=>{
+    const inputs=row.querySelectorAll('input,select');
+    if(inputs.length>=5){
+      const desc=inputs[0].value;const qty=parseInt(inputs[1].value)||0;
+      const price=parseFloat(inputs[2].value)||0;const hs=inputs[3].value;
+      const origin=inputs[4].value;
+      if(desc&&qty>0)items.push({description:desc,quantity:qty,value_amount:price,hs_code:hs,origin_country:origin,weight_unit:'kg',net_weight:'1.0'});
+    }
+  });
+
+  if(items.length===0){showToast('请至少添加一个海关物品','error');return;}
+  const totalValue=items.reduce((sum,i)=>sum+i.value_amount*i.quantity,0);
+
+  // 模拟 Shippo API 创建海关申报（实际调用 POST /customs/declarations）
+  const declId='CUST-DECL-'+Date.now().toString(36).toUpperCase();
+  showToast(`✅ 海关申报已创建 · ${declId} · ${items.length} 件物品 · 总值 $${totalValue.toFixed(2)} · 签署人: ${signer}`,'success');
+  hideShippoCustoms();
+}
+
+// ========== 库存管理（自定义添加 + 网站下单同步） ==========
+let adminInventory=[{sku:'AN-PRO-001',name:'AI美甲机 Pro',category:'设备',qty:128,safe:50,lastIn:'2026-06-15'},
+{sku:'AN-LITE-001',name:'AI美甲机 Lite',category:'设备',qty:110,safe:30,lastIn:'2026-06-10'},
+{sku:'INK-CMYK-001',name:'CMYK 四色墨水套装',category:'墨水',qty:850,safe:200,lastIn:'2026-06-14'},
+{sku:'INK-WHITE-001',name:'白色底胶墨水',category:'墨水',qty:400,safe:150,lastIn:'2026-06-12'},
+{sku:'PART-NOZZLE',name:'打印喷头',category:'配件',qty:35,safe:50,lastIn:'2026-05-20'},
+{sku:'PART-BELT',name:'传动皮带',category:'配件',qty:54,safe:30,lastIn:'2026-06-08'}];
+
+function renderAdminInventory(){
+  const tbody=document.getElementById('admin-inventory-tbody');
+  const catClass={设备:'tag-accent',墨水:'tag-info',配件:'tag-warning',耗材:'tag-secondary'};
+  tbody.innerHTML=adminInventory.map(i=>{
+    const low=i.qty<i.safe;
+    const statusText=low?'库存不足':'正常';
+    const statusClass=low?'tag-danger':'tag-success';
+    const qtyStyle=low?'color:var(--danger);font-weight:700':'';
+    return `<tr><td>${i.sku}</td><td>${i.name}</td><td><span class="tag ${catClass[i.category]||'tag-secondary'}">${i.category}</span></td><td><span style="${qtyStyle}">${i.qty}</span></td><td>${i.safe}</td><td><span class="tag ${statusClass}">${statusText}</span></td><td>${i.lastIn}</td><td style="display:flex;gap:4px"><button class="btn btn-xs btn-secondary" onclick="editInventoryItem('${i.sku}')">调整</button>${low?`<button class="btn btn-xs btn-accent" onclick="showToast('已生成 ${i.name} 采购单','success')">补货</button>`:''}<button class="btn btn-xs btn-danger" onclick="deleteInventoryItem('${i.sku}')">删除</button></td></tr>`;
+  }).join('');
+  document.getElementById('admin-inventory-count').textContent=`共 ${adminInventory.length} 个 SKU · ${adminInventory.filter(i=>i.qty<i.safe).length} 个库存预警`;
+  updateInventoryStats();
+  updateInventoryAlerts();
+}
+function updateInventoryStats(){
+  const dev=adminInventory.filter(i=>i.category==='设备').reduce((s,i)=>s+i.qty,0);
+  const ink=adminInventory.filter(i=>i.category==='墨水').reduce((s,i)=>s+i.qty,0);
+  const part=adminInventory.filter(i=>i.category==='配件').reduce((s,i)=>s+i.qty,0);
+  if(document.getElementById('inv-device-count'))document.getElementById('inv-device-count').textContent=dev;
+  if(document.getElementById('inv-ink-count'))document.getElementById('inv-ink-count').textContent=ink;
+  if(document.getElementById('inv-part-count'))document.getElementById('inv-part-count').textContent=part;
+}
+function updateInventoryAlerts(){
+  const alertList=document.getElementById('inventory-alert-list');
+  if(!alertList)return;
+  const alerts=adminInventory.filter(i=>i.qty<i.safe);
+  if(alerts.length===0){alertList.innerHTML='<div style="padding:12px;text-align:center;color:var(--text-secondary)">✅ 所有库存正常，无预警</div>';return;}
+  alertList.innerHTML=alerts.map(i=>`<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:rgba(255,77,77,0.08);border-radius:var(--radius-sm)"><div><span style="font-weight:700">${i.name}</span><span style="margin-left:8px;font-size:12px;color:var(--text-secondary)">当前 ${i.qty} / 安全库存 ${i.safe}</span></div><button class="btn btn-xs btn-accent" onclick="showToast('已生成 ${i.name} 采购单','success')">生成采购单</button></div>`).join('');
+}
+function filterAdminInventory(cat){
+  const rows=document.querySelectorAll('#admin-inventory-tbody tr');
+  rows.forEach(r=>{const t=r.querySelector('.tag');if(!t)return;r.style.display=(cat==='all'||t.textContent===cat)?'':'none'});
+}
+function searchAdminInventory(q){
+  const rows=document.querySelectorAll('#admin-inventory-tbody tr');
+  rows.forEach(r=>{r.style.display=r.textContent.toLowerCase().includes(q.toLowerCase())?'':'none'});
+}
+function showInventoryForm(editSku){
+  const overlay=document.getElementById('inventory-form-overlay');
+  if(editSku){
+    const i=adminInventory.find(x=>x.sku===editSku);
+    if(i){document.getElementById('if-edit-id').value=i.sku;document.getElementById('if-sku').value=i.sku;document.getElementById('if-name').value=i.name;document.getElementById('if-category').value=i.category;document.getElementById('if-qty').value=i.qty;document.getElementById('if-safe').value=i.safe;document.getElementById('inventory-form-title').textContent='编辑库存';}
+  }else{
+    document.getElementById('if-edit-id').value='';document.getElementById('if-sku').value='';document.getElementById('if-name').value='';document.getElementById('if-category').value='设备';document.getElementById('if-qty').value='';document.getElementById('if-safe').value='';document.getElementById('inventory-form-title').textContent='添加库存';
+  }
+  overlay.style.display='flex';
+}
+function hideInventoryForm(){document.getElementById('inventory-form-overlay').style.display='none';}
+function saveInventory(){
+  const editSku=document.getElementById('if-edit-id').value;
+  const sku=document.getElementById('if-sku').value.trim();
+  const name=document.getElementById('if-name').value.trim();
+  const category=document.getElementById('if-category').value;
+  const qty=parseInt(document.getElementById('if-qty').value)||0;
+  const safe=parseInt(document.getElementById('if-safe').value)||0;
+  if(!sku||!name){showToast('请填写SKU编码和商品名称','error');return;}
+  if(editSku){
+    const i=adminInventory.find(x=>x.sku===editSku);
+    if(i){i.sku=sku;i.name=name;i.category=category;i.qty=qty;i.safe=safe;i.lastIn=new Date().toISOString().slice(0,10);showToast('库存已更新','success');}
+  }else{
+    if(adminInventory.find(x=>x.sku===sku)){showToast('SKU编码已存在','error');return;}
+    adminInventory.push({sku,name,category,qty,safe,lastIn:new Date().toISOString().slice(0,10)});
+    showToast('库存添加成功','success');
+  }
+  hideInventoryForm();
+  renderAdminInventory();
+  updateAdminStats();
+}
+function editInventoryItem(sku){showInventoryForm(sku);}
+function deleteInventoryItem(sku){
+  if(!confirm('确定删除该库存项？'))return;
+  adminInventory=adminInventory.filter(x=>x.sku!==sku);
+  renderAdminInventory();
+  updateAdminStats();
+  showToast('库存项已删除','info');
+}
+
+// 初始化管理后台数据
+startOrderSync();
+renderAdminCustomers();
+renderAdminOrders();
+renderAdminLogistics();
+renderAdminInventory();
 
 // DEVICE
 function switchDeviceMode(mode){document.querySelectorAll('#page-device .auth-tab').forEach(el=>{el.classList.toggle('active',(mode==='b2c'&&el.textContent.includes('B2C'))||(mode==='b2b'&&el.textContent.includes('B2B')))});document.getElementById('device-b2c').classList.toggle('hidden',mode!=='b2c');document.getElementById('device-b2b').classList.toggle('hidden',mode!=='b2b')}
