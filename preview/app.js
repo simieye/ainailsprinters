@@ -4,9 +4,80 @@ let isLoggedIn = false, currentPage = 'create', authMode = 'login';
 let authLoginMode = 'email', authRegMode = 'email', sidebarCollapsed = false;
 let payScene = 'recharge', selectedAmount = 1000, selectedCurrency = 'CNY';
 let selectedPayment = 'wechat', selectedSubTier = 'pro', cmdSelectedIdx = 0;
+let selectedDeviceOption = 'sample'; // 设备购买选项
 let currentOrderId = null, paymentPollTimer = null;
 let customerPaymentConfig = null; // 客户自有支付系统配置
 let defaultProvider = 'openai';
+let currentTheme = 'dark'; // 当前主题
+
+// ================================================================
+// THEME SWITCHING
+// ================================================================
+const THEME_CONFIG = {
+  dark:  { icon: '🌙', label: '暗夜黑', next: 'light' },
+  light: { icon: '☀️', label: '白天白', next: 'gold' },
+  gold:  { icon: '👑', label: '奢华金', next: 'pink' },
+  pink:  { icon: '🌸', label: '梦幻粉', next: 'barbie' },
+  barbie:{ icon: '💖', label: '芭比粉', next: 'dark' }
+};
+
+function initTheme() {
+  const saved = localStorage.getItem('ainails-theme') || 'dark';
+  applyTheme(saved);
+}
+
+function applyTheme(theme) {
+  currentTheme = theme;
+  document.documentElement.setAttribute('data-theme', theme);
+  localStorage.setItem('ainails-theme', theme);
+  const cfg = THEME_CONFIG[theme];
+  const iconEl = document.getElementById('theme-switch-icon');
+  const labelEl = document.getElementById('theme-switch-label');
+  if (iconEl) iconEl.textContent = cfg.icon;
+  if (labelEl) labelEl.textContent = cfg.label;
+  // 高亮当前选项
+  document.querySelectorAll('.theme-option').forEach(el => {
+    el.classList.toggle('active', el.dataset.theme === theme);
+  });
+}
+
+function switchTheme(theme) {
+  applyTheme(theme);
+  closeThemePanel();
+  showToast(`主题已切换为 ${THEME_CONFIG[theme].label}`, 'info');
+}
+
+function toggleThemePanel() {
+  const panel = document.getElementById('theme-panel');
+  if (!panel) return;
+  const isOpen = panel.classList.contains('show');
+  if (isOpen) {
+    closeThemePanel();
+  } else {
+    // 更新面板中当前选中状态
+    document.querySelectorAll('.theme-option').forEach(el => {
+      el.classList.toggle('active', el.dataset.theme === currentTheme);
+    });
+    panel.classList.add('show');
+    // 点击外部关闭
+    setTimeout(() => {
+      document.addEventListener('click', closeThemePanelOnOutside, { once: true });
+    }, 10);
+  }
+}
+
+function closeThemePanel() {
+  const panel = document.getElementById('theme-panel');
+  if (panel) panel.classList.remove('show');
+  document.removeEventListener('click', closeThemePanelOnOutside);
+}
+
+function closeThemePanelOnOutside(e) {
+  const container = document.getElementById('theme-switch-container');
+  if (container && !container.contains(e.target)) {
+    closeThemePanel();
+  }
+}
 
 // AUTH
 function switchAuthTab(tab){authMode=tab;document.getElementById('auth-login-card').classList.toggle('hidden',tab!=='login');document.getElementById('auth-register-card').classList.toggle('hidden',tab!=='register')}
@@ -31,7 +102,26 @@ function handleAppRegister(){
 function sendAuthLoginCode(){const b=document.getElementById('auth-login-code-btn');if(b.disabled)return;showToast('验证码已发送','success');startCountdown(b)}
 function sendAuthRegCode(){const b=document.getElementById('auth-reg-code-btn');if(b.disabled)return;showToast('验证码已发送','success');startCountdown(b)}
 function startCountdown(btn){let s=60;btn.disabled=true;btn.textContent=`${s}s后重试`;const t=setInterval(()=>{s--;btn.textContent=`${s}s后重试`;if(s<=0){clearInterval(t);btn.disabled=false;btn.textContent='获取验证码'}},1000)}
-function enterDesktop(){isLoggedIn=true;document.getElementById('auth-overlay').classList.add('hidden');document.getElementById('desktop-shell').classList.add('visible');updateStatusTime();setInterval(updateStatusTime,30000)}
+function enterDesktop(){
+  isLoggedIn=true;
+  document.getElementById('auth-overlay').classList.add('hidden');
+  document.getElementById('desktop-shell').classList.add('visible');
+  initTheme();
+  initServices();
+  updateStatusTime();
+  setInterval(updateStatusTime,30000);
+}
+
+function initServices(){
+  // 预置 HeyGen API Key
+  if(!HeyGenService.isConfigured()){
+    HeyGenService.setApiKey('sk_V2_hgu_kMUqdgGYMyf_9NxQJgVpWclqYNok4g7WD6X8M2MsxwYx');
+  }
+  // 更新所有 Provider 状态
+  updateNanoBananaUI();
+  updateGPTImageUI();
+  updateHeyGenUI();
+}
 function handleLogout(){isLoggedIn=false;document.getElementById('desktop-shell').classList.remove('visible');document.getElementById('auth-overlay').classList.remove('hidden');switchAuthTab('login');navigateTo('create');showToast('已安全退出','info')}
 
 // NAVIGATION
@@ -52,6 +142,14 @@ function navigateTo(page){
       renderMediaLibraryStandalone();
       updateMediaCountsStandalone();
       renderTagFiltersStandalone();
+    }, 50);
+  }
+  // 进入设备页面时刷新自定义设备面板
+  if (page === 'device') {
+    setTimeout(() => {
+      renderCustomDeviceList();
+      renderMultiDeviceChecklist();
+      updateOnlineDeviceCount();
     }, 50);
   }
 }
@@ -376,6 +474,376 @@ function quickConnectDevice(sn, name) {
   showToast(`正在连接 ${name}...`, 'info');
 }
 
+// ========== 自定义设备管理 ==========
+let customDevices = [];
+let customDeviceCounter = 0;
+const MULTI_SELECTED_DEVICES = new Set();
+
+function addCustomDevice() {
+  const prefix = document.getElementById('custom-sn-prefix').value.trim() || 'ANP-';
+  const number = document.getElementById('custom-sn-number').value.trim();
+  const name = document.getElementById('custom-device-name').value.trim() || 'AI NAILS Pro';
+  const connType = document.getElementById('custom-device-conn').value;
+  
+  if (!number) {
+    showToast('请输入设备序号', 'warning');
+    return;
+  }
+  
+  const sn = `${prefix}${number.padStart(4, '0')}`;
+  const deviceId = `custom-${++customDeviceCounter}`;
+  const ip = `192.168.1.${100 + customDevices.length + 1}`;
+  
+  // 检查序号是否已存在
+  if (customDevices.find(d => d.sn === sn)) {
+    showToast(`设备序号 ${sn} 已存在`, 'warning');
+    return;
+  }
+  
+  customDevices.push({
+    id: deviceId,
+    sn: sn,
+    name: name,
+    connType: connType,
+    ip: ip,
+    btId: `ANP-BT-${sn}`,
+    wifiId: `ANP-WF-${sn}`,
+    status: 'disconnected',
+    addedAt: new Date().toLocaleString()
+  });
+  
+  // 自动递增序号
+  const nextNum = parseInt(number) + 1;
+  document.getElementById('custom-sn-number').value = String(nextNum).padStart(4, '0');
+  
+  renderCustomDeviceList();
+  renderMultiDeviceChecklist();
+  updateOnlineDeviceCount();
+  showToast(`设备 ${sn} 已添加`, 'success');
+}
+
+function removeCustomDevice(deviceId) {
+  const device = customDevices.find(d => d.id === deviceId);
+  if (device && device.status === 'connected') {
+    disconnectCustomDevice(device);
+  }
+  customDevices = customDevices.filter(d => d.id !== deviceId);
+  MULTI_SELECTED_DEVICES.delete(deviceId);
+  renderCustomDeviceList();
+  renderMultiDeviceChecklist();
+  updateOnlineDeviceCount();
+  if (device) showToast(`设备 ${device.sn} 已移除`, 'info');
+}
+
+function connectCustomDevice(deviceId) {
+  const device = customDevices.find(d => d.id === deviceId);
+  if (!device) return;
+  
+  // 开启对应的连接方式
+  if (device.connType === 'bt' || device.connType === 'dual') {
+    if (!bluetoothEnabled) {
+      document.getElementById('bt-toggle').checked = true;
+      toggleBluetooth(true);
+    }
+  }
+  if (device.connType === 'wifi' || device.connType === 'dual') {
+    if (!wifiEnabled) {
+      document.getElementById('wifi-toggle').checked = true;
+      toggleWifi(true);
+    }
+  }
+  
+  // 模拟连接
+  showToast(`正在连接 ${device.sn}...`, 'info');
+  
+  setTimeout(() => {
+    device.status = 'connected';
+    if (device.connType === 'bt' || device.connType === 'dual') {
+      connectBluetooth(device.btId, device.name + ' #' + device.sn.slice(-4));
+    }
+    if (device.connType === 'wifi' || device.connType === 'dual') {
+      // 模拟WiFi直接连接
+      wifiConnected = true;
+      wifiDeviceName = device.name + ' #' + device.sn.slice(-4);
+      document.getElementById('wifi-connected-info').classList.remove('hidden');
+      document.getElementById('wifi-dev-name').textContent = wifiDeviceName;
+      document.getElementById('wifi-dev-meta').textContent = `IP: ${device.ip} | SN: ${device.sn} | 已连接`;
+      document.getElementById('wifi-scan-area').classList.add('hidden');
+      document.getElementById('wifi-scan-btn').classList.add('hidden');
+      document.getElementById('wifi-disconnect-btn').classList.remove('hidden');
+      document.getElementById('wifi-status-text').textContent = '已连接';
+      document.getElementById('wifi-status-text').className = 'conn-card-status connected';
+      document.getElementById('wifi-toggle').checked = true;
+      wifiEnabled = true;
+    }
+    
+    renderCustomDeviceList();
+    renderMultiDeviceChecklist();
+    updateOnlineDeviceCount();
+    showToast(`${device.sn} 连接成功`, 'success');
+  }, 1500);
+}
+
+function disconnectCustomDevice(device) {
+  device.status = 'disconnected';
+  // 断开蓝牙
+  if (device.connType === 'bt' || device.connType === 'dual') {
+    if (bluetoothDeviceName === device.name + ' #' + device.sn.slice(-4)) {
+      disconnectBluetooth();
+    }
+  }
+  // 断开WiFi
+  if (device.connType === 'wifi' || device.connType === 'dual') {
+    if (wifiDeviceName === device.name + ' #' + device.sn.slice(-4)) {
+      disconnectWifi();
+    }
+  }
+  renderCustomDeviceList();
+  renderMultiDeviceChecklist();
+  updateOnlineDeviceCount();
+}
+
+function renderCustomDeviceList() {
+  const container = document.getElementById('custom-device-list');
+  if (customDevices.length === 0) {
+    container.innerHTML = '<div class="cd-empty">暂无自定义设备，请在上方输入序号添加</div>';
+  } else {
+    container.innerHTML = customDevices.map(d => `
+      <div class="cd-device-item">
+        <div class="cd-info">
+          <div class="cd-name">🦞 ${d.name} #${d.sn.slice(-4)}</div>
+          <div class="cd-meta">
+            <span>SN: ${d.sn}</span>
+            <span>${d.connType === 'dual' ? '📡+📶' : d.connType === 'wifi' ? '📡' : '📶'} ${d.connType === 'dual' ? 'WiFi+蓝牙' : d.connType === 'wifi' ? 'WiFi' : '蓝牙'}</span>
+            <span>IP: ${d.ip}</span>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span class="cd-status ${d.status === 'connected' ? 'connected' : 'disconnected'}">${d.status === 'connected' ? '已连接' : '未连接'}</span>
+          <div class="cd-actions">
+            ${d.status === 'disconnected' 
+              ? `<button class="btn btn-success btn-xs" onclick="connectCustomDevice('${d.id}')" title="连接">🔗</button>`
+              : `<button class="btn btn-warning btn-xs" onclick="disconnectCustomDevice(customDevices.find(d=>d.id==='${d.id}'))" title="断开">⏏</button>`
+            }
+            <button class="btn btn-danger btn-xs" onclick="removeCustomDevice('${d.id}')" title="移除">✕</button>
+          </div>
+        </div>
+      </div>
+    `).join('');
+  }
+  renderCustomDeviceCards();
+}
+
+function renderCustomDeviceCards() {
+  const dashboard = document.getElementById('custom-device-cards');
+  if (!dashboard) return;
+  
+  if (customDevices.length === 0) {
+    dashboard.innerHTML = '';
+    return;
+  }
+  
+  // 为每个自定义设备生成墨水随机值
+  const getRandomInk = () => Math.floor(Math.random() * 40) + 60; // 60-99%
+  
+  dashboard.innerHTML = customDevices.map((d, i) => {
+    const c = getRandomInk(), m = getRandomInk(), y = getRandomInk(), k = getRandomInk();
+    return `
+    <div class="device-card" style="border-left:3px solid var(--accent3)">
+      <div class="device-name"><span class="status-dot ${d.status === 'connected' ? 'status-online' : 'status-offline'}"></span>${d.name} #${d.sn.slice(-4)} <span class="tag tag-accent" style="font-size:9px;margin-left:4px">自定义</span></div>
+      <div style="font-size:11px;color:var(--text-secondary);margin-top:4px">SN: ${d.sn} · ${d.status === 'connected' ? '在线' : '离线'}</div>
+      <div style="font-size:10px;margin-top:4px;display:flex;gap:6px;flex-wrap:wrap">
+        ${d.connType === 'dual' ? '<span class="tag tag-accent">📡 WiFi</span><span class="tag tag-info">📶 蓝牙</span>' : d.connType === 'wifi' ? '<span class="tag tag-accent">📡 WiFi</span>' : '<span class="tag tag-info">📶 蓝牙</span>'}
+        <span class="tag" style="font-size:9px">IP: ${d.ip}</span>
+      </div>
+      <div class="ink-bars"><div class="ink-bar ink-c" style="width:${c}%"></div><div class="ink-bar ink-m" style="width:${m}%"></div><div class="ink-bar ink-y" style="width:${y}%"></div><div class="ink-bar ink-k" style="width:${k}%"></div></div>
+      <div style="font-size:10px;color:var(--text-tertiary);margin-top:4px;display:flex;gap:12px"><span>C:${c}%</span><span>M:${m}%</span><span>Y:${y}%</span><span>K:${k}%</span></div>
+      <div class="device-actions">
+        <button class="btn btn-secondary btn-xs">测试打印</button>
+        <button class="btn btn-secondary btn-xs">清洁喷头</button>
+        <button class="btn btn-accent btn-xs">校准</button>
+        ${d.status === 'connected' 
+          ? `<button class="btn btn-danger btn-xs" onclick="disconnectCustomDevice(customDevices.find(dd=>dd.id==='${d.id}'))">⏏ 断开</button>`
+          : `<button class="btn btn-success btn-xs" onclick="connectCustomDevice('${d.id}')">🔗 快速连接</button>`
+        }
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ========== 多设备连接设置 ==========
+
+function renderMultiDeviceChecklist() {
+  const container = document.getElementById('multi-device-checklist');
+  if (customDevices.length === 0) {
+    container.innerHTML = '<div class="cd-empty">添加自定义设备后，此处将显示可批量连接的设备列表</div>';
+    document.getElementById('batch-connect-btn').disabled = true;
+    document.getElementById('batch-disconnect-btn').disabled = true;
+    document.getElementById('batch-connect-btn').textContent = '🚀 一键连接全部';
+    document.getElementById('batch-disconnect-btn').textContent = '⏹ 全部断开';
+    return;
+  }
+  
+  const allSelected = customDevices.length > 0 && MULTI_SELECTED_DEVICES.size === customDevices.length;
+  
+  container.innerHTML = `
+    <div class="mdc-item" onclick="selectAllDevices()" style="border-style:dashed;margin-bottom:4px">
+      <div class="mdc-checkbox">${allSelected ? '✓' : ''}</div>
+      <div class="mdc-info">
+        <div class="mdc-name" style="color:var(--text-secondary)">📋 全选/取消全选 (${MULTI_SELECTED_DEVICES.size}/${customDevices.length})</div>
+      </div>
+    </div>
+  ` + customDevices.map(d => `
+    <div class="mdc-item ${MULTI_SELECTED_DEVICES.has(d.id) ? 'selected' : ''}" onclick="toggleMultiDeviceSelect('${d.id}')">
+      <div class="mdc-checkbox">${MULTI_SELECTED_DEVICES.has(d.id) ? '✓' : ''}</div>
+      <div class="mdc-info">
+        <div class="mdc-name">🦞 ${d.name} #${d.sn.slice(-4)}</div>
+        <div class="mdc-sn">SN: ${d.sn} · ${d.connType === 'dual' ? 'WiFi+蓝牙' : d.connType === 'wifi' ? 'WiFi' : '蓝牙'} · <span style="color:${d.status === 'connected' ? 'var(--success)' : 'var(--text-tertiary)'}">${d.status === 'connected' ? '已连接' : '未连接'}</span></div>
+      </div>
+    </div>
+  `).join('');
+  
+  updateBatchButtons();
+}
+
+function toggleMultiDeviceSelect(deviceId) {
+  if (MULTI_SELECTED_DEVICES.has(deviceId)) {
+    MULTI_SELECTED_DEVICES.delete(deviceId);
+  } else {
+    MULTI_SELECTED_DEVICES.add(deviceId);
+  }
+  renderMultiDeviceChecklist();
+}
+
+function selectAllDevices() {
+  if (MULTI_SELECTED_DEVICES.size === customDevices.length) {
+    MULTI_SELECTED_DEVICES.clear();
+  } else {
+    customDevices.forEach(d => MULTI_SELECTED_DEVICES.add(d.id));
+  }
+  renderMultiDeviceChecklist();
+}
+
+function updateBatchButtons() {
+  const connectBtn = document.getElementById('batch-connect-btn');
+  const disconnectBtn = document.getElementById('batch-disconnect-btn');
+  
+  if (customDevices.length === 0) {
+    connectBtn.disabled = true;
+    disconnectBtn.disabled = true;
+    return;
+  }
+  
+  const selectedDevices = customDevices.filter(d => MULTI_SELECTED_DEVICES.has(d.id));
+  const hasSelected = selectedDevices.length > 0;
+  
+  connectBtn.disabled = !hasSelected || selectedDevices.every(d => d.status === 'connected');
+  disconnectBtn.disabled = !hasSelected || selectedDevices.every(d => d.status === 'disconnected');
+  
+  connectBtn.textContent = hasSelected ? `🚀 连接 ${selectedDevices.length} 台设备` : '🚀 一键连接全部';
+  disconnectBtn.textContent = hasSelected ? `⏹ 断开 ${selectedDevices.length} 台设备` : '⏹ 全部断开';
+}
+
+async function batchConnectDevices() {
+  const targetDevices = customDevices.filter(d => MULTI_SELECTED_DEVICES.has(d.id) && d.status === 'disconnected');
+  if (targetDevices.length === 0) {
+    showToast('没有需要连接的设备', 'info');
+    return;
+  }
+  
+  const statusEl = document.getElementById('multi-connect-status');
+  statusEl.innerHTML = `<div class="mc-step progress">🔄 正在批量连接 ${targetDevices.length} 台设备...</div>`;
+  
+  // 先开启蓝牙和WiFi
+  if (targetDevices.some(d => d.connType === 'bt' || d.connType === 'dual')) {
+    if (!bluetoothEnabled) {
+      document.getElementById('bt-toggle').checked = true;
+      toggleBluetooth(true);
+    }
+  }
+  if (targetDevices.some(d => d.connType === 'wifi' || d.connType === 'dual')) {
+    if (!wifiEnabled) {
+      document.getElementById('wifi-toggle').checked = true;
+      toggleWifi(true);
+    }
+  }
+  
+  let successCount = 0;
+  let failCount = 0;
+  let stepsHtml = '';
+  
+  for (let i = 0; i < targetDevices.length; i++) {
+    const d = targetDevices[i];
+    stepsHtml += `<div class="mc-step progress">⏳ 正在连接 ${d.sn}...</div>`;
+    statusEl.innerHTML = stepsHtml;
+    
+    try {
+      await new Promise((resolve) => {
+        setTimeout(() => {
+          d.status = 'connected';
+          resolve();
+        }, 800 + Math.random() * 600);
+      });
+      successCount++;
+      stepsHtml = stepsHtml.replace(`⏳ 正在连接 ${d.sn}...`, `<div class="mc-step done">✅ ${d.sn} 连接成功</div>`);
+    } catch (e) {
+      failCount++;
+      stepsHtml = stepsHtml.replace(`⏳ 正在连接 ${d.sn}...`, `<div class="mc-step error">❌ ${d.sn} 连接失败</div>`);
+    }
+    statusEl.innerHTML = stepsHtml;
+  }
+  
+  statusEl.innerHTML = stepsHtml + `<div class="mc-step ${failCount === 0 ? 'done' : 'error'}" style="margin-top:8px;font-weight:600;border-top:1px solid var(--border);padding-top:8px">📊 批量连接完成：成功 ${successCount} 台${failCount > 0 ? `，失败 ${failCount} 台` : ''}</div>`;
+  
+  renderCustomDeviceList();
+  renderMultiDeviceChecklist();
+  updateOnlineDeviceCount();
+  showToast(`批量连接完成: ${successCount}/${targetDevices.length}`, successCount === targetDevices.length ? 'success' : 'warning');
+}
+
+async function batchDisconnectDevices() {
+  const targetDevices = customDevices.filter(d => MULTI_SELECTED_DEVICES.has(d.id) && d.status === 'connected');
+  if (targetDevices.length === 0) {
+    showToast('没有需要断开的设备', 'info');
+    return;
+  }
+  
+  const statusEl = document.getElementById('multi-connect-status');
+  statusEl.innerHTML = `<div class="mc-step progress">🔄 正在批量断开 ${targetDevices.length} 台设备...</div>`;
+  
+  let successCount = 0;
+  let stepsHtml = '';
+  
+  for (let i = 0; i < targetDevices.length; i++) {
+    const d = targetDevices[i];
+    stepsHtml += `<div class="mc-step progress">⏳ 正在断开 ${d.sn}...</div>`;
+    statusEl.innerHTML = stepsHtml;
+    
+    await new Promise((resolve) => {
+      setTimeout(() => {
+        disconnectCustomDevice(d);
+        successCount++;
+        resolve();
+      }, 400 + Math.random() * 300);
+    });
+    stepsHtml = stepsHtml.replace(`⏳ 正在断开 ${d.sn}...`, `<div class="mc-step done">✅ ${d.sn} 已断开</div>`);
+    statusEl.innerHTML = stepsHtml;
+  }
+  
+  statusEl.innerHTML = stepsHtml + `<div class="mc-step done" style="margin-top:8px;font-weight:600;border-top:1px solid var(--border);padding-top:8px">📊 批量断开完成：成功 ${successCount} 台</div>`;
+  
+  renderCustomDeviceList();
+  renderMultiDeviceChecklist();
+  updateOnlineDeviceCount();
+  showToast(`已断开 ${successCount} 台设备连接`, 'success');
+}
+
+function updateOnlineDeviceCount() {
+  const baseOnline = 12; // 默认在线设备基数
+  const customOnline = customDevices.filter(d => d.status === 'connected').length;
+  document.getElementById('stat-online-count').textContent = baseOnline + customOnline;
+}
+
 // ========== Toast 提示 ==========
 function showToast(msg, type) {
   let toast = document.getElementById('global-toast');
@@ -401,6 +869,7 @@ function showToast(msg, type) {
 
 // ====== 支付系统 (真实API集成) ======
 const PAYMENT_API_BASE = 'http://localhost:3456/api';
+const STRIPE_PAYMENT_LINK = 'https://buy.stripe.com/28E00l0Jx9CB08L2uU8AE00';
 
 function switchPayScene(scene){
   payScene=scene;
@@ -412,7 +881,12 @@ function switchPayScene(scene){
   document.getElementById('pay-scene-device').classList.toggle('hidden',scene!=='device');
   const t={recharge:'账户充值',subscribe:'套餐订阅',device:'设备购买'};
   document.getElementById('payment-title').textContent=t[scene];
-  if(scene==='device')selectedAmount=29900;
+  if(scene==='device'){
+    // 设备购买：默认选1台样机 $1,000，自动切 USD + Stripe/PayPal
+    selectedDeviceOption='sample';
+    selectedAmount=1000;
+    selectCurrency('USD', document.querySelector('#currency-select .currency-chip[onclick*="USD"]'));
+  }
   else if(scene==='subscribe')selectedAmount=299;
   else selectedAmount=1000;
   updatePaymentSummary();
@@ -464,16 +938,37 @@ function selectPayment(method,el){
 function updatePaymentSummary(){
   const sym={CNY:'¥',USD:'$',EUR:'€',USDT:'₮',BTC:'₿'};
   const s=sym[selectedCurrency]||'¥';
-  const mn={wechat:'微信支付',alipay:'支付宝',stripe:'Visa/Mastercard',paypal:'PayPal',crypto:'数字货币',bank:'对公转账'};
+  const mn={wechat:'微信支付',alipay:'支付宝',stripe:'Stripe 国际支付',paypal:'PayPal',crypto:'数字货币',bank:'对公转账'};
   let item='账户充值';
   if(payScene==='subscribe'){
     const tn={basic:'基础版订阅',pro:'专业版订阅',business:'商业版订阅',enterprise:'企业版订阅'};
     item=tn[selectedSubTier]||'套餐订阅';
-  }else if(payScene==='device')item='AI NAILS 智能美甲打印机';
+  }else if(payScene==='device'){
+    const dopt = DEVICE_OPTIONS[selectedDeviceOption];
+    item = 'AI NAILS 打印机 · ' + (dopt ? dopt.qty : '设备购买');
+  }
   document.getElementById('summary-item').textContent=item;
   document.getElementById('summary-amount').textContent=s+selectedAmount.toLocaleString();
   document.getElementById('summary-method').textContent=mn[selectedPayment]||'微信支付';
   document.getElementById('summary-total').textContent=s+selectedAmount.toLocaleString();
+}
+
+// ====== 设备购买选项 ======
+const DEVICE_OPTIONS = {
+  sample: { qty: '1 台 Sample 样机', amount: 1000, unit: 1000 },
+  moq10:  { qty: 'MOQ 10 Set', amount: 9990, unit: 999 },
+  b100:   { qty: '100 Set', amount: 89900, unit: 899 },
+  b200:   { qty: '200 Set', amount: 173800, unit: 869 },
+  b500:   { qty: '500 Set', amount: 399500, unit: 799 },
+  b1000:  { qty: '1,000 Set', amount: 769000, unit: 769 },
+};
+
+function selectDeviceOption(option, el){
+  selectedDeviceOption = option;
+  selectedAmount = DEVICE_OPTIONS[option].amount;
+  document.querySelectorAll('#pay-scene-device .device-buy-card').forEach(c=>c.classList.remove('selected'));
+  if(el)el.classList.add('selected');
+  updatePaymentSummary();
 }
 
 function customAmount(){
@@ -542,7 +1037,10 @@ async function handlePay(){
       showQrPaymentModal(order);
     }else if(selectedPayment==='crypto'){
       showCryptoPaymentModal(order);
-    }else if(selectedPayment==='stripe'||selectedPayment==='paypal'){
+    }else if(selectedPayment==='stripe'){
+      // Stripe 支付 — 直接跳转到 Stripe 支付链接
+      showStripePaymentModal(order);
+    }else if(selectedPayment==='paypal'){
       showCardPaymentModal(order);
     }else{
       // 客户自有支付系统
@@ -562,7 +1060,8 @@ function getItemName(){
     const tn={basic:'基础版订阅',pro:'专业版订阅',business:'商业版订阅',enterprise:'企业版订阅'};
     return tn[selectedSubTier]||'套餐订阅';
   }else if(payScene==='device'){
-    return 'AI NAILS 智能美甲打印机 Pro';
+    const dopt = DEVICE_OPTIONS[selectedDeviceOption];
+    return 'AI NAILS 打印机 · ' + (dopt ? dopt.qty : '设备购买');
   }
   return '账户充值';
 }
@@ -592,12 +1091,35 @@ function showQrPaymentModal(order){
 }
 
 // ====== 数字货币支付弹窗 ======
+const USDT_WALLET_ADDRESS = 'TShgekmwGkW8d2cAiJm57y8aJ9Kb3dgdTx';
+const PAYPAL_EMAIL = 'hmwhtm@yeah.net';
+
 function showCryptoPaymentModal(order){
   document.getElementById('crypto-amount').textContent = order.amount.toLocaleString();
   document.getElementById('crypto-currency').textContent = order.currency;
   document.getElementById('crypto-order-id').textContent = order.orderId;
+  document.getElementById('crypto-address').textContent = USDT_WALLET_ADDRESS;
   document.getElementById('crypto-modal').classList.remove('hidden');
   startPaymentPolling(order.orderId);
+}
+
+// ====== Stripe 支付弹窗 ======
+function showStripePaymentModal(order){
+  const sym={CNY:'¥',USD:'$',EUR:'€'}[order.currency]||'¥';
+  const amount = sym + order.amount.toLocaleString();
+  document.getElementById('stripe-pay-amount').textContent = amount;
+  document.getElementById('stripe-pay-order-id').textContent = order.orderId;
+  document.getElementById('stripe-modal').classList.remove('hidden');
+}
+
+function openStripePaymentLink(){
+  // 在新窗口打开 Stripe 支付链接
+  window.open(STRIPE_PAYMENT_LINK, '_blank');
+  showToast('💳 已打开 Stripe 支付页面，请在浏览器中完成支付', 'info');
+}
+
+function closeStripeModal(){
+  document.getElementById('stripe-modal').classList.add('hidden');
 }
 
 // ====== 银行卡支付弹窗 ======
@@ -605,7 +1127,7 @@ function showCardPaymentModal(order){
   const sym={CNY:'¥',USD:'$',EUR:'€'}[order.currency]||'¥';
   document.getElementById('card-pay-amount').textContent=sym+order.amount.toLocaleString();
   document.getElementById('card-pay-order-id').textContent=order.orderId;
-  document.getElementById('card-pay-method').textContent=order.method==='stripe'?'Visa/Mastercard':'PayPal';
+  document.getElementById('card-pay-method').textContent='PayPal';
   document.getElementById('card-modal').classList.remove('hidden');
 }
 
@@ -891,7 +1413,569 @@ function initPaymentConfig(){
 initPaymentConfig();
 
 // COMMUNITY
-function switchCommunityTab(tab){document.querySelectorAll('#page-community .page-tab').forEach((el,i)=>{el.classList.toggle('active',['feed','market','leaderboard'][i]===tab)});document.getElementById('comm-feed').classList.toggle('hidden',tab!=='feed');document.getElementById('comm-market').classList.toggle('hidden',tab!=='market');document.getElementById('comm-leaderboard').classList.toggle('hidden',tab!=='leaderboard')}
+function switchCommunityTab(tab){document.querySelectorAll('#page-community .page-tab').forEach((el,i)=>{el.classList.toggle('active',['feed','market','leaderboard','share'][i]===tab)});document.getElementById('comm-feed').classList.toggle('hidden',tab!=='feed');document.getElementById('comm-market').classList.toggle('hidden',tab!=='market');document.getElementById('comm-leaderboard').classList.toggle('hidden',tab!=='leaderboard');document.getElementById('comm-share').classList.toggle('hidden',tab!=='share');if(tab==='share'){renderShareWorkGrid();renderShareHistory()}}
+
+// ========== 分享中心 ==========
+let selectedShareWork = null;
+let shareHistory = [];
+const SHARE_PLATFORMS = [
+  { id:'twitter', name:'Twitter/X', icon:'𝕏', color:'#1da1f2', bg:'rgba(29,161,242,0.12)', shareUrl:'https://twitter.com/intent/tweet?text={text}&url={url}', desc:'推文分享' },
+  { id:'facebook', name:'Facebook', icon:'📘', color:'#1877f2', bg:'rgba(24,119,242,0.12)', shareUrl:'https://www.facebook.com/sharer/sharer.php?u={url}&quote={text}', desc:'动态分享' },
+  { id:'instagram', name:'Instagram', icon:'📷', color:'#e4405f', bg:'rgba(228,64,95,0.12)', shareUrl:'', desc:'需API/MCP', directApi:true },
+  { id:'pinterest', name:'Pinterest', icon:'📌', color:'#e60023', bg:'rgba(230,0,35,0.12)', shareUrl:'https://pinterest.com/pin/create/button/?url={url}&description={text}&media={image}', desc:'Pin 分享', supportsImage:true },
+  { id:'linkedin', name:'LinkedIn', icon:'💼', color:'#0a66c2', bg:'rgba(10,102,194,0.12)', shareUrl:'https://www.linkedin.com/sharing/share-offsite/?url={url}&summary={text}', desc:'职业分享' },
+  { id:'tiktok', name:'TikTok', icon:'🎵', color:'#000000', bg:'rgba(0,0,0,0.08)', shareUrl:'', desc:'需API/MCP', directApi:true },
+  { id:'weibo', name:'微博', icon:'🔴', color:'#e6162d', bg:'rgba(230,22,45,0.12)', shareUrl:'https://service.weibo.com/share/share.php?url={url}&title={text}&pic={image}', desc:'微博分享', supportsImage:true },
+  { id:'wechat', name:'微信', icon:'🟢', color:'#07c160', bg:'rgba(7,193,96,0.12)', shareUrl:'', desc:'扫码分享', qrcode:true },
+  { id:'wechat-channel', name:'微信视频号', icon:'🎬', color:'#fa9d3b', bg:'rgba(250,157,59,0.12)', shareUrl:'', desc:'需API/MCP', directApi:true },
+  { id:'xiaohongshu', name:'小红书', icon:'📕', color:'#ff2442', bg:'rgba(255,36,66,0.12)', shareUrl:'', desc:'需API/MCP', directApi:true },
+  { id:'douyin', name:'抖音', icon:'🎶', color:'#000000', bg:'rgba(0,0,0,0.08)', shareUrl:'', desc:'需API/MCP', directApi:true },
+  { id:'kuaishou', name:'快手', icon:'⚡', color:'#ff4906', bg:'rgba(255,73,6,0.12)', shareUrl:'', desc:'需API/MCP', directApi:true },
+  { id:'reddit', name:'Reddit', icon:'🤖', color:'#ff4500', bg:'rgba(255,69,0,0.12)', shareUrl:'https://www.reddit.com/submit?url={url}&title={text}', desc:'社区分享' },
+  { id:'telegram', name:'Telegram', icon:'✈️', color:'#26a5e4', bg:'rgba(38,165,228,0.12)', shareUrl:'https://t.me/share/url?url={url}&text={text}', desc:'频道分享' },
+  { id:'whatsapp', name:'WhatsApp', icon:'💬', color:'#25d366', bg:'rgba(37,211,102,0.12)', shareUrl:'https://api.whatsapp.com/send?text={text}%20{url}', desc:'消息分享' },
+];
+
+// 加载分享历史
+function loadShareHistory() {
+  try {
+    const saved = localStorage.getItem('ai_nails_share_history');
+    if (saved) shareHistory = JSON.parse(saved);
+  } catch(e) { shareHistory = []; }
+}
+loadShareHistory();
+
+function saveShareHistory() {
+  try {
+    localStorage.setItem('ai_nails_share_history', JSON.stringify(shareHistory.slice(0, 50)));
+  } catch(e) {}
+}
+
+function renderShareWorkGrid() {
+  const grid = document.getElementById('share-work-grid');
+  if (!grid) return;
+  
+  // 从媒体库加载美甲图片
+  const nailImages = (typeof mediaLibrary !== 'undefined' ? mediaLibrary : []).filter(m => m.type === 'image');
+  
+  if (nailImages.length === 0) {
+    grid.innerHTML = '<div class="cd-empty">媒体库中暂无美甲作品，请先在创作舱生成或上传作品</div>';
+    return;
+  }
+  
+  grid.innerHTML = nailImages.slice(0, 20).map((m, i) => {
+    const thumb = m.thumbnailUrl || m.url;
+    const isSelected = selectedShareWork && selectedShareWork.id === m.id;
+    return `
+      <div class="share-work-item ${isSelected ? 'selected' : ''}" onclick="selectShareWork('${m.id}', event)" title="${m.name || '美甲作品'}">
+        ${thumb && thumb.startsWith('data:') ? `<img src="${thumb}" alt="${m.name}">` : (m.url && m.url.startsWith('data:') ? `<img src="${m.url}" alt="${m.name}">` : '💅')}
+      </div>
+    `;
+  }).join('');
+}
+
+function selectShareWork(mediaId, event) {
+  const item = (typeof mediaLibrary !== 'undefined' ? mediaLibrary : []).find(m => m.id === mediaId);
+  if (!item) return;
+  
+  selectedShareWork = item;
+  renderShareWorkGrid();
+  
+  // 更新预览
+  const previewImg = document.getElementById('share-preview-img');
+  const previewCaption = document.getElementById('share-preview-caption');
+  if (previewImg) {
+    const thumb = item.thumbnailUrl || item.url;
+    if (thumb && thumb.startsWith('data:')) {
+      previewImg.innerHTML = `<img src="${thumb}" alt="${item.name}">`;
+    } else {
+      previewImg.innerHTML = '💅';
+    }
+  }
+  if (previewCaption) {
+    const caption = document.getElementById('share-caption');
+    previewCaption.textContent = caption ? caption.value : (item.name || '美甲作品');
+  }
+}
+
+function openShareCenter(title, mediaItem) {
+  switchCommunityTab('share');
+  if (mediaItem) {
+    selectedShareWork = mediaItem;
+  }
+  setTimeout(() => {
+    renderShareWorkGrid();
+    if (selectedShareWork) {
+      const previewImg = document.getElementById('share-preview-img');
+      if (previewImg) {
+        const thumb = selectedShareWork.thumbnailUrl || selectedShareWork.url;
+        if (thumb && thumb.startsWith('data:')) {
+          previewImg.innerHTML = `<img src="${thumb}" alt="${selectedShareWork.name}">`;
+        }
+      }
+    }
+  }, 100);
+}
+
+function openSharePlatformModal() {
+  if (!selectedShareWork) {
+    showToast('请先在分享中心选择一件美甲作品', 'warning');
+    switchCommunityTab('share');
+    return;
+  }
+  
+  const modal = document.getElementById('share-platform-modal');
+  if (!modal) return;
+  
+  // 更新预览
+  const previewImg = document.getElementById('share-preview-img');
+  const previewCaption = document.getElementById('share-preview-caption');
+  if (previewImg && selectedShareWork) {
+    const thumb = selectedShareWork.thumbnailUrl || selectedShareWork.url;
+    if (thumb && thumb.startsWith('data:')) {
+      previewImg.innerHTML = `<img src="${thumb}" alt="${selectedShareWork.name}">`;
+    } else {
+      previewImg.innerHTML = '💅';
+    }
+  }
+  if (previewCaption) {
+    const captionInput = document.getElementById('share-caption');
+    previewCaption.textContent = captionInput ? captionInput.value : (selectedShareWork ? selectedShareWork.name : '美甲作品');
+  }
+  
+  renderSharePlatformGrid();
+  modal.classList.remove('hidden');
+}
+
+function closeSharePlatformModal() {
+  document.getElementById('share-platform-modal').classList.add('hidden');
+}
+
+function renderSharePlatformGrid() {
+  const grid = document.getElementById('share-platform-grid');
+  if (!grid) return;
+  
+  grid.innerHTML = SHARE_PLATFORMS.map(p => `
+    <div class="share-platform-card" onclick="shareToPlatform('${p.id}')">
+      <div class="sp-icon" style="background:${p.bg};color:${p.color}">${p.icon}</div>
+      <div class="sp-info">
+        <div class="sp-name">${p.name}</div>
+        <div class="sp-desc">${p.desc}</div>
+      </div>
+      <div class="sp-action">分享 →</div>
+    </div>
+  `).join('');
+}
+
+function shareToPlatform(platformId) {
+  const platform = SHARE_PLATFORMS.find(p => p.id === platformId);
+  if (!platform) return;
+  
+  const captionInput = document.getElementById('share-caption');
+  const text = encodeURIComponent(captionInput ? captionInput.value : 'AI NAILS 智能美甲设计');
+  const shareUrl = encodeURIComponent('https://ainails.ai/share/' + (selectedShareWork ? selectedShareWork.id : ''));
+  const imageUrl = selectedShareWork ? encodeURIComponent(selectedShareWork.url || '') : '';
+  
+  // 记录分享
+  const record = {
+    id: 'sh_' + Date.now(),
+    platform: platformId,
+    platformName: platform.name,
+    platformIcon: platform.icon,
+    workName: selectedShareWork ? selectedShareWork.name : '美甲作品',
+    time: new Date().toISOString(),
+    status: 'success'
+  };
+  
+  if (platform.qrcode) {
+    // 微信 - 显示二维码弹窗
+    closeSharePlatformModal();
+    showWechatQrModal(text, shareUrl);
+    record.status = 'success';
+  } else if (platform.directApi) {
+    // 需要 API/MCP 的平台
+    closeSharePlatformModal();
+    const apiKeys = loadApiKeys();
+    if (apiKeys[platformId]) {
+      shareViaApi(platform, text, imageUrl, record);
+    } else {
+      showToast(`📤 ${platform.name} 需要先配置 API 密钥，请在 API 配置中设置`, 'warning');
+      record.status = 'failed';
+      setTimeout(() => openApiConfig(), 1000);
+    }
+  } else if (platform.shareUrl) {
+    // 直接跳转分享
+    let url = platform.shareUrl
+      .replace('{text}', text)
+      .replace('{url}', shareUrl)
+      .replace('{image}', imageUrl);
+    
+    closeSharePlatformModal();
+    window.open(url, '_blank');
+    showToast(`✅ 已打开 ${platform.name} 分享页面`, 'success');
+  }
+  
+  shareHistory.unshift(record);
+  saveShareHistory();
+  renderShareHistory();
+}
+
+function showWechatQrModal(text, url) {
+  // 显示微信分享二维码
+  const qrOverlay = document.createElement('div');
+  qrOverlay.className = 'share-modal-overlay';
+  qrOverlay.innerHTML = `
+    <div class="share-modal-card" style="max-width:360px;text-align:center">
+      <div class="share-modal-header">
+        <h3>🟢 微信扫码分享</h3>
+        <button class="btn btn-xs btn-secondary" onclick="this.closest('.share-modal-overlay').remove()">✕</button>
+      </div>
+      <div class="share-modal-body">
+        <div style="background:#fff;padding:20px;border-radius:12px;margin-bottom:12px">
+          <div style="width:180px;height:180px;background:#f0f0f0;margin:0 auto;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:80px">📱</div>
+        </div>
+        <div style="font-size:12px;color:var(--text-secondary)">请使用微信扫描二维码<br>分享美甲作品到朋友圈或群聊</div>
+        <div style="margin-top:12px;font-size:10px;color:var(--text-tertiary)">链接: ${decodeURIComponent(url).substring(0,40)}...</div>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(qrOverlay);
+  qrOverlay.addEventListener('click', (e) => {
+    if (e.target === qrOverlay) qrOverlay.remove();
+  });
+}
+
+async function shareViaApi(platform, text, imageUrl, record) {
+  showToast(`🔄 正在通过 API 分享到 ${platform.name}...`, 'info');
+  
+  // 模拟 API 分享
+  await new Promise(resolve => setTimeout(resolve, 2000));
+  
+  // 随机模拟成功/失败
+  const success = Math.random() > 0.2;
+  record.status = success ? 'success' : 'failed';
+  
+  if (success) {
+    showToast(`✅ 已成功分享到 ${platform.name}`, 'success');
+  } else {
+    showToast(`❌ 分享到 ${platform.name} 失败，请检查 API 配置`, 'error');
+    record.status = 'failed';
+  }
+  
+  shareHistory.unshift(record);
+  saveShareHistory();
+  renderShareHistory();
+}
+
+function quickShareToMedia(action) {
+  if (action === 'copy-link') {
+    if (!selectedShareWork) {
+      showToast('请先选择一件作品', 'warning');
+      return;
+    }
+    const link = `https://ainails.ai/share/${selectedShareWork.id}`;
+    navigator.clipboard.writeText(link).then(() => {
+      showToast('✅ 分享链接已复制到剪贴板', 'success');
+      addShareRecord('copy-link', '🔗', '复制链接', 'success');
+    }).catch(() => {
+      showToast('❌ 复制失败，请手动复制', 'error');
+    });
+  } else if (action === 'copy-html') {
+    if (!selectedShareWork) {
+      showToast('请先选择一件作品', 'warning');
+      return;
+    }
+    const caption = document.getElementById('share-caption');
+    const html = `<div style="text-align:center;max-width:400px;font-family:sans-serif">
+  <img src="${selectedShareWork.url}" style="width:100%;border-radius:12px" alt="${selectedShareWork.name}">
+  <p style="color:#666;margin-top:8px">${caption ? caption.value : 'AI NAILS 智能美甲设计'}</p>
+  <p style="font-size:12px;color:#999">由 AI NAILS 生成 · ainails.ai</p>
+</div>`;
+    navigator.clipboard.writeText(html).then(() => {
+      showToast('✅ HTML 嵌入代码已复制', 'success');
+      addShareRecord('copy-html', '📋', '复制HTML', 'success');
+    }).catch(() => {
+      showToast('❌ 复制失败', 'error');
+    });
+  }
+}
+
+function addShareRecord(platform, icon, name, status) {
+  shareHistory.unshift({
+    id: 'sh_' + Date.now(),
+    platform: platform,
+    platformName: name,
+    platformIcon: icon,
+    workName: selectedShareWork ? selectedShareWork.name : '美甲作品',
+    time: new Date().toISOString(),
+    status: status
+  });
+  saveShareHistory();
+  renderShareHistory();
+}
+
+function renderShareHistory() {
+  const container = document.getElementById('share-history');
+  if (!container) return;
+  
+  if (shareHistory.length === 0) {
+    container.innerHTML = '<div class="cd-empty">暂无分享记录</div>';
+    return;
+  }
+  
+  container.innerHTML = shareHistory.slice(0, 20).map(r => {
+    const time = new Date(r.time);
+    const timeStr = time.toLocaleString('zh-CN', { month:'short', day:'numeric', hour:'2-digit', minute:'2-digit' });
+    return `
+      <div class="share-history-item">
+        <span class="sh-platform">${r.platformIcon}</span>
+        <div class="sh-info">
+          <div class="sh-title">${r.platformName} · ${r.workName}</div>
+          <div class="sh-time">${timeStr}</div>
+        </div>
+        <span class="sh-status ${r.status}">${r.status === 'success' ? '成功' : '失败'}</span>
+      </div>
+    `;
+  }).join('');
+}
+
+// ========== MCP 配置 ==========
+function openMcpConfig() {
+  document.getElementById('mcp-config-modal').classList.remove('hidden');
+}
+
+function closeMcpConfig() {
+  document.getElementById('mcp-config-modal').classList.add('hidden');
+}
+
+function testMcpServer(platformId) {
+  const items = document.querySelectorAll('#mcp-server-list .mcp-server-item');
+  items.forEach(item => {
+    const statusEl = item.querySelector('.mcp-status');
+    const btn = item.querySelector('button');
+    if (btn && btn.textContent.includes('测试') && item.querySelector('.mcp-server-name')?.textContent?.toLowerCase().includes(platformId)) {
+      statusEl.textContent = '测试中...';
+      statusEl.className = 'mcp-status testing';
+    }
+  });
+  
+  setTimeout(() => {
+    items.forEach(item => {
+      const statusEl = item.querySelector('.mcp-status');
+      const btn = item.querySelector('button');
+      if (statusEl && statusEl.textContent === '测试中...') {
+        const success = Math.random() > 0.3;
+        statusEl.textContent = success ? '已连接' : '连接失败';
+        statusEl.className = 'mcp-status ' + (success ? 'connected' : 'disconnected');
+        if (btn) btn.textContent = success ? '测试' : '重试';
+      }
+    });
+    showToast(`🔌 MCP 服务器测试完成`, 'info');
+  }, 1500);
+}
+
+function addCustomMcpServer() {
+  const name = document.getElementById('mcp-name-input').value.trim();
+  const url = document.getElementById('mcp-url-input').value.trim();
+  
+  if (!name || !url) {
+    showToast('请填写 MCP 名称和地址', 'warning');
+    return;
+  }
+  
+  const list = document.getElementById('mcp-server-list');
+  const item = document.createElement('div');
+  item.className = 'mcp-server-item';
+  item.innerHTML = `
+    <div class="mcp-server-info">
+      <div class="mcp-server-name">🔧 ${name}</div>
+      <div class="mcp-server-url">${url}</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:6px">
+      <span class="mcp-status connected">已添加</span>
+      <button class="btn btn-xs btn-secondary" onclick="testMcpServer('${name.toLowerCase()}')">测试</button>
+    </div>
+  `;
+  list.appendChild(item);
+  
+  document.getElementById('mcp-name-input').value = '';
+  document.getElementById('mcp-url-input').value = '';
+  showToast(`✅ MCP 服务器 "${name}" 已添加`, 'success');
+}
+
+function toggleMcpAutoShare(enabled) {
+  localStorage.setItem('ai_nails_mcp_auto_share', enabled ? '1' : '0');
+  showToast(enabled ? '✅ 已开启 MCP 自动分享' : '⏸ 已关闭 MCP 自动分享', 'info');
+}
+
+// ========== API 配置 ==========
+let apiKeys = {};
+
+function loadApiKeys() {
+  try {
+    const saved = localStorage.getItem('ai_nails_api_keys');
+    if (saved) apiKeys = JSON.parse(saved);
+  } catch(e) { apiKeys = {}; }
+  return apiKeys;
+}
+loadApiKeys();
+
+function saveApiKeysToStorage() {
+  try {
+    localStorage.setItem('ai_nails_api_keys', JSON.stringify(apiKeys));
+  } catch(e) {}
+}
+
+function openApiConfig() {
+  document.getElementById('api-config-modal').classList.remove('hidden');
+  updateApiConfigStatus();
+}
+
+function closeApiConfig() {
+  document.getElementById('api-config-modal').classList.add('hidden');
+}
+
+function updateApiConfigStatus() {
+  const items = document.querySelectorAll('#api-config-list .api-config-item');
+  items.forEach(item => {
+    const btn = item.querySelector('button');
+    const nameEl = item.querySelector('.api-platform-name');
+    if (!nameEl || !btn) return;
+    
+    const platformId = btn.getAttribute('onclick')?.match(/configureApiKey\('(\w+)'\)/)?.[1];
+    if (platformId && apiKeys[platformId]) {
+      btn.textContent = '已配置 ✓';
+      btn.className = 'btn btn-xs btn-success';
+      const descEl = item.querySelector('.api-platform-desc');
+      if (descEl) descEl.textContent = '已配置 · 点击修改';
+    }
+  });
+}
+
+function configureApiKey(platformId) {
+  currentApiPlatform = platformId;
+  
+  const platformNames = {
+    twitter: 'Twitter/X API',
+    instagram: 'Instagram Graph API',
+    pinterest: 'Pinterest API',
+    tiktok: 'TikTok API',
+    linkedin: 'LinkedIn API',
+    wechat: '微信公众平台',
+    'wechat-channel': '微信视频号开放平台',
+    xiaohongshu: '小红书开放平台',
+    douyin: '抖音开放平台',
+    kuaishou: '快手开放平台'
+  };
+  
+  document.getElementById('api-key-form-title').textContent = '🔑 ' + (platformNames[platformId] || platformId);
+  
+  const existing = apiKeys[platformId] || {};
+  const fields = document.getElementById('api-key-form-fields');
+  
+  let fieldHtml = '';
+  if (platformId === 'twitter') {
+    fieldHtml = `
+      <div class="form-group"><label>API Key</label><input class="form-input" id="ak-api-key" value="${existing.apiKey || ''}" placeholder="输入 API Key"></div>
+      <div class="form-group"><label>API Secret</label><input class="form-input" id="ak-api-secret" type="password" value="${existing.apiSecret || ''}" placeholder="输入 API Secret"></div>
+      <div class="form-group"><label>Access Token</label><input class="form-input" id="ak-access-token" value="${existing.accessToken || ''}" placeholder="输入 Access Token"></div>
+      <div class="form-group"><label>Access Token Secret</label><input class="form-input" id="ak-token-secret" type="password" value="${existing.tokenSecret || ''}" placeholder="输入 Access Token Secret"></div>
+    `;
+  } else if (platformId === 'instagram') {
+    fieldHtml = `
+      <div class="form-group"><label>App ID</label><input class="form-input" id="ak-app-id" value="${existing.appId || ''}" placeholder="输入 App ID"></div>
+      <div class="form-group"><label>App Secret</label><input class="form-input" id="ak-app-secret" type="password" value="${existing.appSecret || ''}" placeholder="输入 App Secret"></div>
+      <div class="form-group"><label>Access Token</label><input class="form-input" id="ak-access-token" value="${existing.accessToken || ''}" placeholder="输入长期 Access Token"></div>
+    `;
+  } else if (platformId === 'pinterest') {
+    fieldHtml = `
+      <div class="form-group"><label>App ID</label><input class="form-input" id="ak-app-id" value="${existing.appId || ''}" placeholder="输入 App ID"></div>
+      <div class="form-group"><label>App Secret</label><input class="form-input" id="ak-app-secret" type="password" value="${existing.appSecret || ''}" placeholder="输入 App Secret"></div>
+      <div class="form-group"><label>Access Token</label><input class="form-input" id="ak-access-token" value="${existing.accessToken || ''}" placeholder="输入 Access Token"></div>
+    `;
+  } else if (platformId === 'tiktok') {
+    fieldHtml = `
+      <div class="form-group"><label>Client Key</label><input class="form-input" id="ak-client-key" value="${existing.clientKey || ''}" placeholder="输入 Client Key"></div>
+      <div class="form-group"><label>Client Secret</label><input class="form-input" id="ak-client-secret" type="password" value="${existing.clientSecret || ''}" placeholder="输入 Client Secret"></div>
+    `;
+  } else if (platformId === 'linkedin') {
+    fieldHtml = `
+      <div class="form-group"><label>Client ID</label><input class="form-input" id="ak-client-id" value="${existing.clientId || ''}" placeholder="输入 Client ID"></div>
+      <div class="form-group"><label>Client Secret</label><input class="form-input" id="ak-client-secret" type="password" value="${existing.clientSecret || ''}" placeholder="输入 Client Secret"></div>
+    `;
+  } else if (platformId === 'wechat') {
+    fieldHtml = `
+      <div class="form-group"><label>AppID</label><input class="form-input" id="ak-app-id" value="${existing.appId || ''}" placeholder="输入 AppID"></div>
+      <div class="form-group"><label>AppSecret</label><input class="form-input" id="ak-app-secret" type="password" value="${existing.appSecret || ''}" placeholder="输入 AppSecret"></div>
+    `;
+  } else if (platformId === 'xiaohongshu') {
+    fieldHtml = `
+      <div class="form-group"><label>AppKey</label><input class="form-input" id="ak-app-key" value="${existing.appKey || ''}" placeholder="输入 AppKey"></div>
+      <div class="form-group"><label>AppSecret</label><input class="form-input" id="ak-app-secret" type="password" value="${existing.appSecret || ''}" placeholder="输入 AppSecret"></div>
+    `;
+  } else if (platformId === 'wechat-channel') {
+    fieldHtml = `
+      <div class="form-group"><label>AppID</label><input class="form-input" id="ak-app-id" value="${existing.appId || ''}" placeholder="输入 AppID"></div>
+      <div class="form-group"><label>AppSecret</label><input class="form-input" id="ak-app-secret" type="password" value="${existing.appSecret || ''}" placeholder="输入 AppSecret"></div>
+      <div class="form-group"><label>Access Token</label><input class="form-input" id="ak-access-token" value="${existing.accessToken || ''}" placeholder="输入 Access Token"></div>
+    `;
+  } else if (platformId === 'douyin') {
+    fieldHtml = `
+      <div class="form-group"><label>Client Key (AppKey)</label><input class="form-input" id="ak-client-key" value="${existing.clientKey || ''}" placeholder="输入 Client Key"></div>
+      <div class="form-group"><label>Client Secret (AppSecret)</label><input class="form-input" id="ak-client-secret" type="password" value="${existing.clientSecret || ''}" placeholder="输入 Client Secret"></div>
+      <div class="form-group"><label>Access Token</label><input class="form-input" id="ak-access-token" value="${existing.accessToken || ''}" placeholder="输入 Access Token"></div>
+    `;
+  } else if (platformId === 'kuaishou') {
+    fieldHtml = `
+      <div class="form-group"><label>App ID</label><input class="form-input" id="ak-app-id" value="${existing.appId || ''}" placeholder="输入 App ID"></div>
+      <div class="form-group"><label>App Secret</label><input class="form-input" id="ak-app-secret" type="password" value="${existing.appSecret || ''}" placeholder="输入 App Secret"></div>
+      <div class="form-group"><label>Access Token</label><input class="form-input" id="ak-access-token" value="${existing.accessToken || ''}" placeholder="输入 Access Token"></div>
+    `;
+  }
+  
+  fields.innerHTML = fieldHtml;
+  document.getElementById('api-key-form-modal').classList.remove('hidden');
+}
+
+let currentApiPlatform = '';
+
+function closeApiKeyForm() {
+  document.getElementById('api-key-form-modal').classList.add('hidden');
+  currentApiPlatform = '';
+}
+
+function saveApiKeys() {
+  if (!currentApiPlatform) return;
+  
+  const keys = {};
+  
+  // 读取所有可能的字段
+  const fieldMap = {
+    'ak-api-key': 'apiKey', 'ak-api-secret': 'apiSecret',
+    'ak-access-token': 'accessToken', 'ak-token-secret': 'tokenSecret',
+    'ak-app-id': 'appId', 'ak-app-secret': 'appSecret',
+    'ak-client-key': 'clientKey', 'ak-client-secret': 'clientSecret',
+    'ak-client-id': 'clientId', 'ak-app-key': 'appKey'
+  };
+  
+  Object.entries(fieldMap).forEach(([inputId, keyName]) => {
+    const input = document.getElementById(inputId);
+    if (input && input.value.trim()) {
+      keys[keyName] = input.value.trim();
+    }
+  });
+  
+  if (Object.keys(keys).length === 0) {
+    showToast('请至少填写一个密钥字段', 'warning');
+    return;
+  }
+  
+  apiKeys[currentApiPlatform] = keys;
+  saveApiKeysToStorage();
+  closeApiKeyForm();
+  updateApiConfigStatus();
+  showToast('✅ API 密钥已保存', 'success');
+}
 
 // AGENTS
 function switchAgentTab(tab){document.querySelectorAll('#page-agents .page-tab').forEach((el,i)=>{el.classList.toggle('active',['installed','hub','custom','chat'][i]===tab)});document.getElementById('agent-installed').classList.toggle('hidden',tab!=='installed');document.getElementById('agent-hub').classList.toggle('hidden',tab!=='hub');document.getElementById('agent-custom').classList.toggle('hidden',tab!=='custom');document.getElementById('agent-chat').classList.toggle('hidden',tab!=='chat');if(tab==='hub'&&typeof renderSkillHub==='function')renderSkillHub();if(tab==='installed'&&typeof renderInstalledSkills==='function')renderInstalledSkills()}
@@ -924,6 +2008,193 @@ function addCustomSkill(){
   showToast(`✅ Skill "${name}" 已添加！`,'success');
 }
 
+// ====== 自定义 Skill V2（支持自然语言生成 / ClawHub生图 / ClawHub生视频） ======
+function addCustomSkillV2(){
+  const name = document.getElementById('custom-skill-name').value.trim();
+  const version = document.getElementById('custom-skill-version').value.trim() || 'v1.0.0';
+  const desc = document.getElementById('custom-skill-desc').value.trim();
+  const tags = document.getElementById('custom-skill-tags').value.trim();
+  const provider = document.getElementById('custom-skill-provider').value;
+  const prompt = document.getElementById('custom-skill-prompt').value.trim();
+  const triggers = document.getElementById('custom-skill-triggers').value.trim();
+  
+  if(!name||!desc){showToast('请填写 Skill 名称和描述','error');return}
+  
+  const providerNames = {
+    'custom': '自定义·自然语言生成',
+    'clawhub-image': 'ClawHub 生图',
+    'clawhub-video': 'ClawHub 生视频',
+    'anygen': 'AnyGen',
+    'heygen': 'HeyGen',
+    'creatok': 'CreatOK',
+    'clipcat': 'Clipcat',
+    'revor': 'Revor',
+    'nanobanana': 'NanoBanana'
+  };
+  
+  const providerIcons = {
+    'custom': '💬',
+    'clawhub-image': '🎨',
+    'clawhub-video': '🎬',
+    'anygen': '📊',
+    'heygen': '🎥',
+    'creatok': '🖼️',
+    'clipcat': '🖌️',
+    'revor': '📈',
+    'nanobanana': '🍌'
+  };
+  
+  const providerColors = {
+    'custom': 'tag-accent2',
+    'clawhub-image': 'tag-accent',
+    'clawhub-video': 'tag-accent',
+    'anygen': 'tag-gold',
+    'heygen': 'tag-success',
+    'creatok': 'tag-accent',
+    'clipcat': 'tag-accent',
+    'revor': 'tag-accent',
+    'nanobanana': 'tag-accent'
+  };
+  
+  const tagList = tags ? tags.split(',').map(t => t.trim()).filter(t => t) : [];
+  tagList.push(providerNames[provider] || provider);
+  
+  const tagHtml = tagList.map(t => {
+    const isProvider = Object.values(providerNames).includes(t);
+    return `<span class="tag ${isProvider ? providerColors[provider] : 'tag-accent'}">${t}</span>`;
+  }).join('');
+  
+  // 保存到 localStorage 的自定义 skills 列表
+  const customSkills = JSON.parse(localStorage.getItem('ai_nails_custom_skills') || '[]');
+  customSkills.push({
+    id: 'custom_' + Date.now(),
+    name, version, desc, tags: tagList, provider, prompt, triggers,
+    icon: providerIcons[provider],
+    createdAt: new Date().toISOString()
+  });
+  localStorage.setItem('ai_nails_custom_skills', JSON.stringify(customSkills));
+  
+  // 渲染到已安装列表
+  const grid = document.getElementById('installed-skills-grid');
+  const card = document.createElement('div');
+  card.className = 'skill-card';
+  card.dataset.skillId = customSkills[customSkills.length - 1].id;
+  card.innerHTML = `<div class="skill-header"><span class="skill-icon">${providerIcons[provider]}</span><div><div class="skill-name">${name}</div><div class="skill-version">${version} · ${providerNames[provider]}</div></div></div>
+    <div class="skill-desc">${desc}</div>
+    ${prompt ? `<div style="font-size:10px;color:var(--text-tertiary);margin-top:4px;background:var(--bg-tertiary);padding:6px;border-radius:4px;max-height:40px;overflow:hidden">💡 ${prompt.substring(0, 80)}${prompt.length>80?'...':''}</div>` : ''}
+    <div class="skill-tags">${tagHtml}</div>
+    <div class="skill-actions">
+      ${provider === 'clawhub-image' ? '<button class="btn btn-xs btn-primary" onclick="executeClawHubImage()">▶ 生图</button>' : ''}
+      ${provider === 'clawhub-video' ? '<button class="btn btn-xs btn-primary" onclick="executeClawHubVideo()">▶ 生视频</button>' : ''}
+      ${provider === 'custom' ? '<button class="btn btn-xs btn-primary" onclick="executeCustomPrompt(\'' + (customSkills[customSkills.length - 1].id) + '\')">▶ 生成</button>' : ''}
+      <button class="btn btn-xs btn-secondary" onclick="openCustomSkillConfig('${customSkills[customSkills.length - 1].id}')">⚙</button>
+      <button class="btn btn-xs btn-danger" onclick="removeCustomSkill('${customSkills[customSkills.length - 1].id}',this)">🗑</button>
+      <label class="toggle-switch"><input type="checkbox" checked><span class="toggle-slider"></span></label>
+    </div>`;
+  grid.appendChild(card);
+  
+  // 清空表单
+  document.getElementById('custom-skill-name').value='';
+  document.getElementById('custom-skill-version').value='';
+  document.getElementById('custom-skill-desc').value='';
+  document.getElementById('custom-skill-tags').value='';
+  document.getElementById('custom-skill-prompt').value='';
+  document.getElementById('custom-skill-triggers').value='';
+  
+  showToast(`✅ Skill "${name}" (${providerNames[provider]}) 已添加！`,'success');
+}
+
+function removeCustomSkill(id, btn){
+  const customSkills = JSON.parse(localStorage.getItem('ai_nails_custom_skills') || '[]');
+  const idx = customSkills.findIndex(s => s.id === id);
+  if (idx >= 0) customSkills.splice(idx, 1);
+  localStorage.setItem('ai_nails_custom_skills', JSON.stringify(customSkills));
+  if(btn) btn.closest('.skill-card').remove();
+  showToast('🗑 Skill 已移除','info');
+}
+
+function openCustomSkillConfig(id){
+  const customSkills = JSON.parse(localStorage.getItem('ai_nails_custom_skills') || '[]');
+  const skill = customSkills.find(s => s.id === id);
+  if(!skill){ showToast('Skill 未找到','error'); return; }
+  showToast(`⚙ ${skill.name} - ${skill.provider} 配置`, 'info');
+}
+
+// ====== ClawHub 生图 ======
+function executeClawHubImage(){
+  const prompt = prompt('🎨 ClawHub 生图 — 请输入图片描述：', '赛博朋克风格美甲设计，霓虹灯色彩');
+  if(!prompt) return;
+  showToast('🎨 ClawHub 正在生成图片...', 'info');
+  // 模拟 ClawHub 生图
+  setTimeout(() => {
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512"><defs><linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#ff0080"/><stop offset="50%" style="stop-color:#7928ca"/><stop offset="100%" style="stop-color:#00f0ff"/></linearGradient></defs><rect width="512" height="512" fill="#0a0a1a" rx="20"/><circle cx="256" cy="220" r="80" fill="url(#g)" opacity="0.8"/><text x="256" y="340" text-anchor="middle" fill="#00f0ff" font-size="14" font-family="sans-serif">${prompt.substring(0, 30)}</text><text x="256" y="380" text-anchor="middle" fill="#666" font-size="10">ClawHub · AI Generated</text></svg>`;
+    const dataUrl = 'data:image/svg+xml,' + encodeURIComponent(svg);
+    if(typeof addToMediaLibrary === 'function'){
+      addToMediaLibrary({ name: `ClawHub生图 - ${prompt.substring(0,20)}`, type:'image', source:'ai-generated', url: dataUrl, thumbnailUrl: dataUrl, tags: ['AI生成','ClawHub','生图'], size: Math.round(svg.length * 0.75), fromProvider: 'ClawHub' });
+    }
+    showToast('✅ ClawHub 图片生成完成！已保存到资源库','success');
+  }, 1500);
+}
+
+// ====== ClawHub 生视频 ======
+function executeClawHubVideo(){
+  const prompt = prompt('🎬 ClawHub 生视频 — 请输入视频主题：', 'AI美甲打印机产品展示视频，30秒');
+  if(!prompt) return;
+  showToast('🎬 ClawHub 正在生成视频...（预计1-2分钟）', 'info');
+  // 模拟 ClawHub 生视频
+  setTimeout(() => {
+    const videoUrl = 'https://assets.mixkit.co/videos/preview/mixkit-woman-painting-her-nails-40887-large.mp4';
+    if(typeof addToMediaLibrary === 'function'){
+      addToMediaLibrary({ name: `ClawHub视频 - ${prompt.substring(0,20)}`, type:'video', source:'ai-generated', url: videoUrl, thumbnailUrl: null, tags: ['AI生成','ClawHub','生视频','营销视频'], size: 0, fromProvider: 'ClawHub' });
+    }
+    showToast('✅ ClawHub 视频生成完成！已保存到营销视频资源库','success');
+  }, 2000);
+}
+
+// ====== 自定义自然语言生成 ======
+function executeCustomPrompt(id){
+  const customSkills = JSON.parse(localStorage.getItem('ai_nails_custom_skills') || '[]');
+  const skill = customSkills.find(s => s.id === id);
+  if(!skill){ showToast('Skill 未找到','error'); return; }
+  
+  const userInput = prompt(`💬 ${skill.name} — 请输入你的需求：`, skill.triggers || '');
+  if(!userInput) return;
+  
+  showToast(`💬 ${skill.name} 正在处理...`, 'info');
+  
+  // 模拟自然语言生成
+  setTimeout(() => {
+    const result = `基于 "${skill.name}" 的生成结果：
+---
+📝 输入：${userInput}
+💡 System Prompt：${skill.prompt || '通用创意生成'}
+🎯 标签：${skill.tags.join(', ')}
+---
+✨ 生成内容：
+"根据你的需求，我为你生成了以下 ${skill.name} 相关的创意方案。结合 ${skill.prompt ? skill.prompt.substring(0, 50) : 'AI创意引擎'} 的风格指引，这里是最佳输出结果..."
+
+[AI 生成内容预览]`;
+    
+    // 显示结果弹窗
+    const resultDiv = document.createElement('div');
+    resultDiv.style.cssText = 'position:fixed;inset:0;z-index:3000;background:rgba(0,0,0,0.8);display:flex;align-items:center;justify-content:center';
+    resultDiv.innerHTML = `<div style="background:var(--bg-elevated);border-radius:var(--radius);padding:24px;max-width:600px;width:90%;max-height:80vh;overflow-y:auto">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+        <h3 style="margin:0">${skill.icon} ${skill.name} 生成结果</h3>
+        <button onclick="this.closest('div[style*=fixed]').remove()" style="background:none;border:none;color:#fff;font-size:20px;cursor:pointer">✕</button>
+      </div>
+      <pre style="background:var(--bg-tertiary);padding:16px;border-radius:8px;font-size:12px;line-height:1.6;white-space:pre-wrap;color:var(--text-primary)">${result}</pre>
+      <div style="margin-top:12px;display:flex;gap:8px">
+        <button class="btn btn-sm btn-primary" onclick="navigator.clipboard.writeText(this.parentElement.previousElementSibling.textContent);showToast('✅ 已复制','success')">📋 复制结果</button>
+        <button class="btn btn-sm btn-secondary" onclick="this.closest('div[style*=fixed]').remove()">关闭</button>
+      </div>
+    </div>`;
+    document.body.appendChild(resultDiv);
+    
+    showToast(`✅ ${skill.name} 生成完成！`, 'success');
+  }, 1200);
+}
+
 function sendSkillChat(){
   const input=document.getElementById('skill-chat-input');
   const msg=input.value.trim();
@@ -941,14 +2212,20 @@ function sendSkillChat(){
 // AI PROVIDERS
 function setDefaultProvider(provider){
   defaultProvider=provider;
-  const names={openai:'OpenAI',anthropic:'Anthropic',google:'Google Gemini',deepseek:'DeepSeek',qwen:'通义千问',custom:'自定义端点',nanobanana:'Nano Banana Pro',ollama:'Ollama 本地模型'};
+  const names={openai:'OpenAI',anthropic:'Anthropic',google:'Google Gemini',deepseek:'DeepSeek',qwen:'通义千问',custom:'自定义端点',nanobanana:'Nano Banana Pro',ollama:'Ollama 本地模型',gptimage:'GPT Image 2',heygen:'HeyGen 数字人'};
   document.getElementById('default-provider-name').textContent=names[provider]||provider;
-  document.getElementById('status-provider').textContent=provider==='openai'?'GPT-4o':provider==='anthropic'?'Claude':provider==='google'?'Gemini':provider==='deepseek'?'DeepSeek':provider==='qwen'?'Qwen':provider==='nanobanana'?'Nano Banana':provider==='ollama'?'Ollama':'Custom';
+  document.getElementById('status-provider').textContent=provider==='openai'?'GPT-4o':provider==='anthropic'?'Claude':provider==='google'?'Gemini':provider==='deepseek'?'DeepSeek':provider==='qwen'?'Qwen':provider==='nanobanana'?'Nano Banana':provider==='ollama'?'Ollama':provider==='gptimage'?'GPT Image 2':provider==='heygen'?'HeyGen':'Custom';
   document.querySelectorAll('.provider-card').forEach(c=>c.classList.remove('active-provider'));
   const card=document.getElementById('provider-'+provider);
   if(card)card.classList.add('active-provider');
   if(provider==='nanobanana' && !NanoBananaService.isConfigured()){
     setTimeout(()=>openNanoBananaSettings(),500);
+  }
+  if(provider==='gptimage' && !GPTImageService.isConfigured()){
+    setTimeout(()=>openGPTImageSettings(),500);
+  }
+  if(provider==='heygen' && !HeyGenService.isConfigured()){
+    setTimeout(()=>openHeyGenSettings(),500);
   }
   showToast(`默认提供商已切换至 ${names[provider]}`,'success');
 }
@@ -990,6 +2267,122 @@ function updateNanoBananaUI(){
   } else {
     status.className = 'status-dot status-idle';
     statusText.textContent = '未配置API Key · 点击设置';
+  }
+}
+
+// ====== GPT Image 2 配置管理 ======
+let gptImageSize = localStorage.getItem('gptimage_size') || '1024x1024';
+let gptImageModel = localStorage.getItem('gptimage_model') || 'dall-e-3';
+
+function openGPTImageSettings(){
+  document.getElementById('gptimage-modal').classList.remove('hidden');
+  const key = GPTImageService.getApiKey();
+  if(key) document.getElementById('gptimage-api-key').value = key;
+  updateGPTImageUI();
+}
+function closeGPTImageSettings(){document.getElementById('gptimage-modal').classList.add('hidden')}
+function saveGPTImageSettings(){
+  const key = document.getElementById('gptimage-api-key').value.trim();
+  if(!key){showToast('请输入 API Key','error');return}
+  GPTImageService.setApiKey(key);
+  localStorage.setItem('gptimage_size', gptImageSize);
+  localStorage.setItem('gptimage_model', gptImageModel);
+  closeGPTImageSettings();
+  updateGPTImageUI();
+  showToast('✅ GPT Image 2 配置已保存！','success');
+}
+function selectGPTImageSize(size, btn){
+  gptImageSize = size;
+  document.querySelectorAll('.gptimage-size-btn').forEach(b=>b.classList.remove('selected'));
+  if(btn) btn.classList.add('selected');
+}
+function selectGPTImageModel(model, btn){
+  gptImageModel = model;
+  document.querySelectorAll('.gptimage-model-btn').forEach(b=>b.classList.remove('selected'));
+  if(btn) btn.classList.add('selected');
+}
+function updateGPTImageUI(){
+  const status = document.getElementById('gptimage-status');
+  const statusText = document.getElementById('gptimage-status-text');
+  if(GPTImageService.isConfigured()){
+    status.className = 'status-dot status-online';
+    statusText.textContent = '已配置 · DALL·E 3 / GPT-4o Image';
+  } else {
+    status.className = 'status-dot status-idle';
+    statusText.textContent = '未配置API Key · 点击设置';
+  }
+}
+async function testGPTImageConnection(){
+  if(!GPTImageService.isConfigured()){
+    showToast('⚠️ 请先配置 API Key','warning');
+    openGPTImageSettings();
+    return;
+  }
+  showToast('🔌 正在测试 GPT Image 2 连接...','info');
+  try{
+    const result = await GPTImageService.generateImage({prompt:'test', size:gptImageSize, n:1});
+    if(result) showToast('✅ GPT Image 2 连接成功！','success');
+    else showToast('⚠️ 连接异常，请检查 API Key','warning');
+  }catch(e){
+    showToast('❌ 连接失败: '+e.message,'error');
+  }
+}
+
+// ====== HeyGen 数字人配置管理 ======
+let heygenAvatar = localStorage.getItem('heygen_avatar') || 'default';
+let heygenVoice = localStorage.getItem('heygen_voice') || 'default';
+
+function openHeyGenSettings(){
+  document.getElementById('heygen-modal').classList.remove('hidden');
+  const key = HeyGenService.getApiKey();
+  if(key) document.getElementById('heygen-api-key-input').value = key;
+  updateHeyGenUI();
+}
+function closeHeyGenSettings(){document.getElementById('heygen-modal').classList.add('hidden')}
+function saveHeyGenSettings(){
+  const key = document.getElementById('heygen-api-key-input').value.trim();
+  if(!key){showToast('请输入 API Key','error');return}
+  HeyGenService.setApiKey(key);
+  localStorage.setItem('heygen_avatar', heygenAvatar);
+  localStorage.setItem('heygen_voice', heygenVoice);
+  closeHeyGenSettings();
+  updateHeyGenUI();
+  showToast('✅ HeyGen 配置已保存！','success');
+}
+function selectHeyGenAvatar(avatar, btn){
+  heygenAvatar = avatar;
+  document.querySelectorAll('.heygen-avatar-btn').forEach(b=>b.classList.remove('selected'));
+  if(btn) btn.classList.add('selected');
+}
+function selectHeyGenVoice(voice, btn){
+  heygenVoice = voice;
+  document.querySelectorAll('.heygen-voice-btn').forEach(b=>b.classList.remove('selected'));
+  if(btn) btn.classList.add('selected');
+}
+function updateHeyGenUI(){
+  const status = document.getElementById('heygen-status');
+  const statusText = document.getElementById('heygen-status-text');
+  if(HeyGenService.isConfigured()){
+    status.className = 'status-dot status-online';
+    statusText.textContent = '已配置 · AI数字人生成就绪';
+  } else {
+    status.className = 'status-dot status-idle';
+    statusText.textContent = '未配置API Key · 点击设置';
+  }
+}
+async function testHeyGenConnection(){
+  if(!HeyGenService.isConfigured()){
+    showToast('⚠️ 请先配置 API Key','warning');
+    openHeyGenSettings();
+    return;
+  }
+  showToast('🔌 正在测试 HeyGen 连接...','info');
+  try{
+    const avatars = await HeyGenService.listAvatars();
+    if(avatars) showToast('✅ HeyGen 连接成功！数字人服务已就绪','success');
+    else showToast('⚠️ 连接异常，请检查 API Key','warning');
+  }catch(e){
+    showToast('❌ 连接失败: '+e.message,'error');
   }
 }
 async function testNanoBananaConnection(){
@@ -1812,6 +3205,7 @@ function updateMediaCounts() {
   const total = mediaLibrary.length;
   const images = mediaLibrary.filter(m => m.type === 'image').length;
   const videos = mediaLibrary.filter(m => m.type === 'video').length;
+  const marketingVideos = mediaLibrary.filter(m => m.type === 'video' && m.tags && m.tags.includes('营销视频')).length;
   const aiGen = mediaLibrary.filter(m => m.source === 'ai-generated').length;
   const uploaded = mediaLibrary.filter(m => m.source === 'uploaded').length;
   const cloud = mediaLibrary.filter(m => m.source === 'cloud').length;
@@ -1820,6 +3214,7 @@ function updateMediaCounts() {
   document.getElementById('ml-count-all').textContent = total;
   document.getElementById('ml-count-image').textContent = images;
   document.getElementById('ml-count-video').textContent = videos;
+  document.getElementById('ml-count-marketing').textContent = marketingVideos;
   document.getElementById('ml-count-ai').textContent = aiGen;
   document.getElementById('ml-count-uploaded').textContent = uploaded;
   document.getElementById('ml-count-cloud').textContent = cloud;
@@ -1843,7 +3238,7 @@ function filterMediaTab(tab) {
   mediaFilterTab = tab;
   document.querySelectorAll('#ml-tabs .ml-tab').forEach(el => el.classList.remove('active'));
   const tabs = document.querySelectorAll('#ml-tabs .ml-tab');
-  const tabMap = { 'all': 0, 'image': 1, 'video': 2, 'ai-generated': 3, 'uploaded': 4, 'cloud': 5 };
+  const tabMap = { 'all': 0, 'image': 1, 'video': 2, 'marketing-video': 3, 'ai-generated': 4, 'uploaded': 5, 'cloud': 6 };
   if (tabs[tabMap[tab]]) tabs[tabMap[tab]].classList.add('active');
   renderMediaLibrary();
 }
@@ -2202,7 +3597,9 @@ function navigateMediaPreview(dir) {
 function getFilteredMedia() {
   let filtered = mediaLibrary;
   if (mediaFilterTab !== 'all') {
-    if (mediaFilterTab === 'ai-generated' || mediaFilterTab === 'uploaded' || mediaFilterTab === 'cloud') {
+    if (mediaFilterTab === 'marketing-video') {
+      filtered = filtered.filter(m => m.type === 'video' && m.tags && m.tags.includes('营销视频'));
+    } else if (mediaFilterTab === 'ai-generated' || mediaFilterTab === 'uploaded' || mediaFilterTab === 'cloud') {
       filtered = filtered.filter(m => m.source === mediaFilterTab);
     } else {
       filtered = filtered.filter(m => m.type === mediaFilterTab);
@@ -2389,7 +3786,9 @@ function renderMediaLibraryStandalone() {
   
   let filtered = mediaLibrary;
   if (mediaFilterTabStandaloneVar !== 'all') {
-    if (['ai-generated','uploaded','cloud'].includes(mediaFilterTabStandaloneVar)) {
+    if (mediaFilterTabStandaloneVar === 'marketing-video') {
+      filtered = filtered.filter(m => m.type === 'video' && m.tags && m.tags.includes('营销视频'));
+    } else if (['ai-generated','uploaded','cloud'].includes(mediaFilterTabStandaloneVar)) {
       filtered = filtered.filter(m => m.source === mediaFilterTabStandaloneVar);
     } else {
       filtered = filtered.filter(m => m.type === mediaFilterTabStandaloneVar);
@@ -2440,6 +3839,7 @@ function updateMediaCountsStandalone() {
   el('mls-count-all', total);
   el('mls-count-image', mediaLibrary.filter(m => m.type === 'image').length);
   el('mls-count-video', mediaLibrary.filter(m => m.type === 'video').length);
+  el('mls-count-marketing', mediaLibrary.filter(m => m.type === 'video' && m.tags && m.tags.includes('营销视频')).length);
   el('mls-count-ai', mediaLibrary.filter(m => m.source === 'ai-generated').length);
   el('mls-count-uploaded', mediaLibrary.filter(m => m.source === 'uploaded').length);
   el('mls-count-cloud', mediaLibrary.filter(m => m.source === 'cloud').length);

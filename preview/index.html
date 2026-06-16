@@ -17,6 +17,58 @@
   --radius:10px;--radius-sm:6px;--radius-lg:16px;
   --shadow:0 4px 24px rgba(0,0,0,0.4);--shadow-sm:0 2px 8px rgba(0,0,0,0.3);
   --transition:0.2s cubic-bezier(0.4,0,0.2,1);
+  --theme-name:'Dark';
+}
+/* ===== 5套主题配色 ===== */
+/* 黑色主题 (暗夜黑) — 默认 */
+[data-theme="dark"]{
+  --bg-primary:#08080f;--bg-secondary:#0e0e18;--bg-tertiary:#141420;--bg-elevated:#1a1a2e;
+  --border:#1f1f35;--border-light:#2a2a40;
+  --text-primary:#e8e8f0;--text-secondary:#9090a8;--text-tertiary:#606078;
+  --accent:#00f0ff;--accent2:#b44cff;--accent3:#ff6b9d;
+  --success:#00e676;--warning:#ffab00;--danger:#ff5252;--info:#448aff;
+  --shadow:0 4px 24px rgba(0,0,0,0.4);--shadow-sm:0 2px 8px rgba(0,0,0,0.3);
+  --theme-name:'Dark';
+}
+/* 白色主题 (白天白) */
+[data-theme="light"]{
+  --bg-primary:#f5f5f7;--bg-secondary:#ffffff;--bg-tertiary:#ecedf0;--bg-elevated:#ffffff;
+  --border:#d1d1d6;--border-light:#e5e5ea;
+  --text-primary:#1d1d1f;--text-secondary:#6e6e73;--text-tertiary:#aeaeb2;
+  --accent:#0071e3;--accent2:#5856d6;--accent3:#ff2d55;
+  --success:#34c759;--warning:#ff9500;--danger:#ff3b30;--info:#5ac8fa;
+  --shadow:0 4px 24px rgba(0,0,0,0.08);--shadow-sm:0 2px 8px rgba(0,0,0,0.06);
+  --theme-name:'Light';
+}
+/* 金色主题 (奢华金) */
+[data-theme="gold"]{
+  --bg-primary:#0d0b08;--bg-secondary:#16120d;--bg-tertiary:#1f1a12;--bg-elevated:#28221a;
+  --border:#3a3020;--border-light:#4a3e2a;
+  --text-primary:#f5e6c8;--text-secondary:#c4a970;--text-tertiary:#8a7548;
+  --accent:#d4a843;--accent2:#e8c96a;--accent3:#c0392b;
+  --success:#2ecc71;--warning:#f0a500;--danger:#c0392b;--info:#d4a843;
+  --shadow:0 4px 24px rgba(180,130,40,0.15);--shadow-sm:0 2px 8px rgba(180,130,40,0.1);
+  --theme-name:'Gold';
+}
+/* 粉色主题 (梦幻粉) */
+[data-theme="pink"]{
+  --bg-primary:#1a0d15;--bg-secondary:#22131d;--bg-tertiary:#2d1a26;--bg-elevated:#352230;
+  --border:#3d2535;--border-light:#4d3040;
+  --text-primary:#f0dde8;--text-secondary:#c490b0;--text-tertiary:#8a6078;
+  --accent:#e871a4;--accent2:#d06090;--accent3:#ff85c0;
+  --success:#69db7c;--warning:#ffa94d;--danger:#ff6b6b;--info:#da77f2;
+  --shadow:0 4px 24px rgba(232,113,164,0.15);--shadow-sm:0 2px 8px rgba(232,113,164,0.1);
+  --theme-name:'Pink';
+}
+/* 芭比粉主题 (Barbie Pink) */
+[data-theme="barbie"]{
+  --bg-primary:#1a0a18;--bg-secondary:#220f20;--bg-tertiary:#2d1528;--bg-elevated:#351c30;
+  --border:#4a2840;--border-light:#5a3550;
+  --text-primary:#f8e0f0;--text-secondary:#e090c0;--text-tertiary:#b06090;
+  --accent:#ff1493;--accent2:#ff69b4;--accent3:#ffb6c1;
+  --success:#7bed9f;--warning:#ffb347;--danger:#ff4757;--info:#e056a0;
+  --shadow:0 4px 24px rgba(255,20,147,0.18);--shadow-sm:0 2px 8px rgba(255,20,147,0.12);
+  --theme-name:'Barbie';
 }
 *{margin:0;padding:0;box-sizing:border-box}
 html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;background:var(--bg-primary);color:var(--text-primary);-webkit-font-smoothing:antialiased;user-select:none}
@@ -25,6 +77,17 @@ html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFo
 /* LOADING */
 .spinner{width:36px;height:36px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin 0.8s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
+/* THEME SWITCH */
+.theme-switch-container{position:relative;margin-right:8px}
+.theme-switch-btn{display:inline-flex;align-items:center;gap:6px;padding:5px 10px;background:var(--bg-tertiary);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text-primary);font-size:12px;cursor:pointer;transition:var(--transition);-webkit-app-region:no-drag;white-space:nowrap}
+.theme-switch-btn:hover{background:var(--bg-elevated);border-color:var(--accent)}
+.theme-panel{display:none;position:absolute;top:100%;right:0;margin-top:6px;background:var(--bg-elevated);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);z-index:100;min-width:160px;padding:6px;overflow:hidden}
+.theme-panel.show{display:block;animation:fadeIn 0.15s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
+.theme-option{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:var(--radius-sm);cursor:pointer;font-size:12px;color:var(--text-primary);transition:var(--transition)}
+.theme-option:hover{background:var(--bg-tertiary)}
+.theme-option.active{background:var(--bg-tertiary);color:var(--accent)}
+.theme-dot{width:20px;height:20px;border-radius:50%;flex-shrink:0}
 /* AUTH OVERLAY */
 #auth-overlay{position:fixed;inset:0;z-index:1000;background:var(--bg-primary);display:flex;align-items:center;justify-content:center;transition:opacity 0.4s,visibility 0.4s}
 #auth-overlay.hidden{opacity:0;visibility:hidden}
@@ -156,6 +219,44 @@ html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFo
 .progress-bar{height:6px;background:var(--bg-tertiary);border-radius:3px;margin-top:8px;overflow:hidden}.progress-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--accent),var(--accent2))}
 /* DEVICE ACTIONS */
 .device-actions{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+/* CUSTOM DEVICE PANEL */
+.custom-device-panel{display:grid;grid-template-columns:1.2fr 1fr;gap:16px;margin-bottom:20px}
+.custom-device-left,.custom-device-right{background:var(--bg-secondary);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px}
+.custom-device-left{border-left:3px solid var(--accent3)}
+.custom-device-right{border-left:3px solid var(--success)}
+.custom-device-header{display:flex;align-items:center;gap:8px;margin-bottom:14px}
+.custom-device-icon{font-size:18px}
+.custom-device-title{font-size:14px;font-weight:700;color:var(--text-primary)}
+.custom-device-form{margin-bottom:12px}
+.cd-form-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.cd-empty{text-align:center;padding:20px 12px;font-size:12px;color:var(--text-tertiary);border:1px dashed var(--border);border-radius:var(--radius-sm)}
+.custom-device-list{max-height:200px;overflow-y:auto;display:flex;flex-direction:column;gap:6px}
+.cd-device-item{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:var(--bg-tertiary);border:1px solid var(--border);border-radius:var(--radius-sm);transition:var(--transition)}
+.cd-device-item:hover{border-color:var(--accent3)}
+.cd-device-item .cd-info{display:flex;flex-direction:column;gap:2px}
+.cd-device-item .cd-name{font-size:13px;font-weight:600}
+.cd-device-item .cd-meta{font-size:10px;color:var(--text-tertiary);display:flex;gap:8px;flex-wrap:wrap}
+.cd-device-item .cd-actions{display:flex;gap:4px}
+.cd-device-item .cd-status{font-size:10px;padding:2px 8px;border-radius:10px;font-weight:600}
+.cd-status.connected{background:rgba(0,200,83,0.12);color:var(--success)}
+.cd-status.disconnected{background:rgba(255,255,255,0.06);color:var(--text-tertiary)}
+/* MULTI CONNECT */
+.multi-connect-actions{display:flex;gap:8px;margin-bottom:14px}
+.multi-device-checklist{max-height:180px;overflow-y:auto;display:flex;flex-direction:column;gap:6px;margin-bottom:12px}
+.mdc-item{display:flex;align-items:center;gap:10px;padding:8px 10px;background:var(--bg-tertiary);border:1px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;transition:var(--transition)}
+.mdc-item:hover{border-color:var(--success)}
+.mdc-item.selected{border-color:var(--success);background:rgba(0,200,83,0.06)}
+.mdc-item .mdc-checkbox{width:18px;height:18px;border:2px solid var(--border);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:12px;transition:var(--transition);flex-shrink:0}
+.mdc-item.selected .mdc-checkbox{border-color:var(--success);background:var(--success);color:#fff}
+.mdc-item .mdc-info{display:flex;flex-direction:column;gap:1px;flex:1}
+.mdc-item .mdc-name{font-size:13px;font-weight:600}
+.mdc-item .mdc-sn{font-size:10px;color:var(--text-tertiary)}
+.multi-connect-status{padding:10px 12px;background:var(--bg-tertiary);border:1px solid var(--border);border-radius:var(--radius-sm);font-size:11px;color:var(--text-secondary);min-height:40px;line-height:1.5}
+.multi-connect-status .mc-step{display:flex;align-items:center;gap:6px;margin-bottom:4px}
+.multi-connect-status .mc-step.done{color:var(--success)}
+.multi-connect-status .mc-step.error{color:var(--danger)}
+.multi-connect-status .mc-step.progress{color:var(--accent)}
+.multi-connect-status .mc-step.pending{color:var(--text-tertiary)}
 /* CONNECTION PANEL */
 .connection-panel{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px}
 .conn-card{background:var(--bg-secondary);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px;transition:var(--transition)}
@@ -214,6 +315,8 @@ html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFo
 .payment-method{display:flex;align-items:center;gap:10px;padding:12px;background:var(--bg-tertiary);border:1px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;transition:var(--transition)}.payment-method:hover{border-color:var(--accent)}.payment-method.selected{border-color:var(--accent);background:rgba(0,240,255,0.05)}.payment-method .pm-icon{font-size:20px}
 .subscription-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;margin-bottom:16px}
 .sub-card{padding:16px;background:var(--bg-tertiary);border:1px solid var(--border);border-radius:var(--radius);cursor:pointer;transition:var(--transition);text-align:center}.sub-card:hover{border-color:var(--accent)}.sub-card.selected{border-color:var(--accent);background:rgba(0,240,255,0.05)}.sub-card .sub-name{font-size:15px;font-weight:700}.sub-card .sub-price{font-size:24px;font-weight:800;margin:8px 0;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}.sub-card .sub-features{font-size:11px;color:var(--text-secondary);line-height:1.6}
+.device-buy-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;margin-bottom:16px}
+.device-buy-card{padding:14px;background:var(--bg-tertiary);border:1px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;transition:var(--transition);text-align:center}.device-buy-card:hover{border-color:var(--accent)}.device-buy-card.selected{border-color:var(--accent);background:rgba(0,240,255,0.08);box-shadow:0 0 12px rgba(0,240,255,0.1)}.device-buy-card .device-qty{font-size:13px;font-weight:600;color:var(--text-primary);margin-bottom:6px}.device-buy-card .device-price{font-size:20px;font-weight:800;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:4px}.device-buy-card .device-unit{font-size:10px;color:var(--text-tertiary)}
 .payment-summary{background:var(--bg-secondary);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:16px}
 .summary-row{display:flex;justify-content:space-between;padding:6px 0;font-size:13px;color:var(--text-secondary)}.summary-row.total{border-top:1px solid var(--border);margin-top:6px;padding-top:10px;font-weight:700;font-size:15px;color:var(--text-primary)}
 /* COMMUNITY */
@@ -222,6 +325,65 @@ html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFo
 .feed-content{flex:1}.feed-user{font-weight:600;font-size:13px}.feed-time{font-size:11px;color:var(--text-tertiary)}.feed-text{font-size:13px;margin:6px 0;line-height:1.5}.feed-actions{display:flex;gap:16px;font-size:12px;color:var(--text-tertiary)}.feed-actions span{cursor:pointer;transition:var(--transition)}.feed-actions span:hover{color:var(--accent)}
 .market-item{display:flex;align-items:center;gap:12px;padding:12px 16px;background:var(--bg-secondary);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:8px}.market-item .market-preview{width:48px;height:48px;background:var(--bg-tertiary);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0}.market-item .market-info{flex:1}.market-item .market-name{font-weight:600;font-size:13px}.market-item .market-author{font-size:11px;color:var(--text-secondary)}.market-item .market-price{font-weight:700;color:var(--accent)}
 .leaderboard-table{width:100%;border-collapse:collapse;font-size:13px}.leaderboard-table th{text-align:left;padding:10px 14px;color:var(--text-tertiary);font-size:11px;text-transform:uppercase;border-bottom:1px solid var(--border)}.leaderboard-table td{padding:12px 14px;border-bottom:1px solid var(--border)}.leaderboard-table tr:hover{background:var(--bg-tertiary)}.rank-badge{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;font-size:11px;font-weight:700}.rank-1{background:#ffd700;color:#000}.rank-2{background:#c0c0c0;color:#000}.rank-3{background:#cd7f32;color:#fff}
+/* SHARE CENTER */
+.share-section{background:var(--bg-secondary);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px}
+.share-section-title{font-size:14px;font-weight:700;margin-bottom:14px;color:var(--text-primary);display:flex;align-items:center;gap:8px}
+.share-work-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:10px;max-height:180px;overflow-y:auto}
+.share-work-item{aspect-ratio:1;border-radius:var(--radius-sm);border:2px solid transparent;cursor:pointer;overflow:hidden;transition:var(--transition);position:relative;background:var(--bg-tertiary);display:flex;align-items:center;justify-content:center;font-size:32px}
+.share-work-item:hover{border-color:var(--accent);transform:scale(1.03)}
+.share-work-item.selected{border-color:var(--accent);box-shadow:0 0 0 2px rgba(0,240,255,0.3)}
+.share-work-item.selected::after{content:'✓';position:absolute;top:4px;right:4px;width:20px;height:20px;background:var(--accent);color:#000;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700}
+.share-work-item img{width:100%;height:100%;object-fit:cover}
+.share-quick-actions{display:flex;gap:8px;flex-wrap:wrap}
+.share-quick-btn{display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px 18px;background:var(--bg-tertiary);border:1px solid var(--border);border-radius:var(--radius);cursor:pointer;transition:var(--transition);min-width:80px;font-size:11px;color:var(--text-secondary)}
+.share-quick-btn:hover{border-color:var(--accent);background:rgba(0,240,255,0.04);color:var(--text-primary)}
+.share-quick-btn .share-q-icon{font-size:24px}
+.share-history{max-height:150px;overflow-y:auto;display:flex;flex-direction:column;gap:4px}
+.share-history-item{display:flex;align-items:center;gap:10px;padding:8px 10px;background:var(--bg-tertiary);border-radius:var(--radius-sm);font-size:12px}
+.share-history-item .sh-platform{font-size:16px;flex-shrink:0}
+.share-history-item .sh-info{flex:1;display:flex;flex-direction:column;gap:1px}
+.share-history-item .sh-title{font-size:12px;font-weight:600;color:var(--text-primary)}
+.share-history-item .sh-time{font-size:10px;color:var(--text-tertiary)}
+.share-history-item .sh-status{font-size:10px;padding:2px 8px;border-radius:10px;font-weight:600}
+.sh-status.success{background:rgba(0,200,83,0.12);color:var(--success)}
+.sh-status.failed{background:rgba(255,59,48,0.12);color:var(--danger)}
+/* SHARE MODAL */
+.share-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:3000;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
+.share-modal-overlay.hidden{display:none}
+.share-modal-card{background:var(--bg-primary);border:1px solid var(--border);border-radius:var(--radius-lg);padding:0;width:90%;max-width:640px;max-height:85vh;overflow-y:auto;box-shadow:var(--shadow)}
+.share-modal-header{display:flex;align-items:center;justify-content:space-between;padding:18px 20px;border-bottom:1px solid var(--border)}
+.share-modal-header h3{font-size:16px;font-weight:700;margin:0}
+.share-modal-body{padding:20px}
+.share-preview-box{background:var(--bg-tertiary);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:16px;display:flex;align-items:center;gap:14px}
+.share-preview-img{width:80px;height:80px;border-radius:var(--radius-sm);background:var(--bg-secondary);display:flex;align-items:center;justify-content:center;font-size:40px;flex-shrink:0;overflow:hidden}
+.share-preview-img img{width:100%;height:100%;object-fit:cover}
+.share-preview-caption{flex:1;font-size:13px;color:var(--text-secondary);line-height:1.5}
+.share-platform-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px}
+.share-platform-card{display:flex;align-items:center;gap:10px;padding:12px 14px;background:var(--bg-tertiary);border:1px solid var(--border);border-radius:var(--radius);cursor:pointer;transition:var(--transition)}
+.share-platform-card:hover{border-color:var(--accent);background:rgba(0,240,255,0.04)}
+.share-platform-card .sp-icon{width:36px;height:36px;border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.share-platform-card .sp-info{flex:1;display:flex;flex-direction:column;gap:2px}
+.share-platform-card .sp-name{font-size:13px;font-weight:600}
+.share-platform-card .sp-desc{font-size:10px;color:var(--text-tertiary)}
+.share-platform-card .sp-action{font-size:10px;color:var(--accent);font-weight:600}
+/* MCP CONFIG */
+.mcp-server-list{display:flex;flex-direction:column;gap:8px}
+.mcp-server-item{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:var(--bg-tertiary);border:1px solid var(--border);border-radius:var(--radius-sm);gap:12px}
+.mcp-server-info{flex:1}
+.mcp-server-name{font-size:13px;font-weight:600}
+.mcp-server-url{font-size:10px;color:var(--text-tertiary);margin-top:2px;word-break:break-all}
+.mcp-status{font-size:10px;padding:2px 8px;border-radius:10px;font-weight:600;white-space:nowrap}
+.mcp-status.connected{background:rgba(0,200,83,0.12);color:var(--success)}
+.mcp-status.disconnected{background:rgba(255,255,255,0.06);color:var(--text-tertiary)}
+.mcp-status.testing{background:rgba(0,240,255,0.12);color:var(--accent);animation:pulse-text 1s infinite}
+/* API CONFIG */
+.api-config-list{display:flex;flex-direction:column;gap:8px}
+.api-config-item{display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--bg-tertiary);border:1px solid var(--border);border-radius:var(--radius-sm);transition:var(--transition)}
+.api-config-item:hover{border-color:var(--border-light)}
+.api-platform-icon{width:40px;height:40px;border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;font-weight:700}
+.api-platform-info{flex:1}
+.api-platform-name{font-size:13px;font-weight:600}
+.api-platform-desc{font-size:10px;color:var(--text-tertiary);margin-top:2px}
 /* PROVIDER PAGE */
 .provider-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}
 .provider-card{background:var(--bg-secondary);border:1px solid var(--border);border-radius:var(--radius);padding:20px;cursor:pointer;transition:var(--transition);position:relative}.provider-card:hover{border-color:var(--border-light);transform:translateY(-2px)}.provider-card.active-provider{border-color:var(--accent);box-shadow:0 0 0 2px rgba(0,240,255,0.15)}.provider-card .provider-header{display:flex;align-items:center;gap:12px;margin-bottom:12px}.provider-card .provider-icon{font-size:32px}.provider-card .provider-name{font-size:16px;font-weight:700}.provider-card .provider-model{font-size:11px;color:var(--text-secondary)}.provider-card .provider-desc{font-size:12px;color:var(--text-secondary);line-height:1.5;margin-bottom:12px}.provider-card .provider-status{display:flex;align-items:center;gap:6px;font-size:11px}.provider-card .provider-badge{position:absolute;top:12px;right:12px;padding:3px 8px;border-radius:10px;font-size:10px;font-weight:700}.badge-default{background:rgba(0,240,255,0.15);color:var(--accent)}.badge-recommend{background:rgba(0,230,118,0.15);color:var(--success)}
@@ -372,16 +534,16 @@ html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFo
 .ml-upload-preview-item .remove-btn{position:absolute;top:-4px;right:-4px;width:18px;height:18px;border-radius:50%;background:var(--danger);color:#fff;border:none;cursor:pointer;font-size:10px;display:flex;align-items:center;justify-content:center}
 .ml-upload-footer{display:flex;justify-content:flex-end;gap:8px;margin-top:16px}
 /* 预览弹窗 */
-.ml-preview-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:1000;display:flex;align-items:center;justify-content:center;flex-direction:column}
+.ml-preview-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:3000;display:flex;align-items:center;justify-content:center;flex-direction:column}
 .ml-preview-overlay.hidden{display:none}
 .ml-preview-content{max-width:85vw;max-height:75vh;display:flex;align-items:center;justify-content:center}
 .ml-preview-content img,.ml-preview-content video{max-width:100%;max-height:75vh;border-radius:var(--radius);box-shadow:0 8px 40px rgba(0,0,0,0.5)}
 .ml-preview-info{display:flex;align-items:center;gap:12px;margin-top:16px;color:var(--text-secondary);font-size:12px;flex-wrap:wrap;justify-content:center}
 .ml-preview-info .tag{font-size:11px}
 .ml-preview-actions{display:flex;gap:8px;margin-top:12px}
-.ml-preview-close{position:absolute;top:16px;right:24px;width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,0.1);border:none;color:#fff;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:var(--transition)}
-.ml-preview-close:hover{background:rgba(255,255,255,0.2)}
-.ml-preview-nav{position:absolute;top:50%;transform:translateY(-50%);width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,0.1);border:none;color:#fff;font-size:20px;cursor:pointer;transition:var(--transition);display:flex;align-items:center;justify-content:center}
+.ml-preview-close{position:absolute;top:16px;right:24px;width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,0.15);border:none;color:#fff;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:var(--transition);z-index:3001}
+.ml-preview-close:hover{background:rgba(255,255,255,0.3)}
+.ml-preview-nav{position:absolute;top:50%;transform:translateY(-50%);width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,0.15);border:none;color:#fff;font-size:20px;cursor:pointer;transition:var(--transition);display:flex;align-items:center;justify-content:center;z-index:3001}
 .ml-preview-nav:hover{background:rgba(255,255,255,0.25)}
 .ml-preview-prev{left:16px}
 .ml-preview-next{right:16px}
@@ -557,6 +719,34 @@ html[dir="rtl"] .lang-dropdown {
 <span class="titlebar-divider"></span>
 <span id="titlebar-page-name">创作舱 · TALK TO CREATE</span>
 <span style="flex:1"></span>
+<div class="theme-switch-container" id="theme-switch-container">
+  <button class="theme-switch-btn" id="theme-switch-btn" onclick="toggleThemePanel()" title="切换主题">
+    <span id="theme-switch-icon">🌙</span>
+    <span id="theme-switch-label">Dark</span>
+  </button>
+  <div class="theme-panel" id="theme-panel">
+    <div class="theme-option" data-theme="dark" onclick="switchTheme('dark')">
+      <span class="theme-dot" style="background:#08080f;border:2px solid #00f0ff"></span>
+      <span>🌙 暗夜黑</span>
+    </div>
+    <div class="theme-option" data-theme="light" onclick="switchTheme('light')">
+      <span class="theme-dot" style="background:#f5f5f7;border:2px solid #0071e3"></span>
+      <span>☀️ 白天白</span>
+    </div>
+    <div class="theme-option" data-theme="gold" onclick="switchTheme('gold')">
+      <span class="theme-dot" style="background:linear-gradient(135deg,#d4a843,#e8c96a);border:2px solid #d4a843"></span>
+      <span>👑 奢华金</span>
+    </div>
+    <div class="theme-option" data-theme="pink" onclick="switchTheme('pink')">
+      <span class="theme-dot" style="background:linear-gradient(135deg,#e871a4,#ff85c0);border:2px solid #e871a4"></span>
+      <span>🌸 梦幻粉</span>
+    </div>
+    <div class="theme-option" data-theme="barbie" onclick="switchTheme('barbie')">
+      <span class="theme-dot" style="background:linear-gradient(135deg,#ff1493,#ff69b4);border:2px solid #ff1493"></span>
+      <span>💖 芭比粉</span>
+    </div>
+  </div>
+</div>
 <div id="lang-selector-container"></div>
 </div>
 <div id="main-content">
@@ -596,6 +786,7 @@ html[dir="rtl"] .lang-dropdown {
 <button class="ml-tab active" onclick="filterMediaTabStandalone('all',this)">全部 <span class="tab-count" id="mls-count-all">0</span></button>
 <button class="ml-tab" onclick="filterMediaTabStandalone('image',this)">🖼️ 图片 <span class="tab-count" id="mls-count-image">0</span></button>
 <button class="ml-tab" onclick="filterMediaTabStandalone('video',this)">🎥 视频 <span class="tab-count" id="mls-count-video">0</span></button>
+<button class="ml-tab" onclick="filterMediaTabStandalone('marketing-video',this)">📼 营销视频 <span class="tab-count" id="mls-count-marketing">0</span></button>
 <button class="ml-tab" onclick="filterMediaTabStandalone('ai-generated',this)">🤖 AI生成 <span class="tab-count" id="mls-count-ai">0</span></button>
 <button class="ml-tab" onclick="filterMediaTabStandalone('uploaded',this)">📤 本地上传 <span class="tab-count" id="mls-count-uploaded">0</span></button>
 <button class="ml-tab" onclick="filterMediaTabStandalone('cloud',this)">☁️ 云端图库 <span class="tab-count" id="mls-count-cloud">0</span></button>
@@ -645,12 +836,14 @@ html[dir="rtl"] .lang-dropdown {
 <div id="prompt-preview-card" class="prompt-preview" style="display:none"><div class="prompt-preview-label">AI 优化提示词</div><div class="prompt-preview-text" id="optimized-prompt"></div><div style="margin-top:8px" id="prompt-tags"></div></div>
 <!-- 一键添加生图 Skill -->
 <div class="quick-add-section" id="quick-add-section">
-<div class="quick-add-title">⚡ 一键添加生图 Skill</div>
+<div class="quick-add-title">⚡ 一键添加生图/生视频 Skill</div>
 <div class="quick-add-grid" id="quick-add-grid">
 <div class="quick-add-chip" data-skill-id="creatok-image" onclick="quickAddImageSkill('creatok-image')"><span class="chip-icon">🖼️</span>CreatOK 生图<span class="chip-status">未安装</span></div>
 <div class="quick-add-chip" data-skill-id="clipcat-image" onclick="quickAddImageSkill('clipcat-image')"><span class="chip-icon">🎨</span>Clipcat 生图<span class="chip-status">未安装</span></div>
 <div class="quick-add-chip" data-skill-id="nanobanana-pro" onclick="quickAddImageSkill('nanobanana-pro')"><span class="chip-icon">🍌</span>Nano Banana<span class="chip-status">未安装</span></div>
+<div class="quick-add-chip" data-skill-id="clawhub-image" onclick="quickAddImageSkill('clawhub-image')"><span class="chip-icon">🦞</span>ClawHub 生图<span class="chip-status">未安装</span></div>
 <div class="quick-add-chip" data-skill-id="creatok-video" onclick="quickAddImageSkill('creatok-video')"><span class="chip-icon">🎥</span>CreatOK 生视频<span class="chip-status">未安装</span></div>
+<div class="quick-add-chip" data-skill-id="clawhub-video" onclick="quickAddImageSkill('clawhub-video')"><span class="chip-icon">🎬</span>ClawHub 生视频<span class="chip-status">未安装</span></div>
 </div>
 <button class="quick-add-all-btn" id="quick-add-all-btn" onclick="quickAddAllImageSkills()"><span class="btn-text">🚀 一键安装全部生图 Skill</span><span class="btn-spinner"></span></button>
 </div>
@@ -671,6 +864,7 @@ html[dir="rtl"] .lang-dropdown {
 <button class="ml-tab active" onclick="filterMediaTab('all')">全部 <span class="tab-count" id="ml-count-all">0</span></button>
 <button class="ml-tab" onclick="filterMediaTab('image')">🖼️ 图片 <span class="tab-count" id="ml-count-image">0</span></button>
 <button class="ml-tab" onclick="filterMediaTab('video')">🎥 视频 <span class="tab-count" id="ml-count-video">0</span></button>
+<button class="ml-tab" onclick="filterMediaTab('marketing-video')">📼 营销视频 <span class="tab-count" id="ml-count-marketing">0</span></button>
 <button class="ml-tab" onclick="filterMediaTab('ai-generated')">🤖 AI生成 <span class="tab-count" id="ml-count-ai">0</span></button>
 <button class="ml-tab" onclick="filterMediaTab('uploaded')">📤 本地上传 <span class="tab-count" id="ml-count-uploaded">0</span></button>
 <button class="ml-tab" onclick="filterMediaTab('cloud')">☁️ 云端图库 <span class="tab-count" id="ml-count-cloud">0</span></button>
@@ -878,12 +1072,51 @@ html[dir="rtl"] .lang-dropdown {
 </div>
 <div id="device-b2c">
 <div class="stat-grid" style="margin-bottom:20px">
-<div class="stat-card"><div class="stat-label">在线设备</div><div class="stat-value">12</div><div class="stat-change up">▲ 2台新增</div></div>
+<div class="stat-card"><div class="stat-label">在线设备</div><div class="stat-value" id="stat-online-count">12</div><div class="stat-change up">▲ 2台新增</div></div>
 <div class="stat-card"><div class="stat-label">今日打印量</div><div class="stat-value">847</div><div class="stat-change up">▲ 12%</div></div>
 <div class="stat-card"><div class="stat-label">墨水余量</div><div class="stat-value">72%</div><div class="stat-change">CMYK 四色</div></div>
 <div class="stat-card"><div class="stat-label">设备健康度</div><div class="stat-value">98%</div><div class="stat-change up">优秀</div></div>
 </div>
-<div class="device-dashboard">
+<!-- 自定义设备序号 + 多设备连接设置 -->
+<div class="custom-device-panel">
+  <div class="custom-device-left">
+    <div class="custom-device-header">
+      <span class="custom-device-icon">🆔</span>
+      <span class="custom-device-title">自定义设备序号</span>
+    </div>
+    <div class="custom-device-form">
+      <div class="cd-form-row">
+        <input class="form-input" id="custom-sn-prefix" placeholder="前缀（如 ANP-）" value="ANP-" style="width:100px">
+        <input class="form-input" id="custom-sn-number" type="number" placeholder="起始序号" value="0004" min="1" style="width:90px">
+        <input class="form-input" id="custom-device-name" placeholder="设备名称" value="AI NAILS Pro" style="flex:1">
+        <select class="form-input" id="custom-device-conn" style="width:120px">
+          <option value="dual">WiFi+蓝牙</option>
+          <option value="wifi">仅WiFi</option>
+          <option value="bt">仅蓝牙</option>
+        </select>
+        <button class="btn btn-accent btn-xs" onclick="addCustomDevice()" style="white-space:nowrap">➕ 添加设备</button>
+      </div>
+    </div>
+    <div class="custom-device-list" id="custom-device-list">
+      <div class="cd-empty">暂无自定义设备，请在上方输入序号添加</div>
+    </div>
+  </div>
+  <div class="custom-device-right">
+    <div class="custom-device-header">
+      <span class="custom-device-icon">🔗</span>
+      <span class="custom-device-title">多设备连接设置</span>
+    </div>
+    <div class="multi-connect-actions">
+      <button class="btn btn-success" onclick="batchConnectDevices()" id="batch-connect-btn" style="flex:1">🚀 一键连接全部</button>
+      <button class="btn btn-danger" onclick="batchDisconnectDevices()" id="batch-disconnect-btn" style="flex:1">⏹ 全部断开</button>
+    </div>
+    <div class="multi-device-checklist" id="multi-device-checklist">
+      <div class="cd-empty">添加自定义设备后，此处将显示可批量连接的设备列表</div>
+    </div>
+    <div class="multi-connect-status" id="multi-connect-status"></div>
+  </div>
+</div>
+<div class="device-dashboard" id="device-dashboard">
 <div class="device-card">
 <div class="device-name"><span class="status-dot status-online"></span>AI NAILS Pro #001</div>
 <div style="font-size:11px;color:var(--text-secondary);margin-top:4px">SN: ANP-2026-0001 · 固件 v3.2.1</div>
@@ -914,6 +1147,8 @@ html[dir="rtl"] .lang-dropdown {
 <div style="font-size:10px;color:var(--text-tertiary);margin-top:4px;display:flex;gap:12px"><span>C:15%</span><span>M:20%</span><span>Y:30%</span><span>K:25%</span></div>
 <div class="device-actions"><button class="btn btn-secondary btn-xs">测试打印</button><button class="btn btn-warning btn-xs" style="background:rgba(255,171,0,0.15);color:var(--warning)">更换墨盒</button><button class="btn btn-accent btn-xs">校准</button><button class="btn btn-success btn-xs" onclick="quickConnectDevice('ANP-2026-0003','AI NAILS Pro #003')">🔗 快速连接</button></div>
 </div>
+<!-- 自定义设备动态渲染区域 -->
+<div id="custom-device-cards"></div>
 </div>
 </div>
 <div id="device-b2b" class="hidden">
@@ -934,11 +1169,11 @@ html[dir="rtl"] .lang-dropdown {
 
 <!-- PAGE: COMMUNITY -->
 <div class="content-page" id="page-community">
-<div class="page-tabs"><button class="page-tab active" onclick="switchCommunityTab('feed')">动态 Feed</button><button class="page-tab" onclick="switchCommunityTab('market')">交易市场</button><button class="page-tab" onclick="switchCommunityTab('leaderboard')">排行榜</button></div>
+<div class="page-tabs"><button class="page-tab active" onclick="switchCommunityTab('feed')">动态 Feed</button><button class="page-tab" onclick="switchCommunityTab('market')">交易市场</button><button class="page-tab" onclick="switchCommunityTab('leaderboard')">排行榜</button><button class="page-tab" onclick="switchCommunityTab('share')">📤 分享中心</button></div>
 <div id="comm-feed">
-<div class="feed-item"><div class="feed-avatar">🌸</div><div class="feed-content"><div class="feed-user">花漾美甲工作室<span class="feed-time"> · 2分钟前</span></div><div class="feed-text">新发布的「春日樱花」系列甲面设计，使用 AI NAILS 生成 + 微调，效果绝美！💅✨</div><div class="feed-actions"><span>❤ 128</span><span>💬 23</span><span>↗ 分享</span></div></div></div>
-<div class="feed-item"><div class="feed-avatar">🦋</div><div class="feed-content"><div class="feed-user">蝶变美甲<span class="feed-time"> · 15分钟前</span></div><div class="feed-text">赛博朋克主题美甲设计挑战！用 OpenClaw + Gemini 2.0 生成的渐变效果超出预期 🔥</div><div class="feed-actions"><span>❤ 256</span><span>💬 47</span><span>↗ 分享</span></div></div></div>
-<div class="feed-item"><div class="feed-avatar">✨</div><div class="feed-content"><div class="feed-user">星光璀璨 Nail Art<span class="feed-time"> · 1小时前</span></div><div class="feed-text">ClawSkill Hub 上新了「中国风刺绣」Skill，一键生成传统刺绣纹样美甲 🏮</div><div class="feed-actions"><span>❤ 89</span><span>💬 15</span><span>↗ 分享</span></div></div></div>
+<div class="feed-item"><div class="feed-avatar">🌸</div><div class="feed-content"><div class="feed-user">花漾美甲工作室<span class="feed-time"> · 2分钟前</span></div><div class="feed-text">新发布的「春日樱花」系列甲面设计，使用 AI NAILS 生成 + 微调，效果绝美！💅✨</div><div class="feed-actions"><span>❤ 128</span><span>💬 23</span><span onclick="openShareCenter('春日樱花系列',null)">↗ 分享</span></div></div></div>
+<div class="feed-item"><div class="feed-avatar">🦋</div><div class="feed-content"><div class="feed-user">蝶变美甲<span class="feed-time"> · 15分钟前</span></div><div class="feed-text">赛博朋克主题美甲设计挑战！用 OpenClaw + Gemini 2.0 生成的渐变效果超出预期 🔥</div><div class="feed-actions"><span>❤ 256</span><span>💬 47</span><span onclick="openShareCenter('赛博朋克渐变',null)">↗ 分享</span></div></div></div>
+<div class="feed-item"><div class="feed-avatar">✨</div><div class="feed-content"><div class="feed-user">星光璀璨 Nail Art<span class="feed-time"> · 1小时前</span></div><div class="feed-text">ClawSkill Hub 上新了「中国风刺绣」Skill，一键生成传统刺绣纹样美甲 🏮</div><div class="feed-actions"><span>❤ 89</span><span>💬 15</span><span onclick="openShareCenter('中国风刺绣',null)">↗ 分享</span></div></div></div>
 </div>
 <div id="comm-market" class="hidden">
 <div class="market-item"><div class="market-preview">💅</div><div class="market-info"><div class="market-name">赛博朋克渐变套装</div><div class="market-author">by 蝶变美甲</div></div><div class="market-price">¥29.9</div><button class="btn btn-accent btn-xs">购买</button></div>
@@ -954,6 +1189,298 @@ html[dir="rtl"] .lang-dropdown {
 <tr><td>5</td><td>水墨丹青</td><td>65</td><td>4.8K</td><td>¥15,400</td></tr>
 </tbody></table>
 </div>
+<!-- 分享中心 -->
+<div id="comm-share" class="hidden">
+  <!-- 作品选择区 -->
+  <div class="share-section">
+    <div class="share-section-title">🎨 选择美甲作品</div>
+    <div class="share-work-grid" id="share-work-grid">
+      <div class="cd-empty">正在加载媒体库中的美甲作品...</div>
+    </div>
+    <div style="margin-top:12px;display:flex;gap:8px;align-items:center">
+      <input class="form-input" id="share-caption" placeholder="输入分享文案（如：AI生成的春日樱花美甲💅）" style="flex:1" value="✨ AI NAILS 智能生成的绝美甲面设计 #AINails #美甲艺术">
+      <button class="btn btn-accent" onclick="openSharePlatformModal()" id="share-open-btn">📤 一键分享</button>
+    </div>
+  </div>
+  <!-- 快捷分享操作 -->
+  <div class="share-section" style="margin-top:16px">
+    <div class="share-section-title">⚡ 快捷分享操作</div>
+    <div class="share-quick-actions">
+      <button class="share-quick-btn" onclick="quickShareToMedia('copy-link')">
+        <span class="share-q-icon">🔗</span>
+        <span>复制链接</span>
+      </button>
+      <button class="share-quick-btn" onclick="quickShareToMedia('copy-html')">
+        <span class="share-q-icon">📋</span>
+        <span>复制HTML</span>
+      </button>
+      <button class="share-quick-btn" onclick="openSharePlatformModal()">
+        <span class="share-q-icon">🌐</span>
+        <span>社媒分享</span>
+      </button>
+      <button class="share-quick-btn" onclick="openMcpConfig()">
+        <span class="share-q-icon">🔌</span>
+        <span>MCP配置</span>
+      </button>
+      <button class="share-quick-btn" onclick="openApiConfig()">
+        <span class="share-q-icon">🔑</span>
+        <span>API配置</span>
+      </button>
+    </div>
+  </div>
+  <!-- 分享历史 -->
+  <div class="share-section" style="margin-top:16px">
+    <div class="share-section-title">📜 分享记录</div>
+    <div class="share-history" id="share-history">
+      <div class="cd-empty">暂无分享记录</div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- 社媒平台分享弹窗 -->
+<div class="share-modal-overlay hidden" id="share-platform-modal">
+  <div class="share-modal-card">
+    <div class="share-modal-header">
+      <h3>📤 分享到社交媒体平台</h3>
+      <button class="btn btn-xs btn-secondary" onclick="closeSharePlatformModal()">✕</button>
+    </div>
+    <div class="share-modal-body">
+      <div class="share-preview-box" id="share-preview-box">
+        <div class="share-preview-img" id="share-preview-img">💅</div>
+        <div class="share-preview-caption" id="share-preview-caption">选择作品后显示预览</div>
+      </div>
+      <div class="share-platform-grid" id="share-platform-grid">
+        <!-- 动态渲染 -->
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MCP 配置弹窗 -->
+<div class="share-modal-overlay hidden" id="mcp-config-modal">
+  <div class="share-modal-card" style="max-width:560px">
+    <div class="share-modal-header">
+      <h3>🔌 MCP 集成配置</h3>
+      <button class="btn btn-xs btn-secondary" onclick="closeMcpConfig()">✕</button>
+    </div>
+    <div class="share-modal-body">
+      <div class="form-group">
+        <label>MCP 服务器地址</label>
+        <div class="mcp-server-list" id="mcp-server-list">
+          <div class="mcp-server-item">
+            <div class="mcp-server-info">
+              <div class="mcp-server-name">🔵 Twitter/X MCP</div>
+              <div class="mcp-server-url">https://mcp.twitter.ai-nails.com</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:6px">
+              <span class="mcp-status connected">已连接</span>
+              <button class="btn btn-xs btn-secondary" onclick="testMcpServer('twitter')">测试</button>
+            </div>
+          </div>
+          <div class="mcp-server-item">
+            <div class="mcp-server-info">
+              <div class="mcp-server-name">📷 Instagram MCP</div>
+              <div class="mcp-server-url">https://mcp.instagram.ai-nails.com</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:6px">
+              <span class="mcp-status connected">已连接</span>
+              <button class="btn btn-xs btn-secondary" onclick="testMcpServer('instagram')">测试</button>
+            </div>
+          </div>
+          <div class="mcp-server-item">
+            <div class="mcp-server-info">
+              <div class="mcp-server-name">📌 Pinterest MCP</div>
+              <div class="mcp-server-url">https://mcp.pinterest.ai-nails.com</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:6px">
+              <span class="mcp-status connected">已连接</span>
+              <button class="btn btn-xs btn-secondary" onclick="testMcpServer('pinterest')">测试</button>
+            </div>
+          </div>
+          <div class="mcp-server-item">
+            <div class="mcp-server-info">
+              <div class="mcp-server-name">🎵 TikTok MCP</div>
+              <div class="mcp-server-url">https://mcp.tiktok.ai-nails.com</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:6px">
+              <span class="mcp-status disconnected">未连接</span>
+              <button class="btn btn-xs btn-accent" onclick="testMcpServer('tiktok')">连接</button>
+            </div>
+          </div>
+          <div class="mcp-server-item">
+            <div class="mcp-server-info">
+              <div class="mcp-server-name">💼 LinkedIn MCP</div>
+              <div class="mcp-server-url">https://mcp.linkedin.ai-nails.com</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:6px">
+              <span class="mcp-status disconnected">未连接</span>
+              <button class="btn btn-xs btn-accent" onclick="testMcpServer('linkedin')">连接</button>
+            </div>
+          </div>
+          <div class="mcp-server-item">
+            <div class="mcp-server-info">
+              <div class="mcp-server-name">🎶 抖音 MCP</div>
+              <div class="mcp-server-url">https://mcp.douyin.ai-nails.com</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:6px">
+              <span class="mcp-status disconnected">未连接</span>
+              <button class="btn btn-xs btn-accent" onclick="testMcpServer('douyin')">连接</button>
+            </div>
+          </div>
+          <div class="mcp-server-item">
+            <div class="mcp-server-info">
+              <div class="mcp-server-name">⚡ 快手 MCP</div>
+              <div class="mcp-server-url">https://mcp.kuaishou.ai-nails.com</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:6px">
+              <span class="mcp-status disconnected">未连接</span>
+              <button class="btn btn-xs btn-accent" onclick="testMcpServer('kuaishou')">连接</button>
+            </div>
+          </div>
+          <div class="mcp-server-item">
+            <div class="mcp-server-info">
+              <div class="mcp-server-name">🎬 微信视频号 MCP</div>
+              <div class="mcp-server-url">https://mcp.wechat-channel.ai-nails.com</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:6px">
+              <span class="mcp-status disconnected">未连接</span>
+              <button class="btn btn-xs btn-accent" onclick="testMcpServer('wechat-channel')">连接</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="form-group" style="margin-top:14px">
+        <label>添加自定义 MCP 服务器</label>
+        <div style="display:flex;gap:8px">
+          <input class="form-input" id="mcp-name-input" placeholder="MCP 名称" style="width:140px">
+          <input class="form-input" id="mcp-url-input" placeholder="MCP 地址 https://..." style="flex:1">
+          <button class="btn btn-accent btn-xs" onclick="addCustomMcpServer()">➕ 添加</button>
+        </div>
+      </div>
+      <div class="form-group" style="margin-top:14px">
+        <label>MCP 自动分享设置</label>
+        <div style="display:flex;align-items:center;gap:10px;margin-top:6px">
+          <label class="toggle-switch">
+            <input type="checkbox" id="mcp-auto-share" onchange="toggleMcpAutoShare(this.checked)">
+            <span class="toggle-slider"></span>
+          </label>
+          <span style="font-size:12px;color:var(--text-secondary)">生成作品后自动通过 MCP 分享到已连接平台</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- API 配置弹窗 -->
+<div class="share-modal-overlay hidden" id="api-config-modal">
+  <div class="share-modal-card" style="max-width:560px">
+    <div class="share-modal-header">
+      <h3>🔑 API 密钥配置</h3>
+      <button class="btn btn-xs btn-secondary" onclick="closeApiConfig()">✕</button>
+    </div>
+    <div class="share-modal-body">
+      <div class="api-config-list" id="api-config-list">
+        <div class="api-config-item">
+          <div class="api-platform-icon" style="background:rgba(29,161,242,0.12);color:#1da1f2">𝕏</div>
+          <div class="api-platform-info">
+            <div class="api-platform-name">Twitter/X API</div>
+            <div class="api-platform-desc">API Key · API Secret · Access Token</div>
+          </div>
+          <button class="btn btn-xs btn-accent" onclick="configureApiKey('twitter')">配置</button>
+        </div>
+        <div class="api-config-item">
+          <div class="api-platform-icon" style="background:linear-gradient(135deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888);color:#fff">📷</div>
+          <div class="api-platform-info">
+            <div class="api-platform-name">Instagram Graph API</div>
+            <div class="api-platform-desc">App ID · App Secret · Access Token</div>
+          </div>
+          <button class="btn btn-xs btn-accent" onclick="configureApiKey('instagram')">配置</button>
+        </div>
+        <div class="api-config-item">
+          <div class="api-platform-icon" style="background:rgba(230,0,35,0.12);color:#e60023">📌</div>
+          <div class="api-platform-info">
+            <div class="api-platform-name">Pinterest API</div>
+            <div class="api-platform-desc">App ID · App Secret · Access Token</div>
+          </div>
+          <button class="btn btn-xs btn-accent" onclick="configureApiKey('pinterest')">配置</button>
+        </div>
+        <div class="api-config-item">
+          <div class="api-platform-icon" style="background:rgba(0,0,0,0.1);color:#000">🎵</div>
+          <div class="api-platform-info">
+            <div class="api-platform-name">TikTok API</div>
+            <div class="api-platform-desc">Client Key · Client Secret</div>
+          </div>
+          <button class="btn btn-xs btn-accent" onclick="configureApiKey('tiktok')">配置</button>
+        </div>
+        <div class="api-config-item">
+          <div class="api-platform-icon" style="background:rgba(10,102,194,0.12);color:#0a66c2">💼</div>
+          <div class="api-platform-info">
+            <div class="api-platform-name">LinkedIn API</div>
+            <div class="api-platform-desc">Client ID · Client Secret</div>
+          </div>
+          <button class="btn btn-xs btn-accent" onclick="configureApiKey('linkedin')">配置</button>
+        </div>
+        <div class="api-config-item">
+          <div class="api-platform-icon" style="background:rgba(0,200,83,0.12);color:var(--success)">🟢</div>
+          <div class="api-platform-info">
+            <div class="api-platform-name">微信公众平台</div>
+            <div class="api-platform-desc">AppID · AppSecret</div>
+          </div>
+          <button class="btn btn-xs btn-accent" onclick="configureApiKey('wechat')">配置</button>
+        </div>
+        <div class="api-config-item">
+          <div class="api-platform-icon" style="background:rgba(255,36,66,0.12);color:#ff2442">📕</div>
+          <div class="api-platform-info">
+            <div class="api-platform-name">小红书开放平台</div>
+            <div class="api-platform-desc">AppKey · AppSecret</div>
+          </div>
+          <button class="btn btn-xs btn-accent" onclick="configureApiKey('xiaohongshu')">配置</button>
+        </div>
+        <div class="api-config-item">
+          <div class="api-platform-icon" style="background:rgba(250,157,59,0.12);color:#fa9d3b">🎬</div>
+          <div class="api-platform-info">
+            <div class="api-platform-name">微信视频号开放平台</div>
+            <div class="api-platform-desc">AppID · AppSecret · Token</div>
+          </div>
+          <button class="btn btn-xs btn-accent" onclick="configureApiKey('wechat-channel')">配置</button>
+        </div>
+        <div class="api-config-item">
+          <div class="api-platform-icon" style="background:rgba(0,0,0,0.08);color:var(--text-primary)">🎶</div>
+          <div class="api-platform-info">
+            <div class="api-platform-name">抖音开放平台</div>
+            <div class="api-platform-desc">Client Key · Client Secret · Token</div>
+          </div>
+          <button class="btn btn-xs btn-accent" onclick="configureApiKey('douyin')">配置</button>
+        </div>
+        <div class="api-config-item">
+          <div class="api-platform-icon" style="background:rgba(255,73,6,0.12);color:#ff4906">⚡</div>
+          <div class="api-platform-info">
+            <div class="api-platform-name">快手开放平台</div>
+            <div class="api-platform-desc">App ID · App Secret · Token</div>
+          </div>
+          <button class="btn btn-xs btn-accent" onclick="configureApiKey('kuaishou')">配置</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- API Key 配置表单弹窗 -->
+<div class="share-modal-overlay hidden" id="api-key-form-modal">
+  <div class="share-modal-card" style="max-width:460px">
+    <div class="share-modal-header">
+      <h3 id="api-key-form-title">🔑 配置 API 密钥</h3>
+      <button class="btn btn-xs btn-secondary" onclick="closeApiKeyForm()">✕</button>
+    </div>
+    <div class="share-modal-body">
+      <div id="api-key-form-fields"></div>
+      <div style="margin-top:16px;display:flex;gap:8px;justify-content:flex-end">
+        <button class="btn btn-secondary btn-xs" onclick="closeApiKeyForm()">取消</button>
+        <button class="btn btn-accent btn-xs" onclick="saveApiKeys()">💾 保存</button>
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- PAGE: PAYMENT -->
@@ -977,12 +1504,47 @@ html[dir="rtl"] .lang-dropdown {
 <div class="sub-card" onclick="selectSub('enterprise',this)"><div class="sub-name">企业版</div><div class="sub-price">联系销售</div><div class="sub-features">私有化部署<br>SLA 保障<br>专属模型训练</div></div>
 </div>
 </div>
-<div id="pay-scene-device" class="hidden"><div class="card"><div style="display:flex;align-items:center;gap:16px"><div style="font-size:48px">🦞</div><div><div style="font-weight:700;font-size:16px">AI NAILS 智能美甲打印机 Pro</div><div style="color:var(--text-secondary);font-size:13px">1200 DPI · CMYK 四色 · WiFi/蓝牙 · 甲型自适应</div><div style="font-weight:800;font-size:20px;margin-top:8px;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent">¥29,900</div></div></div></div></div>
+<div id="pay-scene-device" class="hidden">
+<div class="card" style="margin-bottom:16px"><div style="display:flex;align-items:center;gap:16px"><div style="font-size:48px">🦞</div><div><div style="font-weight:700;font-size:16px">AI NAILS 智能美甲打印机 Pro</div><div style="color:var(--text-secondary);font-size:13px">1200 DPI · CMYK 四色 · WiFi/蓝牙 · 甲型自适应</div></div></div></div>
+<div style="font-size:13px;font-weight:700;margin-bottom:10px;color:var(--text-primary)">📦 选择购买数量（USD）</div>
+<div class="device-buy-grid">
+<button class="device-buy-card selected" data-device="sample" onclick="selectDeviceOption('sample',this)">
+  <div class="device-qty">🧪 1 台 Sample 样机</div>
+  <div class="device-price">$1,000</div>
+  <div class="device-unit">$1,000 / 台</div>
+</button>
+<button class="device-buy-card" data-device="moq10" onclick="selectDeviceOption('moq10',this)">
+  <div class="device-qty">📦 MOQ 10 Set</div>
+  <div class="device-price">$9,990</div>
+  <div class="device-unit">$999 / 台</div>
+</button>
+<button class="device-buy-card" data-device="b100" onclick="selectDeviceOption('b100',this)">
+  <div class="device-qty">📦 100 Set</div>
+  <div class="device-price">$89,900</div>
+  <div class="device-unit">$899 / 台</div>
+</button>
+<button class="device-buy-card" data-device="b200" onclick="selectDeviceOption('b200',this)">
+  <div class="device-qty">📦 200 Set</div>
+  <div class="device-price">$173,800</div>
+  <div class="device-unit">$869 / 台</div>
+</button>
+<button class="device-buy-card" data-device="b500" onclick="selectDeviceOption('b500',this)">
+  <div class="device-qty">📦 500 Set</div>
+  <div class="device-price">$399,500</div>
+  <div class="device-unit">$799 / 台</div>
+</button>
+<button class="device-buy-card" data-device="b1000" onclick="selectDeviceOption('b1000',this)">
+  <div class="device-qty">📦 1,000 Set</div>
+  <div class="device-price">$769,000</div>
+  <div class="device-unit">$769 / 台</div>
+</button>
+</div>
+</div>
 <div style="margin-top:16px"><div style="font-size:12px;color:var(--text-secondary);margin-bottom:8px;font-weight:600">选择币种</div><div class="currency-select" id="currency-select"><span class="currency-chip selected" onclick="selectCurrency('CNY',this)">¥ CNY</span><span class="currency-chip" onclick="selectCurrency('USD',this)">$ USD</span><span class="currency-chip" onclick="selectCurrency('EUR',this)">€ EUR</span><span class="currency-chip" onclick="selectCurrency('USDT',this)">₮ USDT</span><span class="currency-chip" onclick="selectCurrency('BTC',this)">₿ BTC</span></div></div>
 <div style="margin-top:16px"><div style="font-size:12px;color:var(--text-secondary);margin-bottom:8px;font-weight:600">支付方式</div><div class="payment-methods" id="payment-methods">
 <div class="payment-method selected" data-method="wechat" onclick="selectPayment('wechat',this)"><span class="pm-icon">💬</span><span>微信支付</span></div>
 <div class="payment-method" data-method="alipay" onclick="selectPayment('alipay',this)"><span class="pm-icon">🔵</span><span>支付宝</span></div>
-<div class="payment-method" data-method="stripe" onclick="selectPayment('stripe',this)" style="display:none"><span class="pm-icon">💳</span><span>Visa/Mastercard</span></div>
+<div class="payment-method" data-method="stripe" onclick="selectPayment('stripe',this)" style="display:none"><span class="pm-icon">💳</span><span>Stripe</span></div>
 <div class="payment-method" data-method="paypal" onclick="selectPayment('paypal',this)" style="display:none"><span class="pm-icon">🅿</span><span>PayPal</span></div>
 <div class="payment-method" data-method="crypto" onclick="selectPayment('crypto',this)" style="display:none"><span class="pm-icon">₿</span><span>数字货币</span></div>
 <div class="payment-method" data-method="bank" onclick="selectPayment('bank',this)"><span class="pm-icon">🏦</span><span>对公转账</span></div>
@@ -1026,13 +1588,13 @@ html[dir="rtl"] .lang-dropdown {
 </div>
 </div>
 <div id="agent-custom" class="hidden">
-<div class="card"><div class="card-title">添加自定义 Skill</div><div class="card-subtitle">手动配置 Skill 参数，支持 AnyGen/HeyGen/自定义服务商</div>
+<div class="card"><div class="card-title">添加自定义 Skill</div><div class="card-subtitle">手动配置 Skill 参数，支持 AnyGen/HeyGen/ClawHub/自定义服务商</div>
 <div class="form-row"><div class="form-group"><label>Skill 名称 *</label><input class="form-input" id="custom-skill-name" placeholder="例如：我的美甲风格助手"></div><div class="form-group"><label>版本号</label><input class="form-input" id="custom-skill-version" placeholder="v1.0.0"></div></div>
 <div class="form-group"><label>描述 *</label><input class="form-input" id="custom-skill-desc" placeholder="简要描述这个 Skill 的功能"></div>
-<div class="form-row"><div class="form-group"><label>标签</label><input class="form-input" id="custom-skill-tags" placeholder="美甲, AI, 设计（逗号分隔）"></div><div class="form-group"><label>服务商</label><select class="form-input" id="custom-skill-provider"><option value="custom">自定义</option><option value="anygen">AnyGen</option><option value="heygen">HeyGen</option><option value="creatok">CreatOK</option><option value="clipcat">Clipcat</option><option value="revor">Revor</option><option value="nanobanana">NanoBanana</option></select></div></div>
-<div class="form-group"><label>System Prompt</label><textarea class="form-input" id="custom-skill-prompt" rows="3" placeholder="输入 Skill 的系统提示词..."></textarea></div>
+<div class="form-row"><div class="form-group"><label>标签</label><input class="form-input" id="custom-skill-tags" placeholder="美甲, AI, 设计（逗号分隔）"></div><div class="form-group"><label>服务商</label><select class="form-input" id="custom-skill-provider"><option value="custom">🔧 自定义（自然语言生成）</option><option value="clawhub-image">🎨 ClawHub 生图</option><option value="clawhub-video">🎬 ClawHub 生视频</option><option value="anygen">AnyGen</option><option value="heygen">HeyGen</option><option value="creatok">CreatOK</option><option value="clipcat">Clipcat</option><option value="revor">Revor</option><option value="nanobanana">NanoBanana</option></select></div></div>
+<div class="form-group"><label>System Prompt</label><textarea class="form-input" id="custom-skill-prompt" rows="3" placeholder="输入 Skill 的系统提示词...&#10;&#10;自然语言生成：描述你想让AI生成的内容风格&#10;ClawHub生图：描述图片风格和参数&#10;ClawHub生视频：描述视频主题和时长"></textarea></div>
 <div class="form-group"><label>触发词</label><input class="form-input" id="custom-skill-triggers" placeholder="触发此 Skill 的关键词（逗号分隔）"></div>
-<button class="btn btn-primary btn-sm" onclick="addCustomSkillV2()">添加 Skill</button>
+<button class="btn btn-primary btn-sm" onclick="addCustomSkillV2()">➕ 添加 Skill</button>
 </div>
 </div>
 <div id="agent-chat" class="hidden">
@@ -1099,6 +1661,26 @@ html[dir="rtl"] .lang-dropdown {
 <div class="provider-actions" style="margin-top:8px;display:flex;gap:6px">
 <button class="btn btn-xs btn-accent" onclick="event.stopPropagation();openNanoBananaSettings()">🔑 设置API Key</button>
 <button class="btn btn-xs btn-secondary" onclick="event.stopPropagation();testNanoBananaConnection()">🔌 测试连接</button>
+</div>
+</div>
+<div class="provider-card" id="provider-gptimage" onclick="setDefaultProvider('gptimage')" style="border:1px solid rgba(16,163,127,0.3);background:linear-gradient(135deg,rgba(16,163,127,0.06),rgba(64,200,100,0.06))">
+<div class="provider-badge badge-hot" style="background:#10a37f">生图</div>
+<div class="provider-header"><span class="provider-icon">🖼️</span><div><div class="provider-name">GPT Image 2</div><div class="provider-model">DALL·E 3 · GPT-4o Image · 高精度生图</div></div></div>
+<div class="provider-desc">OpenAI 最新图像生成模型，支持文生图/图生图/风格迁移/局部编辑，商用级画质</div>
+<div class="provider-status"><span id="gptimage-status" class="status-dot status-idle"></span><span id="gptimage-status-text">未配置API Key · 点击设置</span></div>
+<div class="provider-actions" style="margin-top:8px;display:flex;gap:6px">
+<button class="btn btn-xs btn-accent" onclick="event.stopPropagation();openGPTImageSettings()">🔑 设置API Key</button>
+<button class="btn btn-xs btn-secondary" onclick="event.stopPropagation();testGPTImageConnection()">🔌 测试连接</button>
+</div>
+</div>
+<div class="provider-card" id="provider-heygen" onclick="setDefaultProvider('heygen')" style="border:1px solid rgba(139,92,246,0.3);background:linear-gradient(135deg,rgba(139,92,246,0.06),rgba(99,102,241,0.06))">
+<div class="provider-badge badge-hot" style="background:#8b5cf6">视频</div>
+<div class="provider-header"><span class="provider-icon">🎬</span><div><div class="provider-name">HeyGen 数字人</div><div class="provider-model">AI数字人 · 视频生成 · 多语言配音</div></div></div>
+<div class="provider-desc">AI 驱动数字人视频生成，支持真人克隆、虚拟角色、视频翻译、流式交互</div>
+<div class="provider-status"><span id="heygen-status" class="status-dot status-idle"></span><span id="heygen-status-text">未配置API Key · 点击设置</span></div>
+<div class="provider-actions" style="margin-top:8px;display:flex;gap:6px">
+<button class="btn btn-xs btn-accent" onclick="event.stopPropagation();openHeyGenSettings()">🔑 设置API Key</button>
+<button class="btn btn-xs btn-secondary" onclick="event.stopPropagation();testHeyGenConnection()">🔌 测试连接</button>
 </div>
 </div>
 </div>
@@ -1182,6 +1764,26 @@ html[dir="rtl"] .lang-dropdown {
 <div class="modal-actions"><button class="btn btn-secondary btn-sm" onclick="closeNanoBananaSettings()">取消</button><button class="btn btn-primary btn-sm" onclick="saveNanoBananaSettings()">💾 保存配置</button></div>
 </div></div>
 
+<!-- GPT IMAGE 2 API KEY MODAL -->
+<div class="modal-overlay hidden" id="gptimage-modal"><div class="modal" style="width:480px">
+<h3>🖼️ GPT Image 2 API 配置</h3>
+<p style="font-size:12px;color:var(--text-secondary);margin-bottom:16px">使用 OpenAI DALL·E 3 / GPT-4o Image 模型进行高质量AI图像生成。获取 API Key: <a href="https://platform.openai.com/api-keys" target="_blank" style="color:var(--accent)">OpenAI Platform</a></p>
+<div class="form-group"><label>API Key</label><div class="input-row"><input class="form-input" id="gptimage-api-key" type="password" placeholder="sk-..."><button class="btn btn-secondary btn-sm" onclick="togglePassword('gptimage-api-key')" style="white-space:nowrap">👁</button></div></div>
+<div class="form-group"><label>默认尺寸</label><div style="display:flex;gap:8px"><button class="btn btn-xs btn-secondary gptimage-size-btn selected" onclick="selectGPTImageSize('1024x1024',this)">1024×1024</button><button class="btn btn-xs btn-secondary gptimage-size-btn" onclick="selectGPTImageSize('1792x1024',this)">1792×1024</button><button class="btn btn-xs btn-secondary gptimage-size-btn" onclick="selectGPTImageSize('1024x1792',this)">1024×1792</button></div></div>
+<div class="form-group"><label>模型</label><div style="display:flex;gap:8px"><button class="btn btn-xs btn-secondary gptimage-model-btn selected" onclick="selectGPTImageModel('dall-e-3',this)">DALL·E 3</button><button class="btn btn-xs btn-secondary gptimage-model-btn" onclick="selectGPTImageModel('gpt-4o',this)">GPT-4o</button></div></div>
+<div class="modal-actions"><button class="btn btn-secondary btn-sm" onclick="closeGPTImageSettings()">取消</button><button class="btn btn-primary btn-sm" onclick="saveGPTImageSettings()">💾 保存配置</button></div>
+</div></div>
+
+<!-- HEYGEN API KEY MODAL -->
+<div class="modal-overlay hidden" id="heygen-modal"><div class="modal" style="width:480px">
+<h3>🎬 HeyGen 数字人视频 API 配置</h3>
+<p style="font-size:12px;color:var(--text-secondary);margin-bottom:16px">使用 HeyGen 生成 AI 数字人播报视频、定制数字人形象。获取 API Key: <a href="https://app.heygen.com/settings" target="_blank" style="color:var(--accent)">HeyGen Dashboard</a></p>
+<div class="form-group"><label>API Key</label><div class="input-row"><input class="form-input" id="heygen-api-key-input" type="password" placeholder="输入你的 HeyGen API Key..."><button class="btn btn-secondary btn-sm" onclick="togglePassword('heygen-api-key-input')" style="white-space:nowrap">👁</button></div></div>
+<div class="form-group"><label>数字人模板</label><div style="display:flex;gap:8px"><button class="btn btn-xs btn-secondary heygen-avatar-btn selected" onclick="selectHeyGenAvatar('default',this)">默认数字人</button><button class="btn btn-xs btn-secondary heygen-avatar-btn" onclick="selectHeyGenAvatar('custom',this)">自定义形象</button></div></div>
+<div class="form-group"><label>声音</label><div style="display:flex;gap:8px"><button class="btn btn-xs btn-secondary heygen-voice-btn selected" onclick="selectHeyGenVoice('default',this)">默认声音</button><button class="btn btn-xs btn-secondary heygen-voice-btn" onclick="selectHeyGenVoice('female',this)">女声</button><button class="btn btn-xs btn-secondary heygen-voice-btn" onclick="selectHeyGenVoice('male',this)">男声</button></div></div>
+<div class="modal-actions"><button class="btn btn-secondary btn-sm" onclick="closeHeyGenSettings()">取消</button><button class="btn btn-primary btn-sm" onclick="saveHeyGenSettings()">💾 保存配置</button></div>
+</div></div>
+
 <!-- FORGOT PASSWORD MODAL -->
 <div class="modal-overlay hidden" id="forgot-modal"><div class="modal"><h3>找回密码</h3><p>请输入您的注册邮箱，我们将发送重置链接。</p><div class="form-group"><input class="form-input" id="forgot-email" type="email" placeholder="your@email.com"></div><div class="modal-actions"><button class="btn btn-secondary btn-sm" onclick="closeForgotModal()">取消</button><button class="btn btn-primary btn-sm" onclick="handleForgotPassword()">发送重置链接</button></div></div></div>
 
@@ -1210,9 +1812,14 @@ html[dir="rtl"] .lang-dropdown {
   <div class="qr-code" style="font-size:48px">₿</div>
 </div>
 <p style="font-size:11px;color:var(--text-tertiary);margin:8px 0" id="crypto-order-id">订单号: ---</p>
-<div style="background:var(--bg-tertiary);border-radius:8px;padding:12px;margin:12px 0;font-family:monospace;font-size:11px;word-break:break-all;color:var(--text-secondary)">
-  <div style="margin-bottom:8px">钱包地址 (USDT-ERC20):</div>
-  <div style="color:var(--accent)" id="crypto-address">0xAI_Nails_Payment_7F3a8B2c9D1e</div>
+  <div style="background:var(--bg-tertiary);border-radius:8px;padding:12px;margin:12px 0;font-family:monospace;font-size:11px;word-break:break-all;color:var(--text-secondary)">
+  <div style="margin-bottom:8px">钱包地址 (USDT-TRC20):</div>
+  <div style="color:var(--accent)" id="crypto-address">TShgekmwGkW8d2cAiJm57y8aJ9Kb3dgdTx</div>
+</div>
+<p style="font-size:11px;color:var(--text-tertiary);margin:4px 0">📱 支持币安扫码 USDT 付款</p>
+<div style="background:var(--bg-tertiary);border-radius:8px;padding:12px;margin:12px 0;font-size:11px;color:var(--text-secondary)">
+  <div style="margin-bottom:4px">🅿 PayPal 收款:</div>
+  <div style="color:var(--accent)">hmwhtm@yeah.net</div>
 </div>
 <p style="margin:8px 0">应付: <span id="crypto-amount" style="font-weight:800;color:var(--accent)">1,000</span> <span id="crypto-currency">USDT</span></p>
 <p style="font-size:11px;color:var(--text-tertiary)">转账后系统自动确认</p>
@@ -1221,17 +1828,40 @@ html[dir="rtl"] .lang-dropdown {
   <button class="btn btn-secondary btn-sm" onclick="closeCryptoModal()">取消</button>
 </div></div></div>
 
-<!-- ====== 银行卡支付弹窗 ====== -->
+<!-- ====== Stripe 支付弹窗 ====== -->
+<div class="modal-overlay hidden" id="stripe-modal"><div class="modal" style="width:420px;text-align:center">
+<h3>💳 Stripe 国际支付</h3>
+<div style="background:linear-gradient(135deg,#635bff,#0a2540);border-radius:12px;padding:24px;margin:16px 0;color:#fff">
+  <div style="font-size:40px;margin-bottom:12px">💳</div>
+  <div style="font-size:14px;opacity:0.9">通过 Stripe 安全支付平台完成付款</div>
+  <div style="font-weight:800;font-size:24px;margin:12px 0" id="stripe-pay-amount">¥1,000</div>
+  <div style="font-size:11px;opacity:0.7" id="stripe-pay-order-id">订单号: ---</div>
+  <div style="margin-top:16px;display:flex;gap:8px;align-items:center;justify-content:center;background:rgba(255,255,255,0.1);border-radius:8px;padding:8px">
+    <span style="font-size:12px">支持</span>
+    <span>Visa</span><span>·</span><span>Mastercard</span><span>·</span><span>Amex</span><span>·</span><span>Apple Pay</span><span>·</span><span>Google Pay</span>
+  </div>
+</div>
+<p style="font-size:11px;color:var(--text-tertiary)">点击下方按钮将在浏览器中打开 Stripe 安全支付页面</p>
+<div class="modal-actions" style="justify-content:center;gap:8px;margin-top:12px">
+  <button class="btn btn-primary btn-sm" onclick="openStripePaymentLink()" style="background:#635bff;border-color:#635bff;min-width:160px">🔗 前往 Stripe 支付</button>
+  <button class="btn btn-secondary btn-sm" onclick="closeStripeModal()">取消</button>
+</div></div></div>
+
+<!-- ====== 银行卡支付弹窗 (PayPal) ====== -->
 <div class="modal-overlay hidden" id="card-modal"><div class="modal" style="width:400px">
-<h3>💳 <span id="card-pay-method">Visa/Mastercard</span> 支付</h3>
+<h3>🅿️ <span id="card-pay-method">PayPal</span> 支付</h3>
+<div style="background:var(--bg-tertiary);border-radius:8px;padding:12px;margin:12px 0;font-size:12px;color:var(--text-secondary);text-align:center">
+  <div style="margin-bottom:4px">收款账号</div>
+  <div style="color:var(--accent);font-weight:700;font-size:14px">hmwhtm@yeah.net</div>
+</div>
 <div style="background:var(--bg-tertiary);border-radius:8px;padding:12px;margin:12px 0">
-  <div class="form-group"><label>卡号</label><input class="form-input" id="card-number-input" placeholder="1234 5678 9012 3456" maxlength="19" oninput="this.value=this.value.replace(/[^0-9]/g,'').replace(/(.{4})/g,'$1 ').trim()"></div>
-  <div class="form-row"><div class="form-group"><label>有效期</label><input class="form-input" id="card-expiry-input" placeholder="MM/YY" maxlength="5" oninput="this.value=this.value.replace(/[^0-9]/g,'').replace(/^(.{2})/,'$1/')"></div><div class="form-group"><label>CVV</label><input class="form-input" id="card-cvc-input" placeholder="123" maxlength="4" type="password"></div></div>
+  <div class="form-group"><label>您的 PayPal 邮箱</label><input class="form-input" id="card-number-input" placeholder="your@email.com"></div>
+  <div class="form-group"><label>姓名</label><input class="form-input" id="card-expiry-input" placeholder="卡片持有人姓名"></div>
 </div>
 <p style="font-weight:800;font-size:18px;color:var(--accent);text-align:center" id="card-pay-amount">¥1,000</p>
 <p style="font-size:11px;color:var(--text-tertiary);text-align:center" id="card-pay-order-id">订单号: ---</p>
 <div class="modal-actions" style="justify-content:center;gap:8px">
-  <button class="btn btn-primary btn-sm" onclick="submitCardPayment()">确认支付</button>
+  <button class="btn btn-primary btn-sm" onclick="submitCardPayment()" style="background:#0070ba;border-color:#0070ba">确认支付</button>
   <button class="btn btn-secondary btn-sm" onclick="closeCardModal()">取消</button>
 </div></div></div>
 
@@ -2279,6 +2909,7 @@ const OllamaService = {
 <script src="heygen_service.js"></script>
 <script src="creatok_service.js"></script>
 <script src="clipcat_service.js"></script>
+<script src="gptimage_service.js"></script>
 <script src="revor_service.js"></script>
 <script src="skill_integration.js"></script>
 

@@ -314,6 +314,30 @@ const PRESET_SKILLS = [
     enabled: false,
   },
 
+  // === ClawHub Skills ===
+  {
+    id: 'clawhub-image',
+    name: 'ClawHub · AI 生图',
+    version: 'v1.0.0',
+    icon: '🦞',
+    desc: 'ClawHub 驱动的高质量 AI 图片生成，支持多种风格和分辨率',
+    tags: ['ClawHub', '生图', 'AI'],
+    provider: 'clawhub',
+    type: 'image',
+    enabled: false,
+  },
+  {
+    id: 'clawhub-video',
+    name: 'ClawHub · AI 生视频',
+    version: 'v1.0.0',
+    icon: '🎬',
+    desc: 'ClawHub 智能视频生成引擎，自动生成营销视频和产品展示',
+    tags: ['ClawHub', '生视频', 'AI', '营销视频'],
+    provider: 'clawhub',
+    type: 'video',
+    enabled: false,
+  },
+
   // === Revor Skills (外展服务) ===
   {
     id: 'revor-outreach',
@@ -347,9 +371,23 @@ function getAllInstalledSkills() {
   const enabledPresetIds = PRESET_SKILLS.filter(s => s.enabled).map(s => s.id);
   const stored = JSON.parse(localStorage.getItem('installed_skill_ids') || JSON.stringify(enabledPresetIds));
   const customSkills = loadCustomSkills();
+  // 也加载 ai_nails_custom_skills（来自 app.js 的 addCustomSkillV2）
+  const v2CustomSkills = JSON.parse(localStorage.getItem('ai_nails_custom_skills') || '[]');
   
   const presetInstalled = PRESET_SKILLS.filter(s => stored.includes(s.id));
-  return [...presetInstalled, ...customSkills];
+  // 合并两种自定义 skills 格式
+  const mergedCustom = [...customSkills, ...v2CustomSkills.map(s => ({
+    id: s.id,
+    name: s.name,
+    version: s.version,
+    icon: s.icon || '🔧',
+    desc: s.desc,
+    tags: s.tags || [],
+    provider: s.provider || 'custom',
+    type: s.provider === 'clawhub-image' ? 'image' : s.provider === 'clawhub-video' ? 'video' : 'custom',
+    enabled: true,
+  }))];
+  return [...presetInstalled, ...mergedCustom];
 }
 
 // 安装/卸载预置 Skill
@@ -383,6 +421,7 @@ function renderInstalledSkills() {
       else if (s.provider === 'clipcat') cls = 'tag-info';
       else if (s.provider === 'revor') cls = 'tag-warning';
       else if (s.provider === 'nanobanana') cls = 'tag-accent2';
+      else if (s.provider === 'clawhub') cls = 'tag-accent';
       else if (t === '自定义') cls = 'tag-accent2';
       return `<span class="tag ${cls}">${t}</span>`;
     }).join('');
@@ -398,6 +437,9 @@ function renderInstalledSkills() {
       if (s.provider === 'clipcat') return `<button class="btn btn-xs btn-primary" onclick="openClipcatUsePanel('${s.operation}')">▶ 使用</button>`;
       if (s.provider === 'revor') return `<button class="btn btn-xs btn-primary" onclick="openRevorUsePanel()">▶ 使用</button>`;
       if (s.provider === 'nanobanana') return `<button class="btn btn-xs btn-primary" onclick="navigateTo('create')">▶ 使用</button>`;
+      if (s.provider === 'clawhub' && s.type === 'image') return `<button class="btn btn-xs btn-primary" onclick="executeClawHubImage()">▶ 生图</button>`;
+      if (s.provider === 'clawhub' && s.type === 'video') return `<button class="btn btn-xs btn-primary" onclick="executeClawHubVideo()">▶ 生视频</button>`;
+      if (s.provider === 'custom') return `<button class="btn btn-xs btn-primary" onclick="executeCustomPrompt('${s.id}')">▶ 生成</button>`;
       return '';
     })();
 
@@ -427,7 +469,7 @@ function renderInstalledSkills() {
 
 // Skill 开关处理
 function handleSkillToggle(skillId, checked) {
-  const presetPrefixes = ['anygen-', 'heygen-', 'creatok-', 'clipcat-', 'revor-', 'nanobanana-'];
+  const presetPrefixes = ['anygen-', 'heygen-', 'creatok-', 'clipcat-', 'revor-', 'nanobanana-', 'clawhub-'];
   if (presetPrefixes.some(p => skillId.startsWith(p))) {
     togglePresetSkill(skillId, checked);
   }
@@ -552,6 +594,21 @@ async function executeHeyGen() {
         <a href="${videoUrl}" target="_blank" class="btn btn-xs btn-primary" style="display:inline-block;margin-top:10px">🔗 打开视频</a>` : '<p style="color:var(--text-secondary)">视频链接生成中...</p>'}
       </div>`;
     showToast('✅ 数字人视频生成完成！', 'success');
+
+    // 自动保存到营销视频资源库
+    if (videoUrl && typeof addToMediaLibrary === 'function') {
+      addToMediaLibrary({
+        name: `HeyGen 数字人视频 - ${new Date().toLocaleDateString()}`,
+        type: 'video',
+        source: 'ai-generated',
+        url: videoUrl,
+        thumbnailUrl: null,
+        tags: ['AI生成', 'HeyGen', '数字人', '营销视频'],
+        size: 0,
+        fromProvider: 'HeyGen'
+      });
+      showToast('📼 视频已自动保存到营销视频资源库', 'info');
+    }
   } catch (err) {
     let msg = '视频生成失败';
     if (err.message.includes('HEYGEN_KEY_INVALID')) msg = 'API Key 无效';
@@ -946,7 +1003,9 @@ const IMAGE_SKILL_IDS = [
   'creatok-image',
   'clipcat-image',
   'nanobanana-pro',
+  'clawhub-image',
   'creatok-video',
+  'clawhub-video',
 ];
 
 // Skill ID 到 chip 元素的映射信息
@@ -954,7 +1013,9 @@ const IMAGE_SKILL_INFO = {
   'creatok-image': { icon: '🖼️', name: 'CreatOK 生图', provider: 'CreatOK', providerCls: 'badge-creatok' },
   'clipcat-image': { icon: '🎨', name: 'Clipcat 生图', provider: 'Clipcat', providerCls: 'badge-clipcat' },
   'nanobanana-pro': { icon: '🍌', name: 'Nano Banana', provider: 'NanoBanana', providerCls: 'badge-nano' },
+  'clawhub-image': { icon: '🦞', name: 'ClawHub 生图', provider: 'ClawHub', providerCls: 'badge-clawhub' },
   'creatok-video': { icon: '🎥', name: 'CreatOK 生视频', provider: 'CreatOK', providerCls: 'badge-creatok' },
+  'clawhub-video': { icon: '🎬', name: 'ClawHub 生视频', provider: 'ClawHub', providerCls: 'badge-clawhub' },
 };
 
 // 刷新创作舱 Skill 安装状态
