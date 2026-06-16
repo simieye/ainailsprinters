@@ -130,7 +130,7 @@ function navigateTo(page){
   document.querySelectorAll('.sidebar-nav-item').forEach(el=>el.classList.toggle('active',el.dataset.page===page));
   document.querySelectorAll('.content-page').forEach(el=>el.classList.remove('active'));
   const t=document.getElementById('page-'+page);if(t)t.classList.add('active');
-  const names={create:'创作舱 · TALK TO CREATE',medialibrary:'媒体资源库 · 图库管理',device:'龙虾智控 · 设备仪表盘',community:'全球创作者社区',payment:'支付中心',agents:'智能体集群 · Skill 管理',providers:'AI 大模型提供商',openclaw:'OpenClaw 控制台',admin:'管理后台',settings:'设置'};
+  const names={create:'创作舱 · TALK TO CREATE',medialibrary:'媒体资源库 · 图库管理',productcenter:'产品中心 · 美甲机',device:'龙虾智控 · 设备仪表盘',community:'全球创作者社区',payment:'支付中心',agents:'智能体集群 · Skill 管理',providers:'AI 大模型提供商',openclaw:'OpenClaw 控制台',admin:'管理后台',settings:'设置'};
   document.getElementById('titlebar-page-name').textContent=names[page]||page;
   // 进入创作舱时刷新 Skill 快速安装状态
   if (page === 'create' && typeof refreshQuickAddChips === 'function') {
@@ -154,6 +154,23 @@ function navigateTo(page){
   }
 }
 function toggleSidebar(){sidebarCollapsed=!sidebarCollapsed;document.getElementById('sidebar').classList.toggle('collapsed',sidebarCollapsed);document.querySelector('.sidebar-collapse-btn').textContent=sidebarCollapsed?'▶':'◀ 收起菜单'}
+
+// ADMIN TABS
+function switchAdminTab(tab,btn){
+  document.querySelectorAll('.admin-tab').forEach(el=>{el.style.color='var(--text-secondary)';el.style.borderBottomColor='transparent';el.style.fontWeight='400'});
+  btn.style.color='var(--accent)';btn.style.borderBottomColor='var(--accent)';btn.style.fontWeight='700';
+  document.getElementById('admin-orders-panel').style.display=tab==='orders'?'block':'none';
+  document.getElementById('admin-logistics-panel').style.display=tab==='logistics'?'block':'none';
+  document.getElementById('admin-inventory-panel').style.display=tab==='inventory'?'block':'none';
+}
+function filterAdminOrders(status){
+  const rows=document.querySelectorAll('#admin-orders-panel tbody tr');
+  rows.forEach(r=>{const s=r.querySelector('.tag');if(!s)return;const st=s.textContent;r.style.display=(status==='all'||st.includes({completed:'已完成',pending:'待发货',shipped:'运输中',risk:'风控中',cancelled:'已取消'}[status]))?'':'none'});
+}
+function searchAdminOrders(q){
+  const rows=document.querySelectorAll('#admin-orders-panel tbody tr');
+  rows.forEach(r=>{const t=r.textContent.toLowerCase();r.style.display=t.includes(q.toLowerCase())?'':'none'});
+}
 
 // DEVICE
 function switchDeviceMode(mode){document.querySelectorAll('#page-device .auth-tab').forEach(el=>{el.classList.toggle('active',(mode==='b2c'&&el.textContent.includes('B2C'))||(mode==='b2b'&&el.textContent.includes('B2B')))});document.getElementById('device-b2c').classList.toggle('hidden',mode!=='b2c');document.getElementById('device-b2b').classList.toggle('hidden',mode!=='b2b')}
@@ -3050,6 +3067,7 @@ function handleForgotPassword(){const e=document.getElementById('forgot-email').
 const commands=[
   {section:'导航',name:'创作舱',shortcut:'⌘1',action:()=>navigateTo('create')},
   {section:'导航',name:'资源库',shortcut:'⌘2',action:()=>navigateTo('medialibrary')},
+  {section:'导航',name:'产品中心',shortcut:'',action:()=>navigateTo('productcenter')},
   {section:'导航',name:'龙虾智控',shortcut:'⌘3',action:()=>navigateTo('device')},
   {section:'导航',name:'社区',shortcut:'⌘4',action:()=>navigateTo('community')},
   {section:'导航',name:'支付中心',shortcut:'⌘5',action:()=>navigateTo('payment')},
