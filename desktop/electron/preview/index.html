@@ -1802,6 +1802,8 @@ html[dir="rtl"] .lang-dropdown {
         </select>
         <input class="form-input" style="width:180px;padding:4px 8px;font-size:12px" placeholder="🔍 搜索客户名称/手机..." oninput="searchAdminCustomers(this.value)">
         <button class="btn btn-sm btn-accent" onclick="showCustomerForm()">+ 添加客户</button>
+        <button class="btn btn-sm btn-warning" onclick="openCustomerDueDiligencePanel()" style="background:linear-gradient(135deg,#f59e0b,#d97706);color:#fff;border:none">🔍 客户背调</button>
+        <button class="btn btn-sm btn-info" onclick="openCustomerOutreachPanel()" style="background:linear-gradient(135deg,#3b82f6,#2563eb);color:#fff;border:none">🎯 客户触达</button>
       </div>
     </div>
     <div style="overflow-x:auto">
@@ -1842,6 +1844,87 @@ html[dir="rtl"] .lang-dropdown {
         <button class="btn btn-secondary btn-sm" onclick="hideCustomerForm()">取消</button>
         <button class="btn btn-accent btn-sm" onclick="saveCustomer()">保存</button>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 客户背调智能体弹窗 ===== -->
+<div id="customer-due-diligence-panel" class="hidden" style="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.7);z-index:1000;align-items:center;justify-content:center">
+  <div style="background:var(--bg-secondary);border-radius:var(--radius-lg);padding:24px;width:560px;max-height:85vh;overflow-y:auto;border:2px solid #f59e0b">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <h3 style="margin:0;display:flex;align-items:center;gap:8px"><span style="font-size:24px">🔍</span> 客户背调智能体</h3>
+      <button class="btn btn-xs btn-secondary" onclick="closeCustomerDueDiligencePanel()">✕</button>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div style="padding:10px;background:rgba(245,158,11,0.06);border-radius:var(--radius-sm);font-size:12px;color:var(--text-secondary)">
+        AI 驱动的客户背景调查：企业工商信息、信用评估、风险扫描、舆情监控、关联方穿透分析
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div><label style="font-size:12px;color:var(--text-secondary)">客户名称</label><input class="form-input" id="dd-customer-name" placeholder="联系人/个人名称" style="width:100%;box-sizing:border-box"></div>
+        <div><label style="font-size:12px;color:var(--text-secondary)">企业名称</label><input class="form-input" id="dd-company-name" placeholder="公司全称" style="width:100%;box-sizing:border-box"></div>
+      </div>
+      <div><label style="font-size:12px;color:var(--text-secondary)">调查范围</label>
+      <select class="form-input" id="dd-check-scope" style="width:100%">
+        <option value="full">全面调查（工商+信用+风险+舆情+关联方）</option>
+        <option value="basic">基础调查（工商+信用）</option>
+        <option value="risk">风险专项（涉诉+异常+负面）</option>
+      </select></div>
+      <div id="dd-result" style="background:var(--bg-tertiary);border-radius:var(--radius-sm);min-height:60px"></div>
+    </div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px">
+      <button class="btn btn-secondary btn-sm" onclick="closeCustomerDueDiligencePanel()">取消</button>
+      <button class="btn btn-accent btn-sm" onclick="executeCustomerDueDiligence()" style="background:linear-gradient(135deg,#f59e0b,#d97706);color:#fff;border:none">🔍 开始背调</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 客户触达智能体弹窗 ===== -->
+<div id="customer-outreach-panel" class="hidden" style="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.7);z-index:1000;align-items:center;justify-content:center">
+  <div style="background:var(--bg-secondary);border-radius:var(--radius-lg);padding:24px;width:560px;max-height:85vh;overflow-y:auto;border:2px solid #3b82f6">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <h3 style="margin:0;display:flex;align-items:center;gap:8px"><span style="font-size:24px">🎯</span> 客户触达智能体</h3>
+      <button class="btn btn-xs btn-secondary" onclick="closeCustomerOutreachPanel()">✕</button>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div style="padding:10px;background:rgba(59,130,246,0.06);border-radius:var(--radius-sm);font-size:12px;color:var(--text-secondary)">
+        AI 智能客户触达：多渠道路由（LinkedIn/Email/WhatsApp）、个性化内容生成、触达时机优化
+      </div>
+      <div><label style="font-size:12px;color:var(--text-secondary)">选择已有客户</label>
+      <select class="form-input" id="co-select-customer" style="width:100%" onchange="onCustomerOutreachSelect()">
+        <option value="">-- 选择已有客户 --</option>
+      </select></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div><label style="font-size:12px;color:var(--text-secondary)">目标联系人</label><input class="form-input" id="co-target-name" placeholder="联系人姓名" style="width:100%;box-sizing:border-box"></div>
+        <div><label style="font-size:12px;color:var(--text-secondary)">邮箱 / 联系方式</label><input class="form-input" id="co-target-email" placeholder="email@example.com" style="width:100%;box-sizing:border-box"></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div><label style="font-size:12px;color:var(--text-secondary)">触达渠道</label>
+        <select class="form-input" id="co-channel" style="width:100%">
+          <option value="linkedin">💼 LinkedIn</option>
+          <option value="email">📧 Email</option>
+          <option value="whatsapp">💬 WhatsApp</option>
+        </select></div>
+        <div><label style="font-size:12px;color:var(--text-secondary)">触达目的</label>
+        <select class="form-input" id="co-purpose" style="width:100%">
+          <option value="follow_up">跟进</option>
+          <option value="new_product">新品推荐</option>
+          <option value="holiday">节日问候</option>
+          <option value="reactivation">客户激活</option>
+          <option value="partnership">合作洽谈</option>
+        </select></div>
+      </div>
+      <div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+          <label style="font-size:12px;color:var(--text-secondary)">触达内容</label>
+          <button class="btn btn-xs btn-accent" onclick="generateOutreachContent()" style="background:linear-gradient(135deg,#3b82f6,#2563eb);color:#fff;border:none">🤖 AI 生成内容</button>
+        </div>
+        <textarea class="form-input" id="co-message" rows="4" placeholder="触达消息内容..." style="width:100%;box-sizing:border-box;resize:vertical;font-size:13px"></textarea>
+      </div>
+      <div id="co-result" style="background:var(--bg-tertiary);border-radius:var(--radius-sm);min-height:40px"></div>
+    </div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px">
+      <button class="btn btn-secondary btn-sm" onclick="closeCustomerOutreachPanel()">取消</button>
+      <button class="btn btn-accent btn-sm" onclick="executeCustomerOutreach()" style="background:linear-gradient(135deg,#3b82f6,#2563eb);color:#fff;border:none">🚀 发送触达</button>
     </div>
   </div>
 </div>
@@ -1962,6 +2045,7 @@ html[dir="rtl"] .lang-dropdown {
         <div>
           <div style="font-weight:600;font-size:13px">Shippo MCP Server 已连接</div>
           <div style="font-size:11px;color:var(--text-secondary)">端点: mcp.shippo.com · 模式: <span id="shippo-mode-badge">测试模式</span> · API版本: 2018-02-08</div>
+          <div style="font-size:10px;color:var(--success);margin-top:2px">🔑 API Key: shippo_test_53c7**** · 面单生成已就绪</div>
         </div>
         <div style="margin-left:auto;display:flex;gap:6px">
           <button class="btn btn-xs btn-accent" onclick="configureShippoMCP()">⚙ MCP 配置</button>
@@ -2343,7 +2427,8 @@ html[dir="rtl"] .lang-dropdown {
             要求: Node.js v18+<br>
           </div>
           <div style="margin-top:8px"><label style="font-size:11px;color:var(--text-secondary)">Shippo API Token</label>
-          <input class="form-input" id="shippo-api-token" placeholder="ShippoToken shippo_test_... 或 shippo_live_..." style="width:100%;box-sizing:border-box;margin-top:4px"></div>
+          <input class="form-input" id="shippo-api-token" placeholder="shippo_test_..." value="" style="width:100%;box-sizing:border-box;margin-top:4px">
+          <div style="font-size:10px;color:var(--text-secondary);margin-top:4px">请输入 Shippo API Token · 支持 Sandbox 模式面单生成</div></div>
         </div>
         <div style="font-size:12px;color:var(--text-secondary);line-height:1.6">
           <strong>Cursor 配置示例:</strong>

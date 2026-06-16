@@ -117,6 +117,8 @@ function initServices(){
   if(!HeyGenService.isConfigured()){
     HeyGenService.setApiKey('sk_V2_hgu_kMUqdgGYMyf_9NxQJgVpWclqYNok4g7WD6X8M2MsxwYx');
   }
+  // 初始化 Shippo API Key
+  initShippoApiKey();
   // 更新所有 Provider 状态
   updateNanoBananaUI();
   updateGPTImageUI();
@@ -400,6 +402,17 @@ let shippoRates=[];
 let shippoLabels=[];
 let shippoCustomsItems=[];
 
+const SHIPPO_BASE_URL = 'https://api.goshippo.com';
+
+// 初始化 Shippo API Key（从 localStorage 读取，用户需自行配置）
+function initShippoApiKey() {
+  return localStorage.getItem('shippo_api_key');
+}
+
+function getShippoApiKey() {
+  return localStorage.getItem('shippo_api_key');
+}
+
 // Shippo 跨境比价弹窗
 function showShippoRateForm(){
   const overlay=document.getElementById('shippo-rate-overlay');
@@ -453,9 +466,11 @@ function toggleShippoMCPFields(){
 }
 function saveShippoMCPConfig(){
   const mode=document.getElementById('shippo-mcp-mode').value;
-  const token=document.getElementById('shippo-api-token')?.value||'';
+  const token=document.getElementById('shippo-api-token')?.value||getShippoApiKey();
   if(mode==='local'&&!token){showToast('请输入 Shippo API Token','error');return;}
-  showToast(`Shippo MCP 配置已保存 · 模式: ${mode==='hosted'?'托管服务器':'本地服务器'}`,'success');
+  // 保存 token 到 localStorage
+  if (token) localStorage.setItem('shippo_api_key', token);
+  showToast(`Shippo MCP 配置已保存 · 模式: ${mode==='hosted'?'托管服务器':'本地服务器'} · API Key: ${token.substring(0,15)}...`,'success');
   document.getElementById('shippo-mode-badge').textContent=mode==='hosted'?'生产模式':'测试模式';
   hideShippoMCPConfig();
 }
