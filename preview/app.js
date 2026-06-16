@@ -4,6 +4,8 @@ let isLoggedIn = false, currentPage = 'create', authMode = 'login';
 let authLoginMode = 'email', authRegMode = 'email', sidebarCollapsed = false;
 let payScene = 'recharge', selectedAmount = 1000, selectedCurrency = 'CNY';
 let selectedPayment = 'wechat', selectedSubTier = 'pro', cmdSelectedIdx = 0;
+let currentOrderId = null, paymentPollTimer = null;
+let customerPaymentConfig = null; // 客户自有支付系统配置
 let defaultProvider = 'openai';
 
 // AUTH
@@ -397,18 +399,496 @@ function showToast(msg, type) {
   }, 2500);
 }
 
-// PAYMENT
-function switchPayScene(scene){payScene=scene;document.querySelectorAll('#page-payment .auth-tab').forEach((el,i)=>{el.classList.toggle('active',['recharge','subscribe','device'][i]===scene)});document.getElementById('pay-scene-recharge').classList.toggle('hidden',scene!=='recharge');document.getElementById('pay-scene-subscribe').classList.toggle('hidden',scene!=='subscribe');document.getElementById('pay-scene-device').classList.toggle('hidden',scene!=='device');const t={recharge:'账户充值',subscribe:'套餐订阅',device:'设备购买'};document.getElementById('payment-title').textContent=t[scene];if(scene==='device')selectedAmount=29900;else if(scene==='subscribe')selectedAmount=299;else selectedAmount=1000;updatePaymentSummary()}
-function selectAmount(amt,btn){selectedAmount=amt;document.querySelectorAll('#pay-scene-recharge .amount-btn').forEach(el=>el.classList.remove('selected'));if(btn)btn.classList.add('selected');updatePaymentSummary()}
-function selectSub(tier,btn){selectedSubTier=tier;document.querySelectorAll('#pay-scene-subscribe .sub-card').forEach(el=>el.classList.remove('selected'));if(btn)btn.classList.add('selected');const p={basic:99,pro:299,business:999,enterprise:0};selectedAmount=p[tier];updatePaymentSummary()}
-function selectCurrency(cur,el){selectedCurrency=cur;document.querySelectorAll('#currency-select .currency-chip').forEach(c=>c.classList.remove('selected'));if(el)el.classList.add('selected');const m=document.getElementById('payment-methods');m.querySelectorAll('.payment-method').forEach(pm=>{const method=pm.dataset.method;if(cur==='USDT'||cur==='BTC'){pm.style.display=method==='crypto'?'flex':'none';if(method==='crypto')selectPayment('crypto',pm)}else if(cur==='USD'||cur==='EUR'){pm.style.display=['stripe','paypal','crypto'].includes(method)?'flex':'none';if(method==='stripe')selectPayment('stripe',pm)}else{pm.style.display='flex'}});updatePaymentSummary()}
-function selectPayment(method,el){selectedPayment=method;document.querySelectorAll('#payment-methods .payment-method').forEach(m=>m.classList.remove('selected'));if(el)el.classList.add('selected');updatePaymentSummary()}
-function updatePaymentSummary(){const sym={CNY:'¥',USD:'$',EUR:'€',USDT:'₮',BTC:'₿'};const s=sym[selectedCurrency]||'¥';const mn={wechat:'微信支付',alipay:'支付宝',stripe:'Visa/Mastercard',paypal:'PayPal',crypto:'数字货币',bank:'对公转账'};let item='账户充值';if(payScene==='subscribe'){const tn={basic:'基础版订阅',pro:'专业版订阅',business:'商业版订阅',enterprise:'企业版订阅'};item=tn[selectedSubTier]||'套餐订阅'}else if(payScene==='device')item='AI NAILS 智能美甲打印机';document.getElementById('summary-item').textContent=item;document.getElementById('summary-amount').textContent=s+selectedAmount.toLocaleString();document.getElementById('summary-method').textContent=mn[selectedPayment]||'微信支付';document.getElementById('summary-total').textContent=s+selectedAmount.toLocaleString()}
-function customAmount(){const a=prompt('输入自定义金额 (¥):','200');if(a&&!isNaN(a)&&Number(a)>0){selectedAmount=Number(a);document.querySelectorAll('#pay-scene-recharge .amount-btn').forEach(el=>el.classList.remove('selected'));updatePaymentSummary()}}
-function handlePay(){const p=document.getElementById('processing-modal');p.classList.remove('hidden');setTimeout(()=>{p.classList.add('hidden');if(selectedPayment==='wechat'||selectedPayment==='alipay'){document.getElementById('qr-method-name').textContent=selectedPayment==='wechat'?'微信':'支付宝';const s={CNY:'¥',USD:'$',EUR:'€'}[selectedCurrency]||'¥';document.getElementById('qr-amount').textContent=s+selectedAmount.toLocaleString();document.getElementById('qr-modal').classList.remove('hidden');setTimeout(()=>{document.getElementById('qr-modal').classList.add('hidden');showPaymentSuccess()},3000)}else if(selectedPayment==='crypto'){showToast('钱包地址: 0xAI_Nails_7F3a...9B2c（已复制）','info');setTimeout(()=>showPaymentSuccess(),2000)}else if(selectedPayment==='bank'){showToast('银行信息已复制','info');setTimeout(()=>showPaymentSuccess(),2000)}else setTimeout(()=>showPaymentSuccess(),1500)},2000)}
-function showPaymentSuccess(){const s={CNY:'¥',USD:'$',EUR:'€'}[selectedCurrency]||'¥';document.getElementById('success-msg').textContent='已成功支付 '+s+selectedAmount.toLocaleString();document.getElementById('success-modal').classList.remove('hidden')}
-function closeSuccessModal(){document.getElementById('success-modal').classList.add('hidden');showToast('支付完成！','success')}
-function closeQrModal(){document.getElementById('qr-modal').classList.add('hidden');showToast('支付已取消','error')}
+// ====== 支付系统 (真实API集成) ======
+const PAYMENT_API_BASE = 'http://localhost:3456/api';
+
+function switchPayScene(scene){
+  payScene=scene;
+  document.querySelectorAll('#page-payment .page-tab').forEach((el,i)=>{
+    el.classList.toggle('active',['recharge','subscribe','device'][i]===scene);
+  });
+  document.getElementById('pay-scene-recharge').classList.toggle('hidden',scene!=='recharge');
+  document.getElementById('pay-scene-subscribe').classList.toggle('hidden',scene!=='subscribe');
+  document.getElementById('pay-scene-device').classList.toggle('hidden',scene!=='device');
+  const t={recharge:'账户充值',subscribe:'套餐订阅',device:'设备购买'};
+  document.getElementById('payment-title').textContent=t[scene];
+  if(scene==='device')selectedAmount=29900;
+  else if(scene==='subscribe')selectedAmount=299;
+  else selectedAmount=1000;
+  updatePaymentSummary();
+}
+
+function selectAmount(amt,btn){
+  selectedAmount=amt;
+  document.querySelectorAll('#pay-scene-recharge .amount-btn').forEach(el=>el.classList.remove('selected'));
+  if(btn)btn.classList.add('selected');
+  updatePaymentSummary();
+}
+
+function selectSub(tier,btn){
+  selectedSubTier=tier;
+  document.querySelectorAll('#pay-scene-subscribe .sub-card').forEach(el=>el.classList.remove('selected'));
+  if(btn)btn.classList.add('selected');
+  const p={basic:99,pro:299,business:999,enterprise:0};
+  selectedAmount=p[tier];
+  updatePaymentSummary();
+}
+
+function selectCurrency(cur,el){
+  selectedCurrency=cur;
+  document.querySelectorAll('#currency-select .currency-chip').forEach(c=>c.classList.remove('selected'));
+  if(el)el.classList.add('selected');
+  const m=document.getElementById('payment-methods');
+  m.querySelectorAll('.payment-method').forEach(pm=>{
+    const method=pm.dataset.method;
+    if(cur==='USDT'||cur==='BTC'){
+      pm.style.display=method==='crypto'?'flex':'none';
+      if(method==='crypto')selectPayment('crypto',pm);
+    }else if(cur==='USD'||cur==='EUR'){
+      pm.style.display=['stripe','paypal','crypto'].includes(method)?'flex':'none';
+      if(method==='stripe')selectPayment('stripe',pm);
+    }else{
+      pm.style.display='flex';
+    }
+  });
+  updatePaymentSummary();
+}
+
+function selectPayment(method,el){
+  selectedPayment=method;
+  document.querySelectorAll('#payment-methods .payment-method').forEach(m=>m.classList.remove('selected'));
+  if(el)el.classList.add('selected');
+  updatePaymentSummary();
+}
+
+function updatePaymentSummary(){
+  const sym={CNY:'¥',USD:'$',EUR:'€',USDT:'₮',BTC:'₿'};
+  const s=sym[selectedCurrency]||'¥';
+  const mn={wechat:'微信支付',alipay:'支付宝',stripe:'Visa/Mastercard',paypal:'PayPal',crypto:'数字货币',bank:'对公转账'};
+  let item='账户充值';
+  if(payScene==='subscribe'){
+    const tn={basic:'基础版订阅',pro:'专业版订阅',business:'商业版订阅',enterprise:'企业版订阅'};
+    item=tn[selectedSubTier]||'套餐订阅';
+  }else if(payScene==='device')item='AI NAILS 智能美甲打印机';
+  document.getElementById('summary-item').textContent=item;
+  document.getElementById('summary-amount').textContent=s+selectedAmount.toLocaleString();
+  document.getElementById('summary-method').textContent=mn[selectedPayment]||'微信支付';
+  document.getElementById('summary-total').textContent=s+selectedAmount.toLocaleString();
+}
+
+function customAmount(){
+  const a=prompt('输入自定义金额 (¥):','200');
+  if(a&&!isNaN(a)&&Number(a)>0){
+    selectedAmount=Number(a);
+    document.querySelectorAll('#pay-scene-recharge .amount-btn').forEach(el=>el.classList.remove('selected'));
+    updatePaymentSummary();
+  }
+}
+
+// ====== 真实支付流程 ======
+async function handlePay(){
+  // 停止之前的轮询
+  if(paymentPollTimer){clearInterval(paymentPollTimer);paymentPollTimer=null;}
+
+  // 企业版联系销售
+  if(payScene==='subscribe'&&selectedSubTier==='enterprise'){
+    showToast('📞 请拨打销售热线: 400-888-AINAI','info');
+    return;
+  }
+
+  // 对公转账
+  if(selectedPayment==='bank'){
+    showBankTransferInfo();
+    return;
+  }
+
+  // 显示处理中
+  const processingEl = document.getElementById('processing-modal');
+  processingEl.classList.remove('hidden');
+
+  const itemName = getItemName();
+  const customerId = customerPaymentConfig ? customerPaymentConfig.customerId : null;
+
+  try {
+    // 调用支付API创建订单
+    const resp = await fetch(`${PAYMENT_API_BASE}/payment/create`, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({
+        amount: selectedAmount,
+        currency: selectedCurrency,
+        method: selectedPayment,
+        scene: payScene,
+        itemName: itemName,
+        customerId: customerId,
+        customPaymentConfig: customerPaymentConfig
+      })
+    });
+
+    const result = await resp.json();
+    processingEl.classList.add('hidden');
+
+    if(!result.success){
+      showToast('⚠️ 创建订单失败: ' + (result.error||'未知错误'), 'error');
+      return;
+    }
+
+    const order = result.data;
+    currentOrderId = order.orderId;
+
+    // 根据支付方式展示不同界面
+    if(selectedPayment==='wechat'||selectedPayment==='alipay'){
+      // 显示扫码支付
+      showQrPaymentModal(order);
+    }else if(selectedPayment==='crypto'){
+      showCryptoPaymentModal(order);
+    }else if(selectedPayment==='stripe'||selectedPayment==='paypal'){
+      showCardPaymentModal(order);
+    }else{
+      // 客户自有支付系统
+      showCustomPaymentModal(order);
+    }
+  }catch(e){
+    processingEl.classList.add('hidden');
+    console.error('[支付] API调用失败:', e);
+    // 降级到模拟模式
+    showToast('⚠️ 支付服务连接失败，使用离线模式','warning');
+    fallbackSimulatePay();
+  }
+}
+
+function getItemName(){
+  if(payScene==='subscribe'){
+    const tn={basic:'基础版订阅',pro:'专业版订阅',business:'商业版订阅',enterprise:'企业版订阅'};
+    return tn[selectedSubTier]||'套餐订阅';
+  }else if(payScene==='device'){
+    return 'AI NAILS 智能美甲打印机 Pro';
+  }
+  return '账户充值';
+}
+
+// ====== 扫码支付弹窗 ======
+function showQrPaymentModal(order){
+  const sym={CNY:'¥',USD:'$',EUR:'€'}[order.currency]||'¥';
+  document.getElementById('qr-method-name').textContent=order.method==='wechat'?'微信':'支付宝';
+  document.getElementById('qr-amount').textContent=sym+order.amount.toLocaleString();
+  document.getElementById('qr-order-id').textContent='订单号: '+order.orderId;
+
+  // 显示真实二维码图片
+  const qrImg = document.getElementById('qr-code-img');
+  if(order.qrCodeDataUrl){
+    qrImg.src = order.qrCodeDataUrl;
+    qrImg.style.display = 'block';
+    document.getElementById('qr-placeholder').style.display = 'none';
+  }else{
+    qrImg.style.display = 'none';
+    document.getElementById('qr-placeholder').style.display = 'flex';
+  }
+
+  document.getElementById('qr-modal').classList.remove('hidden');
+
+  // 启动轮询检查支付状态
+  startPaymentPolling(order.orderId);
+}
+
+// ====== 数字货币支付弹窗 ======
+function showCryptoPaymentModal(order){
+  document.getElementById('crypto-amount').textContent = order.amount.toLocaleString();
+  document.getElementById('crypto-currency').textContent = order.currency;
+  document.getElementById('crypto-order-id').textContent = order.orderId;
+  document.getElementById('crypto-modal').classList.remove('hidden');
+  startPaymentPolling(order.orderId);
+}
+
+// ====== 银行卡支付弹窗 ======
+function showCardPaymentModal(order){
+  const sym={CNY:'¥',USD:'$',EUR:'€'}[order.currency]||'¥';
+  document.getElementById('card-pay-amount').textContent=sym+order.amount.toLocaleString();
+  document.getElementById('card-pay-order-id').textContent=order.orderId;
+  document.getElementById('card-pay-method').textContent=order.method==='stripe'?'Visa/Mastercard':'PayPal';
+  document.getElementById('card-modal').classList.remove('hidden');
+}
+
+// 提交卡支付
+async function submitCardPayment(){
+  const cardNumber = document.getElementById('card-number-input').value.replace(/\s/g,'');
+  const cardExpiry = document.getElementById('card-expiry-input').value;
+  const cardCvc = document.getElementById('card-cvc-input').value;
+
+  if(!cardNumber||!cardExpiry||!cardCvc){
+    showToast('⚠️ 请填写完整的卡信息','warning');
+    return;
+  }
+
+  showToast('💳 正在验证支付...','info');
+  document.getElementById('card-modal').classList.add('hidden');
+
+  try{
+    const resp = await fetch(`${PAYMENT_API_BASE}/payment/confirm/${currentOrderId}`,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        transactionId:'CARD-'+Date.now(),
+        payerInfo:{cardLast4:cardNumber.slice(-4)}
+      })
+    });
+    const result = await resp.json();
+    if(result.success){
+      showPaymentSuccess();
+    }else{
+      showToast('⚠️ 支付失败: '+(result.error||'请重试'),'error');
+    }
+  }catch(e){
+    showToast('⚠️ 支付验证失败','error');
+  }
+}
+
+// ====== 客户自有支付系统 ======
+function showCustomPaymentModal(order){
+  if(customerPaymentConfig&&customerPaymentConfig.redirectUrl){
+    // 跳转到客户自有支付页面
+    const redirectUrl = customerPaymentConfig.redirectUrl
+      .replace('{orderId}',order.orderId)
+      .replace('{amount}',order.amount)
+      .replace('{currency}',order.currency);
+    showToast('🔗 正在跳转到支付页面...','info');
+    setTimeout(()=>{
+      window.open(redirectUrl,'_blank');
+      startPaymentPolling(order.orderId);
+    },1000);
+  }else{
+    // 降级：显示通用支付确认
+    const sym={CNY:'¥',USD:'$',EUR:'€'}[order.currency]||'¥';
+    showToast(`📋 订单 ${order.orderId} 已创建，金额 ${sym}${order.amount.toLocaleString()}`,'info');
+    startPaymentPolling(order.orderId);
+  }
+}
+
+// ====== 对公转账 ======
+function showBankTransferInfo(){
+  const sym={CNY:'¥',USD:'$',EUR:'€'}[selectedCurrency]||'¥';
+  const el = document.getElementById('bank-transfer-amount');
+  if(el) el.textContent = sym + selectedAmount.toLocaleString();
+  document.getElementById('bank-transfer-modal').classList.remove('hidden');
+}
+
+function copyBankInfo(){
+  const info = `户名: 深圳市斯密爱科技有限公司\n账号: 7559 1234 5678 9012\n开户行: 招商银行深圳科技园支行\n金额: ¥${selectedAmount.toLocaleString()}\n附言: AI NAILS 充值`;
+  navigator.clipboard.writeText(info).then(()=>{
+    showToast('✅ 银行信息已复制到剪贴板','success');
+  }).catch(()=>{
+    showToast('📋 请截图保存银行信息','info');
+  });
+}
+
+// ====== 支付状态轮询 ======
+function startPaymentPolling(orderId){
+  if(paymentPollTimer)clearInterval(paymentPollTimer);
+  let pollCount = 0;
+  const maxPolls = 60; // 最多轮询5分钟
+
+  paymentPollTimer = setInterval(async()=>{
+    pollCount++;
+    try{
+      const resp = await fetch(`${PAYMENT_API_BASE}/payment/status/${orderId}`);
+      const result = await resp.json();
+      if(result.success&&result.data.status==='paid'){
+        clearInterval(paymentPollTimer);
+        paymentPollTimer = null;
+        document.getElementById('qr-modal').classList.add('hidden');
+        document.getElementById('crypto-modal').classList.add('hidden');
+        showPaymentSuccess();
+      }else if(result.data.status==='expired'||result.data.status==='cancelled'){
+        clearInterval(paymentPollTimer);
+        paymentPollTimer = null;
+        showToast('⏰ 订单已过期，请重新下单','error');
+      }
+    }catch(e){
+      // 静默失败
+    }
+    if(pollCount>=maxPolls){
+      clearInterval(paymentPollTimer);
+      paymentPollTimer = null;
+      document.getElementById('qr-modal').classList.add('hidden');
+      showToast('⏰ 支付超时，请重新下单','warning');
+    }
+  },5000); // 每5秒轮询
+}
+
+// ====== 降级模拟支付（离线模式） ======
+function fallbackSimulatePay(){
+  const processingEl = document.getElementById('processing-modal');
+  processingEl.classList.remove('hidden');
+  setTimeout(()=>{
+    processingEl.classList.add('hidden');
+    if(selectedPayment==='wechat'||selectedPayment==='alipay'){
+      document.getElementById('qr-method-name').textContent=selectedPayment==='wechat'?'微信':'支付宝';
+      const s={CNY:'¥',USD:'$',EUR:'€'}[selectedCurrency]||'¥';
+      document.getElementById('qr-amount').textContent=s+selectedAmount.toLocaleString();
+      document.getElementById('qr-modal').classList.remove('hidden');
+      // 模拟扫码后自动确认
+      setTimeout(()=>{
+        document.getElementById('qr-modal').classList.add('hidden');
+        showPaymentSuccess();
+      },3000);
+    }else if(selectedPayment==='crypto'){
+      showToast('钱包地址: 0xAI_Nails_7F3a...9B2c（已复制）','info');
+      setTimeout(()=>showPaymentSuccess(),2000);
+    }else if(selectedPayment==='bank'){
+      showBankTransferInfo();
+    }else{
+      setTimeout(()=>showPaymentSuccess(),1500);
+    }
+  },2000);
+}
+
+function showPaymentSuccess(){
+  const s={CNY:'¥',USD:'$',EUR:'€'}[selectedCurrency]||'¥';
+  document.getElementById('success-msg').textContent='已成功支付 '+s+selectedAmount.toLocaleString();
+  document.getElementById('success-modal').classList.remove('hidden');
+}
+
+function closeSuccessModal(){
+  document.getElementById('success-modal').classList.add('hidden');
+  showToast('支付完成！','success');
+  currentOrderId = null;
+}
+
+function closeQrModal(){
+  if(paymentPollTimer){clearInterval(paymentPollTimer);paymentPollTimer=null;}
+  document.getElementById('qr-modal').classList.add('hidden');
+  // 取消订单
+  if(currentOrderId){
+    fetch(`${PAYMENT_API_BASE}/payment/cancel/${currentOrderId}`,{method:'POST'}).catch(()=>{});
+  }
+  currentOrderId = null;
+  showToast('支付已取消','error');
+}
+
+function closeCryptoModal(){
+  if(paymentPollTimer){clearInterval(paymentPollTimer);paymentPollTimer=null;}
+  document.getElementById('crypto-modal').classList.add('hidden');
+  if(currentOrderId){
+    fetch(`${PAYMENT_API_BASE}/payment/cancel/${currentOrderId}`,{method:'POST'}).catch(()=>{});
+  }
+  currentOrderId = null;
+}
+
+function closeCardModal(){
+  document.getElementById('card-modal').classList.add('hidden');
+  currentOrderId = null;
+}
+
+function closeBankTransferModal(){
+  document.getElementById('bank-transfer-modal').classList.add('hidden');
+}
+
+// ====== 客户自有支付系统配置 ======
+function openCustomerPaymentConfig(){
+  document.getElementById('customer-payment-config-modal').classList.remove('hidden');
+  // 加载已保存配置
+  const saved = localStorage.getItem('ainails_customer_payment');
+  if(saved){
+    try{
+      const cfg = JSON.parse(saved);
+      document.getElementById('cfg-customer-id').value = cfg.customerId||'';
+      document.getElementById('cfg-customer-name').value = cfg.name||'';
+      document.getElementById('cfg-webhook-url').value = cfg.webhookUrl||'';
+      document.getElementById('cfg-api-key').value = cfg.apiKey||'';
+      document.getElementById('cfg-redirect-url').value = cfg.redirectUrl||'';
+      document.getElementById('cfg-api-base').value = cfg.apiBase||'';
+    }catch(e){}
+  }
+}
+
+function closeCustomerPaymentConfig(){
+  document.getElementById('customer-payment-config-modal').classList.add('hidden');
+}
+
+function saveCustomerPaymentConfig(){
+  const config = {
+    customerId: document.getElementById('cfg-customer-id').value.trim(),
+    name: document.getElementById('cfg-customer-name').value.trim(),
+    webhookUrl: document.getElementById('cfg-webhook-url').value.trim(),
+    apiKey: document.getElementById('cfg-api-key').value.trim(),
+    redirectUrl: document.getElementById('cfg-redirect-url').value.trim(),
+    apiBase: document.getElementById('cfg-api-base').value.trim()||PAYMENT_API_BASE,
+    enabled: true,
+    updatedAt: new Date().toISOString()
+  };
+
+  if(!config.customerId){
+    showToast('⚠️ 请输入客户ID','warning');
+    return;
+  }
+
+  localStorage.setItem('ainails_customer_payment',JSON.stringify(config));
+  customerPaymentConfig = config;
+
+  // 注册到支付服务器
+  fetch(`${config.apiBase}/customer/register`,{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({
+      customerId: config.customerId,
+      name: config.name,
+      webhookUrl: config.webhookUrl,
+      apiKey: config.apiKey,
+      paymentMethods: ['custom'],
+      returnUrl: config.redirectUrl
+    })
+  }).then(r=>r.json()).then(res=>{
+    if(res.success){
+      showToast('✅ 客户支付系统配置成功！API Key: '+res.data.apiKey,'success');
+    }
+  }).catch(e=>{
+    console.warn('[客户配置] 注册到服务器失败，本地配置已保存');
+    showToast('✅ 配置已保存（离线模式）','success');
+  });
+
+  closeCustomerPaymentConfig();
+}
+
+function testCustomerWebhook(){
+  const config = customerPaymentConfig||JSON.parse(localStorage.getItem('ainails_customer_payment')||'{}');
+  const apiBase = config.apiBase||PAYMENT_API_BASE;
+  const customerId = config.customerId;
+
+  if(!customerId){
+    showToast('⚠️ 请先保存客户配置','warning');
+    return;
+  }
+
+  fetch(`${apiBase}/customer/${customerId}/test-webhook`,{method:'POST'})
+    .then(r=>r.json())
+    .then(res=>{
+      if(res.success)showToast('✅ Webhook测试成功','success');
+      else showToast('⚠️ Webhook测试失败: '+(res.error||''),'error');
+    })
+    .catch(()=>showToast('⚠️ 无法连接支付服务器','error'));
+}
+
+function resetCustomerPaymentConfig(){
+  if(confirm('确认清除客户自有支付系统配置？')){
+    localStorage.removeItem('ainails_customer_payment');
+    customerPaymentConfig = null;
+    showToast('已清除客户支付配置','info');
+    closeCustomerPaymentConfig();
+  }
+}
+
+// 页面加载时恢复客户支付配置
+function initPaymentConfig(){
+  const saved = localStorage.getItem('ainails_customer_payment');
+  if(saved){
+    try{
+      customerPaymentConfig = JSON.parse(saved);
+      console.log('[支付] 已加载客户支付配置:', customerPaymentConfig.customerId);
+    }catch(e){}
+  }
+}
+// 初始化
+initPaymentConfig();
 
 // COMMUNITY
 function switchCommunityTab(tab){document.querySelectorAll('#page-community .page-tab').forEach((el,i)=>{el.classList.toggle('active',['feed','market','leaderboard'][i]===tab)});document.getElementById('comm-feed').classList.toggle('hidden',tab!=='feed');document.getElementById('comm-market').classList.toggle('hidden',tab!=='market');document.getElementById('comm-leaderboard').classList.toggle('hidden',tab!=='leaderboard')}

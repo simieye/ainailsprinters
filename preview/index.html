@@ -988,7 +988,12 @@ html[dir="rtl"] .lang-dropdown {
 <div class="payment-method" data-method="bank" onclick="selectPayment('bank',this)"><span class="pm-icon">🏦</span><span>对公转账</span></div>
 </div></div>
 <div class="payment-summary"><div class="summary-row"><span>项目</span><span id="summary-item">账户充值</span></div><div class="summary-row"><span>金额</span><span id="summary-amount">¥1,000</span></div><div class="summary-row"><span>支付方式</span><span id="summary-method">微信支付</span></div><div class="summary-row total"><span>应付总额</span><span id="summary-total">¥1,000</span></div></div>
-<button class="btn btn-primary" onclick="handlePay()">确认支付</button>
+<button class="btn btn-primary" onclick="handlePay()" style="width:100%;padding:14px;font-size:15px">💳 确认支付</button>
+<div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border)">
+<div style="font-size:12px;color:var(--text-secondary);margin-bottom:8px;font-weight:600">🔌 高级设置</div>
+<button class="btn btn-secondary btn-sm" onclick="openCustomerPaymentConfig()" style="width:100%">⚙️ 接入客户自有支付系统</button>
+<p style="font-size:10px;color:var(--text-tertiary);margin-top:6px;text-align:center">将支付流程接入您自己的收款系统，支持自定义 Webhook 回调</p>
+</div>
 </div>
 
 <!-- PAGE: AGENTS -->
@@ -1183,11 +1188,108 @@ html[dir="rtl"] .lang-dropdown {
 <!-- PROCESSING MODAL -->
 <div class="modal-overlay hidden" id="processing-modal"><div class="modal"><div class="processing-animation"><div class="spinner"></div><p>正在处理支付，请稍候...</p></div></div></div>
 
-<!-- QR CODE MODAL -->
-<div class="modal-overlay hidden" id="qr-modal"><div class="modal"><div class="qr-container"><div class="qr-code">📱</div><p>请使用 <span id="qr-method-name">微信</span> 扫描二维码支付</p><p style="font-weight:800;font-size:18px;color:var(--accent)" id="qr-amount">¥1,000</p><p style="font-size:11px;color:var(--text-tertiary)">二维码有效时间：5分钟</p></div><div class="modal-actions"><button class="btn btn-secondary btn-sm" onclick="closeQrModal()">取消</button></div></div></div>
+<!-- ====== 扫码支付弹窗 ====== -->
+<div class="modal-overlay hidden" id="qr-modal"><div class="modal" style="width:380px;text-align:center">
+<h3>📱 扫码支付</h3>
+<div class="qr-container">
+  <img id="qr-code-img" src="" alt="支付二维码" style="width:240px;height:240px;margin:0 auto;display:none;border-radius:12px">
+  <div id="qr-placeholder" class="qr-code" style="font-size:64px">📱</div>
+</div>
+<p style="font-size:11px;color:var(--text-tertiary);margin:8px 0" id="qr-order-id">订单号: ---</p>
+<p style="margin:4px 0">请使用 <span id="qr-method-name" style="color:var(--accent);font-weight:700">微信</span> 扫描二维码支付</p>
+<p style="font-weight:800;font-size:20px;color:var(--accent);margin:8px 0" id="qr-amount">¥1,000</p>
+<p style="font-size:11px;color:var(--text-tertiary)">⏱ 二维码有效期 5分钟 · 支付成功后自动确认</p>
+<div class="modal-actions" style="justify-content:center;gap:8px">
+  <button class="btn btn-secondary btn-sm" onclick="closeQrModal()">取消支付</button>
+</div></div></div>
 
-<!-- SUCCESS MODAL -->
+<!-- ====== 数字货币支付弹窗 ====== -->
+<div class="modal-overlay hidden" id="crypto-modal"><div class="modal" style="width:400px;text-align:center">
+<h3>₿ 数字货币支付</h3>
+<div class="qr-container">
+  <div class="qr-code" style="font-size:48px">₿</div>
+</div>
+<p style="font-size:11px;color:var(--text-tertiary);margin:8px 0" id="crypto-order-id">订单号: ---</p>
+<div style="background:var(--bg-tertiary);border-radius:8px;padding:12px;margin:12px 0;font-family:monospace;font-size:11px;word-break:break-all;color:var(--text-secondary)">
+  <div style="margin-bottom:8px">钱包地址 (USDT-ERC20):</div>
+  <div style="color:var(--accent)" id="crypto-address">0xAI_Nails_Payment_7F3a8B2c9D1e</div>
+</div>
+<p style="margin:8px 0">应付: <span id="crypto-amount" style="font-weight:800;color:var(--accent)">1,000</span> <span id="crypto-currency">USDT</span></p>
+<p style="font-size:11px;color:var(--text-tertiary)">转账后系统自动确认</p>
+<div class="modal-actions" style="justify-content:center;gap:8px">
+  <button class="btn btn-accent btn-sm" onclick="navigator.clipboard.writeText(document.getElementById('crypto-address').textContent);showToast('✅ 地址已复制','success')">📋 复制地址</button>
+  <button class="btn btn-secondary btn-sm" onclick="closeCryptoModal()">取消</button>
+</div></div></div>
+
+<!-- ====== 银行卡支付弹窗 ====== -->
+<div class="modal-overlay hidden" id="card-modal"><div class="modal" style="width:400px">
+<h3>💳 <span id="card-pay-method">Visa/Mastercard</span> 支付</h3>
+<div style="background:var(--bg-tertiary);border-radius:8px;padding:12px;margin:12px 0">
+  <div class="form-group"><label>卡号</label><input class="form-input" id="card-number-input" placeholder="1234 5678 9012 3456" maxlength="19" oninput="this.value=this.value.replace(/[^0-9]/g,'').replace(/(.{4})/g,'$1 ').trim()"></div>
+  <div class="form-row"><div class="form-group"><label>有效期</label><input class="form-input" id="card-expiry-input" placeholder="MM/YY" maxlength="5" oninput="this.value=this.value.replace(/[^0-9]/g,'').replace(/^(.{2})/,'$1/')"></div><div class="form-group"><label>CVV</label><input class="form-input" id="card-cvc-input" placeholder="123" maxlength="4" type="password"></div></div>
+</div>
+<p style="font-weight:800;font-size:18px;color:var(--accent);text-align:center" id="card-pay-amount">¥1,000</p>
+<p style="font-size:11px;color:var(--text-tertiary);text-align:center" id="card-pay-order-id">订单号: ---</p>
+<div class="modal-actions" style="justify-content:center;gap:8px">
+  <button class="btn btn-primary btn-sm" onclick="submitCardPayment()">确认支付</button>
+  <button class="btn btn-secondary btn-sm" onclick="closeCardModal()">取消</button>
+</div></div></div>
+
+<!-- ====== 对公转账弹窗 ====== -->
+<div class="modal-overlay hidden" id="bank-transfer-modal"><div class="modal" style="width:420px">
+<h3>🏦 对公转账</h3>
+<div style="background:var(--bg-tertiary);border-radius:8px;padding:16px;margin:12px 0;font-size:13px;line-height:2">
+  <div><strong>户名:</strong> 深圳市斯密爱科技有限公司</div>
+  <div><strong>账号:</strong> 7559 1234 5678 9012</div>
+  <div><strong>开户行:</strong> 招商银行深圳科技园支行</div>
+  <div style="border-top:1px solid var(--border);margin-top:8px;padding-top:8px"><strong>金额:</strong> <span style="color:var(--accent);font-size:16px">¥<span id="bank-transfer-amount">1,000</span></span></div>
+  <div><strong>附言:</strong> AI NAILS 充值</div>
+</div>
+<p style="font-size:11px;color:var(--text-tertiary)">转账后请截图发送至客服微信确认，或系统将在收到款项后自动确认</p>
+<div class="modal-actions" style="justify-content:center;gap:8px">
+  <button class="btn btn-accent btn-sm" onclick="copyBankInfo()">📋 复制转账信息</button>
+  <button class="btn btn-secondary btn-sm" onclick="closeBankTransferModal()">关闭</button>
+</div></div></div>
+
+<!-- ====== 支付成功弹窗 ====== -->
 <div class="modal-overlay hidden" id="success-modal"><div class="modal" style="text-align:center"><div class="success-icon">✅</div><h3>支付成功！</h3><p id="success-msg">已成功支付 ¥1,000</p><div class="modal-actions" style="justify-content:center"><button class="btn btn-primary btn-sm" onclick="closeSuccessModal()">确 定</button></div></div></div>
+
+<!-- ====== 客户自有支付系统配置弹窗 ====== -->
+<div class="modal-overlay hidden" id="customer-payment-config-modal"><div class="modal" style="width:520px;max-height:80vh;overflow-y:auto">
+<h3>⚙️ 客户自有支付系统接入</h3>
+<p style="font-size:12px;color:var(--text-secondary);margin-bottom:16px">将 AI NAILS 的支付流程接入您自己的支付收款系统。配置完成后，所有支付将使用您的自有系统处理。</p>
+
+<div class="form-group"><label>客户ID *</label><input class="form-input" id="cfg-customer-id" placeholder="例如: my-company-001"></div>
+<div class="form-group"><label>客户名称</label><input class="form-input" id="cfg-customer-name" placeholder="例如: 某某美甲连锁"></div>
+<div class="form-group"><label>Webhook 回调地址</label><input class="form-input" id="cfg-webhook-url" placeholder="https://your-server.com/api/payment/callback">
+<p style="font-size:10px;color:var(--text-tertiary);margin-top:4px">支付成功后 AI NAILS 会向此地址 POST 通知，Header包含 X-API-Key 和 X-Webhook-Signature</p></div>
+<div class="form-group"><label>API Key（用于签名验证）</label><input class="form-input" id="cfg-api-key" placeholder="自动生成或自定义"></div>
+<div class="form-group"><label>支付跳转URL（可选）</label><input class="form-input" id="cfg-redirect-url" placeholder="https://your-pay.com/checkout?order={orderId}&amount={amount}">
+<p style="font-size:10px;color:var(--text-tertiary);margin-top:4px">支持变量: {orderId} {amount} {currency}</p></div>
+<div class="form-group"><label>支付API服务器地址</label><input class="form-input" id="cfg-api-base" placeholder="http://localhost:3456/api" value="http://localhost:3456/api">
+<p style="font-size:10px;color:var(--text-tertiary);margin-top:4px">AI NAILS 支付服务器地址，默认为本地服务</p></div>
+
+<div style="background:var(--bg-tertiary);border-radius:8px;padding:12px;margin:12px 0;font-size:11px;line-height:1.6">
+  <div style="font-weight:600;color:var(--accent);margin-bottom:6px">📡 Webhook 回调数据格式</div>
+  <code style="display:block;background:var(--bg-primary);padding:8px;border-radius:6px;white-space:pre-wrap;color:var(--text-secondary)">POST {webhookUrl}
+Headers: X-API-Key, X-Webhook-Event, X-Webhook-Signature
+Body: {
+  "event": "payment.success",
+  "orderId": "AN...",
+  "amount": 1000,
+  "currency": "CNY",
+  "method": "wechat",
+  "transactionId": "TXN...",
+  "paidAt": "2026-06-04T..."
+}</code>
+</div>
+
+<div class="modal-actions" style="gap:8px">
+  <button class="btn btn-primary btn-sm" onclick="saveCustomerPaymentConfig()">💾 保存配置</button>
+  <button class="btn btn-accent btn-sm" onclick="testCustomerWebhook()">🧪 测试Webhook</button>
+  <button class="btn btn-danger btn-sm" onclick="resetCustomerPaymentConfig()">🗑 清除配置</button>
+  <button class="btn btn-secondary btn-sm" onclick="closeCustomerPaymentConfig()">关闭</button>
+</div></div></div>
 
 <!-- STYLE PICKER MODAL -->
 <div class="modal-overlay hidden" id="style-modal"><div class="modal" style="width:480px"><h3>🎭 选择美甲风格</h3><div class="style-grid">
