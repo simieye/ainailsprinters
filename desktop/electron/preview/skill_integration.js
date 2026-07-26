@@ -390,6 +390,80 @@ const PRESET_SKILLS = [
     operation: 'search',
     enabled: true,
   },
+
+  // === Monid Skills (统一工具发现与执行) ===
+  {
+    id: 'monid-discover',
+    name: 'Monid · 工具发现',
+    version: 'v0.1.4',
+    icon: '🧩',
+    desc: '搜索数百个可用工具和 API 端点：网页抓取、数据丰富、社交媒体、搜索、监控等',
+    tags: ['Monid', '工具发现', 'API'],
+    provider: 'monid',
+    operation: 'discover',
+    apiKeyEnv: 'MONID_API_KEY',
+    enabled: true,
+  },
+  {
+    id: 'monid-web-scrape',
+    name: 'Monid · 网页抓取',
+    version: 'v0.1.4',
+    icon: '🕸️',
+    desc: '抓取网页内容、提取结构化数据、处理 JS 渲染页面',
+    tags: ['Monid', '抓取', '数据提取'],
+    provider: 'monid',
+    operation: 'web-scrape',
+    apiKeyEnv: 'MONID_API_KEY',
+    enabled: true,
+  },
+  {
+    id: 'monid-data-enrich',
+    name: 'Monid · 数据丰富',
+    version: 'v0.1.4',
+    icon: '📊',
+    desc: '丰富公司/人物/产品数据，获取深度商业情报和背景信息',
+    tags: ['Monid', '数据', '情报'],
+    provider: 'monid',
+    operation: 'data-enrich',
+    apiKeyEnv: 'MONID_API_KEY',
+    enabled: false,
+  },
+  {
+    id: 'monid-social',
+    name: 'Monid · 社交媒体',
+    version: 'v0.1.4',
+    icon: '📱',
+    desc: '社交媒体内容搜索、趋势监控、受众分析',
+    tags: ['Monid', '社交媒体', '监控'],
+    provider: 'monid',
+    operation: 'social-media',
+    apiKeyEnv: 'MONID_API_KEY',
+    enabled: false,
+  },
+  {
+    id: 'monid-search',
+    name: 'Monid · 全网搜索',
+    version: 'v0.1.4',
+    icon: '🌐',
+    desc: '搜索引擎结果、新闻、图片、视频等多维度全网搜索',
+    tags: ['Monid', '搜索', '全网'],
+    provider: 'monid',
+    operation: 'search',
+    apiKeyEnv: 'MONID_API_KEY',
+    enabled: false,
+  },
+  {
+    id: 'monid-monitor',
+    name: 'Monid · 内容监控',
+    version: 'v0.1.4',
+    icon: '📡',
+    desc: '监控网页变化、价格变动、品牌提及、竞品动态',
+    tags: ['Monid', '监控', '竞品'],
+    provider: 'monid',
+    operation: 'content-monitor',
+    apiKeyEnv: 'MONID_API_KEY',
+    enabled: false,
+  },
 ];
 
 // 加载自定义 Skills（从 localStorage）
@@ -461,6 +535,7 @@ function renderInstalledSkills() {
       else if (s.provider === 'revor') cls = 'tag-warning';
       else if (s.provider === 'agent-reach') cls = 'tag-accent';
       else if (s.provider === 'nanobanana') cls = 'tag-accent2';
+      else if (s.provider === 'monid') cls = 'tag-accent2';
       else if (s.provider === 'clawhub') cls = 'tag-accent';
       else if (t === '自定义') cls = 'tag-accent2';
       return `<span class="tag ${cls}">${t}</span>`;
@@ -480,6 +555,7 @@ function renderInstalledSkills() {
       if (s.provider === 'revor') return `<button class="btn btn-xs btn-primary" onclick="openRevorUsePanel()">▶ 使用</button>`;
       if (s.provider === 'agent-reach') return `<button class="btn btn-xs btn-primary" onclick="openAgentReachPanel()">▶ 使用</button>`;
       if (s.provider === 'nanobanana') return `<button class="btn btn-xs btn-primary" onclick="navigateTo('create')">▶ 使用</button>`;
+      if (s.provider === 'monid') return `<button class="btn btn-xs btn-primary" onclick="openMonidUsePanel('${s.operation}')">▶ 使用</button>`;
       if (s.provider === 'clawhub' && s.type === 'image') return `<button class="btn btn-xs btn-primary" onclick="executeClawHubImage()">▶ 生图</button>`;
       if (s.provider === 'clawhub' && s.type === 'video') return `<button class="btn btn-xs btn-primary" onclick="executeClawHubVideo()">▶ 生视频</button>`;
       if (s.provider === 'custom') return `<button class="btn btn-xs btn-primary" onclick="executeCustomPrompt('${s.id}')">▶ 生成</button>`;
@@ -512,7 +588,7 @@ function renderInstalledSkills() {
 
 // Skill 开关处理
 function handleSkillToggle(skillId, checked) {
-  const presetPrefixes = ['anygen-', 'heygen-', 'creatok-', 'clipcat-', 'revor-', 'agent-reach-', 'nanobanana-', 'clawhub-'];
+  const presetPrefixes = ['anygen-', 'heygen-', 'creatok-', 'clipcat-', 'revor-', 'agent-reach-', 'nanobanana-', 'clawhub-', 'monid-'];
   if (presetPrefixes.some(p => skillId.startsWith(p))) {
     togglePresetSkill(skillId, checked);
   }
@@ -676,6 +752,7 @@ function openSkillConfig(skillId) {
   else if (skill.provider === 'clipcat') openClipcatConfig();
   else if (skill.provider === 'revor') openRevorConfig();
   else if (skill.provider === 'agent-reach') openAgentReachConfig();
+  else if (skill.provider === 'monid') openMonidConfig();
   else if (skill.provider === 'nanobanana') { if (typeof openNanoBananaSettings === 'function') openNanoBananaSettings(); }
 }
 
@@ -737,6 +814,7 @@ function renderSkillHub() {
     if (s.provider === 'clipcat') providerCls = 'tag-info';
     if (s.provider === 'revor') providerCls = 'tag-warning';
     if (s.provider === 'nanobanana') providerCls = 'tag-accent2';
+    if (s.provider === 'monid') providerCls = 'tag-accent2';
 
     return `
     <div class="skill-card">
@@ -779,8 +857,9 @@ function addCustomSkillV2() {
   else if (provider === 'creatok') tagList.push('CreatOK');
   else if (provider === 'clipcat') tagList.push('Clipcat');
   else if (provider === 'revor') tagList.push('Revor');
+  else if (provider === 'monid') tagList.push('Monid');
 
-  const iconMap = { anygen: '📊', heygen: '🎬', creatok: '🖼️', clipcat: '📦', revor: '📨', nanobanana: '🍌' };
+  const iconMap = { anygen: '📊', heygen: '🎬', creatok: '🖼️', clipcat: '📦', revor: '📨', nanobanana: '🍌', monid: '🧩' };
   const newSkill = {
     id,
     name,
@@ -1455,6 +1534,12 @@ window.executeRevor = executeRevor;
 window.openRevorConfig = openRevorConfig;
 window.closeRevorConfig = closeRevorConfig;
 window.saveRevorConfig = saveRevorConfig;
+window.openMonidUsePanel = openMonidUsePanel;
+window.closeMonidPanel = closeMonidPanel;
+window.executeMonid = executeMonid;
+window.openMonidConfig = openMonidConfig;
+window.closeMonidConfig = closeMonidConfig;
+window.saveMonidConfig = saveMonidConfig;
 window.quickAddImageSkill = quickAddImageSkill;
 window.quickAddAllImageSkills = quickAddAllImageSkills;
 window.refreshQuickAddChips = refreshQuickAddChips;
@@ -1471,6 +1556,9 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   if (window.__CLIPCAT_API_KEY__ && !ClipcatService.isConfigured()) {
     ClipcatService.setApiKey(window.__CLIPCAT_API_KEY__);
+  }
+  if (window.__MONID_API_KEY__ && !MonidService.isConfigured()) {
+    MonidService.setApiKey(window.__MONID_API_KEY__);
   }
 
   // 初始化创作舱 Skill 快速添加面板状态
@@ -1671,4 +1759,129 @@ function markAgentReachUninstalled() {
   document.getElementById('ar-config-status').style.color = 'var(--text-tertiary)';
   refreshAgentReachChannelStatus();
   showToast('Agent Reach 已标记为未安装', 'info');
+}
+
+// ============ Monid 面板函数 ============
+
+let monidCurrentOp = 'discover';
+
+function openMonidUsePanel(operation) {
+  monidCurrentOp = operation;
+  const capInfo = MonidService.capabilities[operation];
+  if (!capInfo) return;
+
+  const panel = document.getElementById('monid-use-panel');
+  if (!panel) return;
+
+  document.getElementById('monid-panel-title').textContent = `${capInfo.icon} ${capInfo.name}`;
+  document.getElementById('monid-panel-desc').textContent = capInfo.desc || '';
+  document.getElementById('monid-query').value = '';
+  document.getElementById('monid-result').innerHTML = '';
+  panel.classList.remove('hidden');
+  panel.style.display = 'flex';
+}
+
+function closeMonidPanel() {
+  const panel = document.getElementById('monid-use-panel');
+  if (!panel) return;
+  panel.classList.add('hidden');
+  panel.style.display = 'none';
+}
+
+async function executeMonid() {
+  const query = document.getElementById('monid-query').value.trim();
+  if (!query) { showToast('请输入搜索关键词', 'error'); return; }
+  if (!MonidService.isConfigured()) { showToast('请先在配置中设置 Monid API Key', 'error'); openMonidConfig(); return; }
+
+  const resultDiv = document.getElementById('monid-result');
+  const execBtn = document.getElementById('monid-exec-btn');
+
+  resultDiv.innerHTML = `<div style="text-align:center;padding:20px">
+    <div class="spinner" style="width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--primary);border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 12px"></div>
+    <div style="color:var(--text-secondary)">正在搜索 Monid 工具: "${query}"...</div>
+  </div>`;
+  execBtn.disabled = true;
+  execBtn.textContent = '搜索中...';
+
+  try {
+    const result = await MonidService.discover(query);
+    renderMonidResults(result);
+    showToast('✅ Monid 工具发现完成！', 'success');
+  } catch (err) {
+    let msg = '工具发现失败';
+    if (err.message.includes('MONID_KEY_INVALID')) msg = 'API Key 无效，请检查配置';
+    else if (err.message.includes('MONID_RATE_LIMIT')) msg = '请求过于频繁，请稍后重试';
+    else if (err.message.includes('MONID_NO_CREDITS')) msg = 'API 额度不足';
+    else if (err.message.includes('网络')) msg = '网络连接失败，请检查网络';
+
+    resultDiv.innerHTML = `<div style="text-align:center;padding:20px">
+      <span style="font-size:48px">❌</span>
+      <p style="color:var(--danger);margin-top:10px">${msg}</p>
+      <p style="color:var(--text-tertiary);font-size:11px">${err.message}</p>
+    </div>`;
+    showToast('❌ ' + msg, 'error');
+  } finally {
+    execBtn.disabled = false;
+    execBtn.textContent = '🔍 开始搜索';
+  }
+}
+
+function renderMonidResults(data) {
+  const resultDiv = document.getElementById('monid-result');
+  if (!resultDiv) return;
+
+  if (!data || !data.tools || data.tools.length === 0) {
+    resultDiv.innerHTML = `<div style="text-align:center;padding:20px;color:var(--text-tertiary)">
+      未找到匹配的工具，请尝试其他关键词
+    </div>`;
+    return;
+  }
+
+  let html = `<div style="background:rgba(139,92,246,0.08);padding:10px 12px;border-radius:8px;margin-bottom:12px;font-size:12px;color:var(--text-secondary)">
+    找到 <strong>${data.tools.length}</strong> 个工具 · 查询: "${data.query || ''}"
+  </div>`;
+
+  data.tools.forEach((tool, i) => {
+    html += `<div style="margin-bottom:8px;padding:12px;background:var(--bg);border-radius:8px;border-left:3px solid var(--primary)">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+        <span style="font-weight:600;font-size:13px;color:var(--primary)">${tool.icon || '🔧'} ${tool.name || tool.id}</span>
+        ${tool.premium ? '<span style="font-size:10px;background:rgba(245,158,11,0.15);color:#F59E0B;padding:2px 6px;border-radius:4px">💰 付费</span>' : '<span style="font-size:10px;background:rgba(16,185,129,0.15);color:#10B981;padding:2px 6px;border-radius:4px">免费</span>'}
+      </div>
+      <div style="font-size:11px;color:var(--text-secondary);line-height:1.5;margin-bottom:6px">${tool.desc || tool.description || ''}</div>
+      <div style="display:flex;gap:4px;flex-wrap:wrap">
+        ${(tool.tags || []).map(t => `<span style="font-size:10px;background:var(--bg-tertiary);padding:2px 6px;border-radius:4px;color:var(--text-tertiary)">${t}</span>`).join('')}
+      </div>
+    </div>`;
+  });
+
+  resultDiv.innerHTML = html;
+}
+
+// Monid 配置面板
+function openMonidConfig() {
+  const modal = document.getElementById('monid-config-modal');
+  if (!modal) return;
+  modal.classList.remove('hidden');
+  modal.style.display = 'flex';
+
+  const key = MonidService.getApiKey();
+  document.getElementById('monid-config-key').value = key;
+  document.getElementById('monid-config-status').textContent = key ? '已配置' : '未配置';
+  document.getElementById('monid-config-status').style.color = key ? 'var(--success)' : 'var(--danger)';
+}
+
+function closeMonidConfig() {
+  const modal = document.getElementById('monid-config-modal');
+  if (!modal) return;
+  modal.classList.add('hidden');
+  modal.style.display = 'none';
+}
+
+function saveMonidConfig() {
+  const key = document.getElementById('monid-config-key').value.trim();
+  if (!key) { showToast('请输入 Monid API Key', 'error'); return; }
+  MonidService.setApiKey(key);
+  closeMonidConfig();
+  renderInstalledSkills();
+  showToast('✅ Monid API Key 已保存！', 'success');
 }

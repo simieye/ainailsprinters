@@ -2019,6 +2019,52 @@ html[dir="rtl"] .lang-dropdown {
   </div>
 </div>
 
+<!-- ===== Monid 配置面板 ===== -->
+<div id="monid-config-modal" class="skill-config-modal hidden" style="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.7);z-index:1100;align-items:center;justify-content:center">
+  <div style="background:var(--bg-secondary);border-radius:var(--radius-lg);padding:24px;width:520px;max-height:80vh;overflow-y:auto;border:2px solid var(--primary)">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <h3 style="margin:0;display:flex;align-items:center;gap:8px"><span style="font-size:24px">🧩</span> Monid 配置</h3>
+      <button class="btn btn-xs btn-secondary" onclick="closeMonidConfig()">✕</button>
+    </div>
+    <div style="margin-bottom:12px">
+      <span style="font-size:12px;color:var(--text-secondary)">配置状态: </span>
+      <span id="monid-config-status" style="font-weight:600;font-size:13px">检测中...</span>
+    </div>
+    <div style="padding:10px;background:rgba(139,92,246,0.06);border-radius:8px;margin-bottom:12px;font-size:12px;color:var(--text-secondary);line-height:1.6">
+      <strong>获取 API Key:</strong><br>
+      1. 访问 <a href="https://app.monid.ai" target="_blank" style="color:var(--primary)">app.monid.ai</a> 注册账号<br>
+      2. 在 <a href="https://app.monid.ai/access/api-keys" target="_blank" style="color:var(--primary)">API Keys 页面</a> 生成密钥<br>
+      <span style="color:var(--text-tertiary);font-size:10px">Monid 提供数百个工具端点 · 部分为付费高级端点</span>
+    </div>
+    <div style="margin-bottom:12px">
+      <label style="font-size:12px;color:var(--text-secondary);display:block;margin-bottom:6px">API Key</label>
+      <input id="monid-config-key" class="form-input" type="password" placeholder="输入 Monid API Key (monid_live_...)" style="width:100%">
+    </div>
+    <div style="display:flex;gap:8px;justify-content:flex-end">
+      <button class="btn btn-sm btn-secondary" onclick="closeMonidConfig()">关闭</button>
+      <button class="btn btn-sm btn-primary" onclick="saveMonidConfig()">💾 保存配置</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== Monid 使用面板 ===== -->
+<div id="monid-use-panel" class="hidden" style="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.7);z-index:1050;display:none;align-items:center;justify-content:center">
+  <div style="background:var(--bg-secondary);border-radius:var(--radius-lg);padding:24px;width:640px;max-height:85vh;overflow-y:auto;border:2px solid var(--primary)">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <h3 id="monid-panel-title" style="margin:0;display:flex;align-items:center;gap:8px">🧩 Monid</h3>
+      <button class="btn btn-xs btn-secondary" onclick="closeMonidPanel()">✕</button>
+    </div>
+    <p id="monid-panel-desc" style="font-size:12px;color:var(--text-secondary);margin-bottom:16px"></p>
+    <div style="margin-bottom:12px">
+      <textarea id="monid-query" class="form-input" rows="2" placeholder="输入搜索关键词，发现可用工具和 API..." style="width:100%;resize:vertical"></textarea>
+    </div>
+    <div style="display:flex;gap:8px;margin-bottom:16px">
+      <button id="monid-exec-btn" class="btn btn-primary" onclick="executeMonid()">🔍 开始搜索</button>
+    </div>
+    <div id="monid-result" style="min-height:100px;max-height:400px;overflow-y:auto"></div>
+  </div>
+</div>
+
 <!-- ===== 订单管理面板 ===== -->
 <div id="admin-orders-panel" style="display:none">
   <div class="card" style="margin-bottom:16px">
@@ -3802,6 +3848,7 @@ const OllamaService = {
 <script src="gptimage_service.js"></script>
 <script src="revor_service.js"></script>
 <script src="agent_reach_service.js"></script>
+<script src="monid_service.js"></script>
 <script src="skill_integration.js"></script>
 
 </body>
