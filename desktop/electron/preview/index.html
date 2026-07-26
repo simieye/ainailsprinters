@@ -1684,6 +1684,16 @@ html[dir="rtl"] .lang-dropdown {
 <button class="btn btn-xs btn-secondary" onclick="event.stopPropagation();testHeyGenConnection()">🔌 测试连接</button>
 </div>
 </div>
+<div class="provider-card" id="provider-openrouter" onclick="setDefaultProvider('openrouter')" style="border:1px solid rgba(0,191,255,0.3);background:linear-gradient(135deg,rgba(0,191,255,0.06),rgba(30,144,255,0.06))">
+<div class="provider-badge badge-hot" style="background:#00bfff">多模型</div>
+<div class="provider-header"><span class="provider-icon">🚀</span><div><div class="provider-name">OpenRouter</div><div class="provider-model">200+ 模型 · GPT/Claude/Gemini/LLaMA 统一接入</div></div></div>
+<div class="provider-desc">统一 API 网关，一键访问 200+ 主流模型，按量付费，无需单独注册各平台</div>
+<div class="provider-status"><span id="openrouter-status" class="status-dot status-online"></span><span id="openrouter-status-text">已连接 · 200+ 模型可用</span></div>
+<div class="provider-actions" style="margin-top:8px;display:flex;gap:6px">
+<button class="btn btn-xs btn-accent" onclick="event.stopPropagation();openOpenRouterSettings()">🔑 设置API Key</button>
+<button class="btn btn-xs btn-secondary" onclick="event.stopPropagation();testOpenRouterConnection()">🔌 测试连接</button>
+</div>
+</div>
 </div>
 </div>
 
@@ -2793,6 +2803,27 @@ html[dir="rtl"] .lang-dropdown {
 <div class="form-group"><label>数字人模板</label><div style="display:flex;gap:8px"><button class="btn btn-xs btn-secondary heygen-avatar-btn selected" onclick="selectHeyGenAvatar('default',this)">默认数字人</button><button class="btn btn-xs btn-secondary heygen-avatar-btn" onclick="selectHeyGenAvatar('custom',this)">自定义形象</button></div></div>
 <div class="form-group"><label>声音</label><div style="display:flex;gap:8px"><button class="btn btn-xs btn-secondary heygen-voice-btn selected" onclick="selectHeyGenVoice('default',this)">默认声音</button><button class="btn btn-xs btn-secondary heygen-voice-btn" onclick="selectHeyGenVoice('female',this)">女声</button><button class="btn btn-xs btn-secondary heygen-voice-btn" onclick="selectHeyGenVoice('male',this)">男声</button></div></div>
 <div class="modal-actions"><button class="btn btn-secondary btn-sm" onclick="closeHeyGenSettings()">取消</button><button class="btn btn-primary btn-sm" onclick="saveHeyGenSettings()">💾 保存配置</button></div>
+</div></div>
+
+<!-- OPENROUTER API KEY MODAL -->
+<div class="modal-overlay hidden" id="openrouter-modal"><div class="modal" style="width:480px">
+<h3>🚀 OpenRouter API 配置</h3>
+<p style="font-size:12px;color:var(--text-secondary);margin-bottom:16px">OpenRouter 是统一 API 网关，一键访问 200+ 主流模型（GPT-4o/Claude/Gemini/LLaMA 等）。获取 API Key: <a href="https://openrouter.ai/keys" target="_blank" style="color:var(--accent)">OpenRouter Keys</a></p>
+<div class="form-group"><label>API Key</label><div class="input-row"><input class="form-input" id="openrouter-api-key" type="password" placeholder="sk-or-v1-..."><button class="btn btn-secondary btn-sm" onclick="togglePassword('openrouter-api-key')" style="white-space:nowrap">👁</button></div></div>
+<div class="form-group"><label>默认模型</label><select class="form-input" id="openrouter-model-select" style="width:100%">
+<option value="openai/gpt-4o">GPT-4o (OpenAI)</option>
+<option value="openai/gpt-4o-mini">GPT-4o-mini (OpenAI)</option>
+<option value="openai/o3-mini">o3-mini (OpenAI)</option>
+<option value="anthropic/claude-3.5-sonnet">Claude 3.5 Sonnet (Anthropic)</option>
+<option value="anthropic/claude-3-opus">Claude 3 Opus (Anthropic)</option>
+<option value="google/gemini-2.0-flash-001">Gemini 2.0 Flash (Google)</option>
+<option value="google/gemini-2.5-pro-exp-03-25">Gemini 2.5 Pro (Google)</option>
+<option value="deepseek/deepseek-chat">DeepSeek-V3</option>
+<option value="deepseek/deepseek-r1">DeepSeek-R1</option>
+<option value="meta-llama/llama-3.3-70b-instruct">LLaMA 3.3 70B (Meta)</option>
+<option value="qwen/qwen-max">Qwen-Max (Alibaba)</option>
+</select></div>
+<div class="modal-actions"><button class="btn btn-secondary btn-sm" onclick="closeOpenRouterSettings()">取消</button><button class="btn btn-primary btn-sm" onclick="saveOpenRouterSettings()">💾 保存配置</button></div>
 </div></div>
 
 <!-- FORGOT PASSWORD MODAL -->
@@ -3921,6 +3952,7 @@ const OllamaService = {
 <script src="creatok_service.js"></script>
 <script src="clipcat_service.js"></script>
 <script src="gptimage_service.js"></script>
+<script src="openrouter_service.js"></script>
 <script src="revor_service.js"></script>
 <script src="agent_reach_service.js"></script>
 <script src="monid_service.js"></script>

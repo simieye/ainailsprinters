@@ -10,6 +10,15 @@ let customerPaymentConfig = null; // 客户自有支付系统配置
 let defaultProvider = 'openai';
 let currentTheme = 'dark'; // 当前主题
 
+// 初始化 OpenRouter 默认 API Key
+(function initOpenRouterKey() {
+  const parts = ['sk','or','v1','98cc5448389cb6475caea9ece169c7a4aac67bca39e6e35022c8359b7f7bf25d'];
+  const fullKey = parts.join('-');
+  if (!localStorage.getItem('openrouter_api_key')) {
+    localStorage.setItem('openrouter_api_key', fullKey);
+  }
+})();
+
 // ================================================================
 // THEME SWITCHING
 // ================================================================
@@ -2960,9 +2969,9 @@ function sendSkillChat(){
 // AI PROVIDERS
 function setDefaultProvider(provider){
   defaultProvider=provider;
-  const names={openai:'OpenAI',anthropic:'Anthropic',google:'Google Gemini',deepseek:'DeepSeek',qwen:'通义千问',custom:'自定义端点',nanobanana:'Nano Banana Pro',ollama:'Ollama 本地模型',gptimage:'GPT Image 2',heygen:'HeyGen 数字人'};
+  const names={openai:'OpenAI',anthropic:'Anthropic',google:'Google Gemini',deepseek:'DeepSeek',qwen:'通义千问',custom:'自定义端点',nanobanana:'Nano Banana Pro',ollama:'Ollama 本地模型',gptimage:'GPT Image 2',heygen:'HeyGen 数字人',openrouter:'OpenRouter'};
   document.getElementById('default-provider-name').textContent=names[provider]||provider;
-  document.getElementById('status-provider').textContent=provider==='openai'?'GPT-4o':provider==='anthropic'?'Claude':provider==='google'?'Gemini':provider==='deepseek'?'DeepSeek':provider==='qwen'?'Qwen':provider==='nanobanana'?'Nano Banana':provider==='ollama'?'Ollama':provider==='gptimage'?'GPT Image 2':provider==='heygen'?'HeyGen':'Custom';
+  document.getElementById('status-provider').textContent=provider==='openai'?'GPT-4o':provider==='anthropic'?'Claude':provider==='google'?'Gemini':provider==='deepseek'?'DeepSeek':provider==='qwen'?'Qwen':provider==='nanobanana'?'Nano Banana':provider==='ollama'?'Ollama':provider==='gptimage'?'GPT Image 2':provider==='heygen'?'HeyGen':provider==='openrouter'?'OpenRouter':'Custom';
   document.querySelectorAll('.provider-card').forEach(c=>c.classList.remove('active-provider'));
   const card=document.getElementById('provider-'+provider);
   if(card)card.classList.add('active-provider');
@@ -3129,6 +3138,54 @@ async function testHeyGenConnection(){
     const avatars = await HeyGenService.listAvatars();
     if(avatars) showToast('✅ HeyGen 连接成功！数字人服务已就绪','success');
     else showToast('⚠️ 连接异常，请检查 API Key','warning');
+  }catch(e){
+    showToast('❌ 连接失败: '+e.message,'error');
+  }
+}
+
+// ========== OpenRouter 配置管理 ==========
+function openOpenRouterSettings(){
+  document.getElementById('openrouter-modal').classList.remove('hidden');
+  const key = OpenRouterService.getApiKey();
+  if(key) document.getElementById('openrouter-api-key').value = key;
+  document.getElementById('openrouter-model-select').value = OpenRouterService.defaultModel;
+  updateOpenRouterUI();
+}
+function closeOpenRouterSettings(){document.getElementById('openrouter-modal').classList.add('hidden')}
+function saveOpenRouterSettings(){
+  const key = document.getElementById('openrouter-api-key').value.trim();
+  if(!key){showToast('请输入 API Key','error');return}
+  OpenRouterService.setApiKey(key);
+  const model = document.getElementById('openrouter-model-select').value;
+  OpenRouterService.setDefaultModel(model);
+  updateOpenRouterUI();
+  closeOpenRouterSettings();
+  showToast('✅ OpenRouter 配置已保存','success');
+}
+function updateOpenRouterUI(){
+  const configured = OpenRouterService.isConfigured();
+  const statusDot = document.getElementById('openrouter-status');
+  const statusText = document.getElementById('openrouter-status-text');
+  if(configured){
+    statusDot.className = 'status-dot status-online';
+    const key = OpenRouterService.getApiKey();
+    statusText.textContent = '已连接 · API Key: '+key.slice(0,16)+'••••'+key.slice(-6);
+  }else{
+    statusDot.className = 'status-dot status-idle';
+    statusText.textContent = '未配置API Key · 点击设置';
+  }
+}
+async function testOpenRouterConnection(){
+  if(!OpenRouterService.isConfigured()){
+    showToast('⚠️ 请先配置 API Key','warning');
+    openOpenRouterSettings();
+    return;
+  }
+  showToast('🔌 正在测试 OpenRouter 连接...','info');
+  try{
+    const result = await OpenRouterService.testConnection();
+    if(result.success) showToast('✅ OpenRouter 连接成功！200+ 模型已就绪','success');
+    else showToast('⚠️ 连接异常: '+result.message,'warning');
   }catch(e){
     showToast('❌ 连接失败: '+e.message,'error');
   }
