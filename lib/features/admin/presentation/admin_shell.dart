@@ -67,6 +67,13 @@ class _AdminShellState extends ConsumerState<AdminShell> {
       route: '/admin/payments',
       color: Color(0xFFFFD700),
     ),
+    _SystemInfo(
+      index: 7,
+      icon: Icons.precision_manufacturing,
+      label: '生产管理',
+      route: '/admin/production',
+      color: Color(0xFFFF6B35),
+    ),
   ];
 
   @override

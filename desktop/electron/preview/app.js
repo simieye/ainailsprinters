@@ -165,10 +165,12 @@ function switchAdminTab(tab,btn){
   document.getElementById('admin-orders-panel').style.display=tab==='orders'?'block':'none';
   document.getElementById('admin-logistics-panel').style.display=tab==='logistics'?'block':'none';
   document.getElementById('admin-inventory-panel').style.display=tab==='inventory'?'block':'none';
+  document.getElementById('admin-production-panel').style.display=tab==='production'?'block':'none';
   if(tab==='customers')renderAdminCustomers();
   if(tab==='orders')renderAdminOrders();
   if(tab==='logistics')renderAdminLogistics();
   if(tab==='inventory')renderAdminInventory();
+  if(tab==='production')renderAdminProduction();
 }
 
 // ========== 客户管理 ==========
@@ -749,12 +751,154 @@ function deleteInventoryItem(sku){
   showToast('库存项已删除','info');
 }
 
+// ========== 生产管理 ==========
+let adminProductionOrders=[
+  {id:'WO-2026-0891',name:'霓虹幻彩甲片套装',qty:500,line:'L1-AI印刷线',priority:'urgent',progress:65,endDate:'2026-07-28',status:'in_progress'},
+  {id:'WO-2026-0892',name:'星空渐变美甲贴',qty:1200,line:'L2-激光产线',priority:'high',progress:35,endDate:'2026-07-30',status:'in_progress'},
+  {id:'WO-2026-0893',name:'樱花限定套装',qty:800,line:'L3-3D打印线',priority:'normal',progress:0,endDate:'2026-08-05',status:'pending'},
+  {id:'WO-2026-0894',name:'金属质感甲片',qty:600,line:'L1-AI印刷线',priority:'high',progress:0,endDate:'2026-08-04',status:'pending'},
+  {id:'WO-2026-0895',name:'水彩晕染美甲贴',qty:1500,line:'L2-激光产线',priority:'normal',progress:100,endDate:'2026-07-26',status:'completed'},
+  {id:'WO-2026-0896',name:'镭射幻彩套装',qty:400,line:'L3-3D打印线',priority:'urgent',progress:0,endDate:'2026-08-01',status:'pending'},
+  {id:'WO-2026-0897',name:'卡通IP联名款',qty:2000,line:'L1-AI印刷线',priority:'normal',progress:0,endDate:'2026-08-10',status:'pending'},
+  {id:'WO-2026-0898',name:'透明果冻甲片',qty:300,line:'L4-手工线',priority:'low',progress:40,endDate:'2026-07-28',status:'paused'},
+  {id:'WO-2026-0899',name:'婚礼限定套装',qty:200,line:'L4-手工线',priority:'high',progress:100,endDate:'2026-07-22',status:'completed'},
+  {id:'WO-2026-0900',name:'夜光美甲贴',qty:900,line:'L2-激光产线',priority:'normal',progress:0,endDate:'2026-08-03',status:'pending'}
+];
+let adminQualityInspections=[
+  {id:'QC-2026-0151',woId:'WO-2026-0895',name:'水彩晕染美甲贴',total:500,defects:8,pass:492,rate:98.4,inspector:'张质检',status:'passed'},
+  {id:'QC-2026-0152',woId:'WO-2026-0891',name:'霓虹幻彩甲片套装',total:200,defects:3,pass:197,rate:98.5,inspector:'李品控',status:'in_progress'},
+  {id:'QC-2026-0153',woId:'WO-2026-0899',name:'婚礼限定套装',total:200,defects:1,pass:199,rate:99.5,inspector:'王质检',status:'passed'},
+  {id:'QC-2026-0154',woId:'WO-2026-0892',name:'星空渐变美甲贴',total:150,defects:12,pass:138,rate:92.0,inspector:'张质检',status:'pending_recheck'},
+  {id:'QC-2026-0155',woId:'WO-2026-0898',name:'透明果冻甲片',total:100,defects:5,pass:95,rate:95.0,inspector:'赵品控',status:'pending_recheck'}
+];
+let productionOrderFilter='all';
+
+function renderAdminProduction(){
+  // 更新统计
+  const filtered=productionOrderFilter==='all'?adminProductionOrders:adminProductionOrders.filter(o=>o.status===productionOrderFilter);
+  document.getElementById('admin-production-count').textContent=`共 ${filtered.length} 个工单`;
+  document.getElementById('prod-pending').textContent=adminProductionOrders.filter(o=>o.status==='pending').length;
+  document.getElementById('prod-inprogress').textContent=adminProductionOrders.filter(o=>o.status==='in_progress').length;
+  document.getElementById('prod-completed').textContent=adminProductionOrders.filter(o=>o.status==='completed').length;
+  const utilizations=[78.5,65.3,42.0,55.8,88.2];
+  document.getElementById('prod-utilization').textContent=(utilizations.reduce((a,b)=>a+b,0)/utilizations.length).toFixed(1);
+  document.getElementById('prod-material-alert').textContent='4';
+  // 工单表格
+  const tbody=document.getElementById('admin-production-tbody');
+  const priorityLabels={urgent:'紧急',high:'高',normal:'普通',low:'低'};
+  const priorityColors={urgent:'tag-danger',high:'tag-warning',normal:'tag-success',low:'tag-secondary'};
+  const statusLabels={pending:'待处理',in_progress:'生产中',completed:'已完成',paused:'已暂停',cancelled:'已取消'};
+  const statusColors={pending:'tag-warning',in_progress:'tag-info',completed:'tag-success',paused:'tag-secondary',cancelled:'tag-danger'};
+  tbody.innerHTML=filtered.map(o=>`<tr>
+    <td style="font-family:monospace;font-size:11px">${o.id}</td>
+    <td><strong>${o.name}</strong></td>
+    <td>${o.qty}</td>
+    <td>${o.line}</td>
+    <td><span class="tag ${priorityColors[o.priority]||'tag-secondary'}">${priorityLabels[o.priority]||o.priority}</span></td>
+    <td><div style="display:flex;align-items:center;gap:6px"><div style="flex:1;height:6px;background:var(--bg-tertiary);border-radius:3px;overflow:hidden"><div style="height:100%;width:${o.progress}%;background:${o.progress>=80?'var(--success)':o.progress>=40?'var(--info)':'var(--warning)'};border-radius:3px"></div></div><span style="font-size:11px">${o.progress}%</span></div></td>
+    <td>${o.endDate}</td>
+    <td><span class="tag ${statusColors[o.status]||'tag-secondary'}">${statusLabels[o.status]||o.status}</span></td>
+    <td style="display:flex;gap:4px"><button class="btn btn-xs btn-secondary" onclick="editProductionOrder('${o.id}')">✏️</button><button class="btn btn-xs btn-danger" onclick="deleteProductionOrder('${o.id}')">🗑</button></td>
+  </tr>`).join('');
+  // 产线状态
+  const lines=[
+    {name:'L1-AI印刷线',status:'running',label:'运行中',progress:78,order:'WO-2026-0891',output:85,color:'var(--success)'},
+    {name:'L2-激光产线',status:'running',label:'运行中',progress:45,order:'WO-2026-0892',output:62,color:'var(--success)'},
+    {name:'L3-3D打印线',status:'idle',label:'空闲',progress:0,order:'等待工单',output:0,color:'var(--warning)'},
+    {name:'L4-手工线',status:'maintenance',label:'维护中',progress:0,order:'维护保养',output:0,color:'var(--info)'},
+    {name:'L5-质检包装线',status:'running',label:'运行中',progress:92,order:'WO-2026-0895',output:120,color:'var(--success)'}
+  ];
+  document.getElementById('production-lines-grid').innerHTML=lines.map(l=>`<div style="padding:14px;background:var(--bg-secondary);border:1px solid var(--border);border-radius:var(--radius)">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+      <strong style="font-size:13px">${l.name}</strong>
+      <span style="width:8px;height:8px;border-radius:50%;background:${l.color};box-shadow:0 0 6px ${l.color}"></span>
+    </div>
+    <div style="font-size:11px;color:${l.color};margin-bottom:8px">${l.label}</div>
+    <div style="height:6px;background:var(--bg-tertiary);border-radius:3px;overflow:hidden;margin-bottom:6px">
+      <div style="height:100%;width:${l.progress}%;background:${l.color};border-radius:3px"></div>
+    </div>
+    <div style="font-size:10px;color:var(--text-tertiary)">工单: ${l.order}</div>
+    <div style="font-size:10px;color:var(--text-tertiary)">今日产出: ${l.output}件</div>
+  </div>`).join('');
+  // 质检表格
+  const qtbody=document.getElementById('admin-quality-tbody');
+  const qStatusLabels={passed:'通过',failed:'不通过',in_progress:'检验中',pending_recheck:'待复检'};
+  const qStatusColors={passed:'tag-success',failed:'tag-danger',in_progress:'tag-info',pending_recheck:'tag-warning'};
+  qtbody.innerHTML=adminQualityInspections.map(q=>`<tr>
+    <td style="font-family:monospace;font-size:11px">${q.id}</td>
+    <td style="font-family:monospace;font-size:11px">${q.woId}</td>
+    <td>${q.name}</td>
+    <td>${q.total}</td>
+    <td>${q.pass}</td>
+    <td style="color:${q.defects>0?'var(--danger)':'var(--text-primary)'}">${q.defects}</td>
+    <td style="color:${q.rate>=95?'var(--success)':'var(--warning)'};font-weight:700">${q.rate}%</td>
+    <td>${q.inspector}</td>
+    <td><span class="tag ${qStatusColors[q.status]||'tag-secondary'}">${qStatusLabels[q.status]||q.status}</span></td>
+  </tr>`).join('');
+}
+function filterProductionOrders(status){
+  productionOrderFilter=status;
+  renderAdminProduction();
+}
+function showProductionForm(editId){
+  const overlay=document.getElementById('production-form-overlay');
+  document.getElementById('production-form-title').textContent=editId?'编辑生产工单':'新建生产工单';
+  document.getElementById('pf-edit-id').value=editId||'';
+  if(editId){
+    const o=adminProductionOrders.find(x=>x.id===editId);
+    if(o){
+      document.getElementById('pf-name').value=o.name;
+      document.getElementById('pf-qty').value=o.qty;
+      document.getElementById('pf-line').value=o.line;
+      document.getElementById('pf-priority').value=o.priority;
+      document.getElementById('pf-date').value=o.endDate;
+    }
+  }else{
+    document.getElementById('pf-name').value='';
+    document.getElementById('pf-qty').value='';
+    document.getElementById('pf-line').value='L1-AI印刷线';
+    document.getElementById('pf-priority').value='normal';
+    document.getElementById('pf-date').value='';
+  }
+  overlay.style.display='flex';
+}
+function hideProductionForm(){
+  document.getElementById('production-form-overlay').style.display='none';
+}
+function saveProductionOrder(){
+  const editId=document.getElementById('pf-edit-id').value;
+  const name=document.getElementById('pf-name').value.trim();
+  const qty=parseInt(document.getElementById('pf-qty').value)||0;
+  const line=document.getElementById('pf-line').value;
+  const priority=document.getElementById('pf-priority').value;
+  const endDate=document.getElementById('pf-date').value;
+  if(!name||!qty){showToast('请填写产品名称和数量','error');return;}
+  if(editId){
+    const o=adminProductionOrders.find(x=>x.id===editId);
+    if(o){o.name=name;o.qty=qty;o.line=line;o.priority=priority;o.endDate=endDate;showToast('工单已更新','success');}
+  }else{
+    const newId='WO-'+new Date().getFullYear()+'-'+(adminProductionOrders.length+9000);
+    adminProductionOrders.unshift({id:newId,name,qty,line,priority,progress:0,endDate:endDate||'待定',status:'pending'});
+    showToast('工单创建成功','success');
+  }
+  hideProductionForm();
+  renderAdminProduction();
+}
+function editProductionOrder(id){showProductionForm(id);}
+function deleteProductionOrder(id){
+  if(!confirm('确定删除工单 '+id+'？'))return;
+  adminProductionOrders=adminProductionOrders.filter(x=>x.id!==id);
+  renderAdminProduction();
+  showToast('工单已删除','info');
+}
+
 // 初始化管理后台数据
 startOrderSync();
 renderAdminCustomers();
 renderAdminOrders();
 renderAdminLogistics();
 renderAdminInventory();
+renderAdminProduction();
 
 // DEVICE
 function switchDeviceMode(mode){document.querySelectorAll('#page-device .auth-tab').forEach(el=>{el.classList.toggle('active',(mode==='b2c'&&el.textContent.includes('B2C'))||(mode==='b2b'&&el.textContent.includes('B2B')))});document.getElementById('device-b2c').classList.toggle('hidden',mode!=='b2c');document.getElementById('device-b2b').classList.toggle('hidden',mode!=='b2b')}

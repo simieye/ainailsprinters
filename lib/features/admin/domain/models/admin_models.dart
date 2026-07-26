@@ -279,3 +279,110 @@ class RegionRevenue {
     required this.storeCount,
   });
 }
+
+// ========== 生产管理模型 ==========
+
+/// 生产工单
+class ProductionWorkOrder {
+  final String id;
+  final String productName;
+  final int quantity;
+  final String productionLine;
+  final String priority; // urgent/high/normal/low
+  final DateTime plannedStart;
+  final DateTime plannedEnd;
+  final String status; // pending/in_progress/completed/paused/cancelled
+  final double progress; // 0-100
+
+  const ProductionWorkOrder({
+    required this.id,
+    required this.productName,
+    required this.quantity,
+    required this.productionLine,
+    required this.priority,
+    required this.plannedStart,
+    required this.plannedEnd,
+    required this.status,
+    required this.progress,
+  });
+}
+
+/// 生产线
+class ProductionLine {
+  final String name;
+  final String status; // running/idle/maintenance/offline
+  final double currentProgress; // 0-100
+  final String currentOrder;
+  final int todayOutput;
+
+  const ProductionLine({
+    required this.name,
+    required this.status,
+    required this.currentProgress,
+    required this.currentOrder,
+    required this.todayOutput,
+  });
+}
+
+/// 质检记录
+class QualityInspection {
+  final String id;
+  final String workOrderId;
+  final String productName;
+  final int totalInspected;
+  final int defectCount;
+  final String inspector;
+  final String status; // passed/failed/in_progress/pending_recheck
+
+  const QualityInspection({
+    required this.id,
+    required this.workOrderId,
+    required this.productName,
+    required this.totalInspected,
+    required this.defectCount,
+    required this.inspector,
+    required this.status,
+  });
+}
+
+/// 物料库存
+class MaterialInventory {
+  final String id;
+  final String name;
+  final String category;
+  final int currentStock;
+  final int safetyStock;
+  final String unit;
+  final String supplier;
+  final String status; // normal/low/out_of_stock
+
+  const MaterialInventory({
+    required this.id,
+    required this.name,
+    required this.category,
+    required this.currentStock,
+    required this.safetyStock,
+    required this.unit,
+    required this.supplier,
+    required this.status,
+  });
+}
+
+/// 产能数据
+class ProductionCapacity {
+  final String lineName;
+  final double utilization; // 利用率百分比
+  final int dailyCapacity;
+  final int monthlyOutput;
+  final double yieldRate; // 良品率
+  final int runningHours; // 每日运行时长
+
+  const ProductionCapacity({
+    required this.lineName,
+    required this.utilization,
+    required this.dailyCapacity,
+    required this.monthlyOutput,
+    required this.yieldRate,
+    required this.runningHours,
+  });
+}

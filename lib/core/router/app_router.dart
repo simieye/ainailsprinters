@@ -13,6 +13,15 @@ import '../../features/community/presentation/pages/community_detail_page.dart';
 import '../../features/community/presentation/pages/publish_post_page.dart';
 import '../../features/auth/presentation/pages/login_page.dart';
 import '../../features/auth/presentation/pages/register_page.dart';
+import '../../features/admin/presentation/admin_shell.dart';
+import '../../features/admin/presentation/pages/headquarters_page.dart';
+import '../../features/admin/presentation/pages/tech_support_page.dart';
+import '../../features/admin/presentation/pages/dealers_page.dart';
+import '../../features/admin/presentation/pages/stores_page.dart';
+import '../../features/admin/presentation/pages/users_page.dart';
+import '../../features/admin/presentation/pages/community_page.dart';
+import '../../features/admin/presentation/pages/payment_hub_page.dart';
+import '../../features/admin/presentation/pages/production_page.dart';
 import '../di/providers.dart';
 import 'app_shell.dart';
 
@@ -122,6 +131,68 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: '/community/publish',
         name: 'community-publish',
         builder: (context, state) => const PublishPostPage(),
+      ),
+      // ===== 管理后台路由 =====
+      ShellRoute(
+        builder: (context, state, child) => AdminShell(child: child),
+        routes: [
+          GoRoute(
+            path: '/admin/headquarters',
+            name: 'admin-headquarters',
+            pageBuilder: (context, state) => const NoTransitionPage(
+              child: HeadquartersPage(),
+            ),
+          ),
+          GoRoute(
+            path: '/admin/tech-support',
+            name: 'admin-tech-support',
+            pageBuilder: (context, state) => const NoTransitionPage(
+              child: TechSupportPage(),
+            ),
+          ),
+          GoRoute(
+            path: '/admin/dealers',
+            name: 'admin-dealers',
+            pageBuilder: (context, state) => const NoTransitionPage(
+              child: DealersPage(),
+            ),
+          ),
+          GoRoute(
+            path: '/admin/stores',
+            name: 'admin-stores',
+            pageBuilder: (context, state) => const NoTransitionPage(
+              child: StoresPage(),
+            ),
+          ),
+          GoRoute(
+            path: '/admin/users',
+            name: 'admin-users',
+            pageBuilder: (context, state) => const NoTransitionPage(
+              child: UsersPage(),
+            ),
+          ),
+          GoRoute(
+            path: '/admin/community',
+            name: 'admin-community',
+            pageBuilder: (context, state) => const NoTransitionPage(
+              child: CommunityPage(),
+            ),
+          ),
+          GoRoute(
+            path: '/admin/payments',
+            name: 'admin-payments',
+            pageBuilder: (context, state) => const NoTransitionPage(
+              child: PaymentHubPage(),
+            ),
+          ),
+          GoRoute(
+            path: '/admin/production',
+            name: 'admin-production',
+            pageBuilder: (context, state) => const NoTransitionPage(
+              child: ProductionPage(),
+            ),
+          ),
+        ],
       ),
     ],
   );

@@ -40,6 +40,13 @@ final selectedContentIdProvider = StateProvider<String?>((ref) => null);
 final supportTicketsProvider = StateProvider<List<SupportTicket>>((ref) => []);
 final selectedTicketIdProvider = StateProvider<String?>((ref) => null);
 
+// ===== 生产管理数据 =====
+final productionWorkOrdersProvider = StateProvider<List<ProductionWorkOrder>>((ref) => []);
+final productionLinesProvider = StateProvider<List<ProductionLine>>((ref) => []);
+final qualityInspectionsProvider = StateProvider<List<QualityInspection>>((ref) => []);
+final materialInventoryProvider = StateProvider<List<MaterialInventory>>((ref) => []);
+final productionCapacityProvider = StateProvider<List<ProductionCapacity>>((ref) => []);
+
 // ===== 仪表盘筛选 =====
 final adminDateRangeProvider = StateProvider<String>((ref) => 'month'); // day/week/month/quarter/year
 final adminSearchQueryProvider = StateProvider<String>((ref) => '');
