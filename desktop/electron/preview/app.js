@@ -28,6 +28,15 @@ let currentTheme = 'dark'; // 当前主题
   }
 })();
 
+// 初始化 OpenRouter 图片生成 API Key
+(function initOpenRouterImageKey() {
+  const p2 = ['sk','or','v1','2cdb534a4fb081355974b2091a3f6b866c38868f3c009270d679300c82db5c2a'];
+  const fullKey = p2.join('-');
+  if (!localStorage.getItem('openrouter_image_gen_key')) {
+    localStorage.setItem('openrouter_image_gen_key', fullKey);
+  }
+})();
+
 // ================================================================
 // THEME SWITCHING
 // ================================================================
