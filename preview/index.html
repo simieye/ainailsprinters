@@ -761,8 +761,11 @@ html[dir="rtl"] .lang-dropdown {
 <button class="sidebar-nav-item" data-page="medialibrary" onclick="navigateTo('medialibrary')"><span class="nav-icon">🖼️</span><span class="sidebar-label">资源库</span><span class="sidebar-badge badge-new">媒体</span></button>
 <button class="sidebar-nav-item" data-page="device" onclick="navigateTo('device')"><span class="nav-icon">🦞</span><span class="sidebar-label" data-i18n="nav.device">龙虾智控</span><span class="sidebar-badge badge-new" data-i18n="tag.new">设备</span></button>
 <button class="sidebar-nav-item" data-page="productcenter" onclick="navigateTo('productcenter')"><span class="nav-icon">💅</span><span class="sidebar-label">产品中心</span><span class="sidebar-badge badge-hot">NEW</span></button>
+<button class="sidebar-nav-item" data-page="digitalstore" onclick="navigateTo('digitalstore')"><span class="nav-icon">🏪</span><span class="sidebar-label">AI数字门店</span><span class="sidebar-badge badge-pro">POD</span></button>
+<button class="sidebar-nav-item" data-page="materialcenter" onclick="navigateTo('materialcenter')"><span class="nav-icon">🌿</span><span class="sidebar-label">健康材料中心</span><span class="sidebar-badge badge-new">生物基</span></button>
 <button class="sidebar-nav-item" data-page="community" onclick="navigateTo('community')"><span class="nav-icon">🌍</span><span class="sidebar-label" data-i18n="nav.community">社区</span></button>
 <button class="sidebar-nav-item" data-page="payment" onclick="navigateTo('payment')"><span class="nav-icon">💳</span><span class="sidebar-label" data-i18n="nav.payment">支付中心</span></button>
+<button class="sidebar-nav-item" data-page="datacockpit" onclick="navigateTo('datacockpit')"><span class="nav-icon">📊</span><span class="sidebar-label">数据驾驶舱</span><span class="sidebar-badge badge-accent">BI</span></button>
 <div class="sidebar-section-title" data-i18n="nav.section_ai">AI 引擎</div>
 <button class="sidebar-nav-item" data-page="agents" onclick="navigateTo('agents')"><span class="nav-icon">🧠</span><span class="sidebar-label" data-i18n="nav.agents">智能体集群</span><span class="sidebar-badge badge-pro" data-i18n="tag.pro">Skill</span></button>
 <button class="sidebar-nav-item" data-page="providers" onclick="navigateTo('providers')"><span class="nav-icon">🔌</span><span class="sidebar-label" data-i18n="nav.providers">模型提供商</span></button>
@@ -1170,7 +1173,7 @@ html[dir="rtl"] .lang-dropdown {
 
 <!-- PAGE: COMMUNITY -->
 <div class="content-page" id="page-community">
-<div class="page-tabs"><button class="page-tab active" onclick="switchCommunityTab('feed')">动态 Feed</button><button class="page-tab" onclick="switchCommunityTab('market')">交易市场</button><button class="page-tab" onclick="switchCommunityTab('leaderboard')">排行榜</button><button class="page-tab" onclick="switchCommunityTab('share')">📤 分享中心</button></div>
+<div class="page-tabs"><button class="page-tab active" onclick="switchCommunityTab('feed')">动态 Feed</button><button class="page-tab" onclick="switchCommunityTab('market')">交易市场</button><button class="page-tab" onclick="switchCommunityTab('opc')">🚀 OPC创业</button><button class="page-tab" onclick="switchCommunityTab('podmarket')">🌍 POD跨境市场</button><button class="page-tab" onclick="switchCommunityTab('leaderboard')">排行榜</button><button class="page-tab" onclick="switchCommunityTab('share')">📤 分享中心</button></div>
 <div id="comm-feed">
 <div class="feed-item"><div class="feed-avatar">🌸</div><div class="feed-content"><div class="feed-user">花漾美甲工作室<span class="feed-time"> · 2分钟前</span></div><div class="feed-text">新发布的「春日樱花」系列甲面设计，使用 AI NAILS 生成 + 微调，效果绝美！💅✨</div><div class="feed-actions"><span>❤ 128</span><span>💬 23</span><span onclick="openShareCenter('春日樱花系列',null)">↗ 分享</span></div></div></div>
 <div class="feed-item"><div class="feed-avatar">🦋</div><div class="feed-content"><div class="feed-user">蝶变美甲<span class="feed-time"> · 15分钟前</span></div><div class="feed-text">赛博朋克主题美甲设计挑战！用 OpenClaw + Gemini 2.0 生成的渐变效果超出预期 🔥</div><div class="feed-actions"><span>❤ 256</span><span>💬 47</span><span onclick="openShareCenter('赛博朋克渐变',null)">↗ 分享</span></div></div></div>
@@ -1180,6 +1183,98 @@ html[dir="rtl"] .lang-dropdown {
 <div class="market-item"><div class="market-preview">💅</div><div class="market-info"><div class="market-name">赛博朋克渐变套装</div><div class="market-author">by 蝶变美甲</div></div><div class="market-price">¥29.9</div><button class="btn btn-accent btn-xs">购买</button></div>
 <div class="market-item"><div class="market-preview">🌸</div><div class="market-info"><div class="market-name">春日樱花系列</div><div class="market-author">by 花漾工作室</div></div><div class="market-price">¥19.9</div><button class="btn btn-accent btn-xs">购买</button></div>
 <div class="market-item"><div class="market-preview">🦋</div><div class="market-info"><div class="market-name">蝴蝶梦境 · 限定</div><div class="market-author">by AI NAILS 官方</div></div><div class="market-price">¥39.9</div><button class="btn btn-accent btn-xs">购买</button></div>
+</div>
+
+<!-- OPC 创业赋能 -->
+<div id="comm-opc" class="hidden">
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:20px">
+    <div class="card" style="padding:20px;text-align:center;background:linear-gradient(135deg,rgba(139,92,246,0.08),rgba(99,102,241,0.08))">
+      <div style="font-size:40px;margin-bottom:12px">🚀</div>
+      <h3 style="font-size:15px;margin-bottom:8px">OPC创业扶持计划</h3>
+      <p style="font-size:12px;color:var(--text-secondary);margin-bottom:12px">零门槛启动 · 总部全程陪跑<br>设备租赁 · 技术培训 · 流量扶持</p>
+      <button class="btn btn-accent btn-sm" onclick="applyOPC()">立即申请</button>
+    </div>
+    <div class="card" style="padding:20px;text-align:center;background:linear-gradient(135deg,rgba(34,197,94,0.08),rgba(16,185,129,0.08))">
+      <div style="font-size:40px;margin-bottom:12px">🎨</div>
+      <h3 style="font-size:15px;margin-bottom:8px">独立设计师孵化</h3>
+      <p style="font-size:12px;color:var(--text-secondary);margin-bottom:12px">创意变现 · 版权保护<br>AIGC训练 · 全球分发分成</p>
+      <button class="btn btn-accent btn-sm">加入创作者计划</button>
+    </div>
+    <div class="card" style="padding:20px;text-align:center;background:linear-gradient(135deg,rgba(245,158,11,0.08),rgba(239,68,68,0.08))">
+      <div style="font-size:40px;margin-bottom:12px">🌍</div>
+      <h3 style="font-size:15px;margin-bottom:8px">跨境卖家POD接入</h3>
+      <p style="font-size:12px;color:var(--text-secondary);margin-bottom:12px">一键接入POD供应链<br>全球物流 · 多语言客服 · 自动分润</p>
+      <button class="btn btn-accent btn-sm">开通跨境服务</button>
+    </div>
+  </div>
+  <div class="card" style="margin-bottom:20px">
+    <div class="card-header"><div class="card-title">🏆 OPC共创联盟 · TOP合伙人</div></div>
+    <table><thead><tr><th>排名</th><th>合伙人</th><th>区域</th><th>月均订单</th><th>月均营收</th><th>等级</th></tr></thead>
+      <tbody>
+        <tr><td><span class="rank-badge rank-1">1</span></td><td>花漾美甲工作室</td><td>深圳南山</td><td>1,240单</td><td>¥368,000</td><td><span class="tag tag-accent">钻石</span></td></tr>
+        <tr><td><span class="rank-badge rank-2">2</span></td><td>蝶变美甲连锁</td><td>成都锦江</td><td>986单</td><td>¥285,000</td><td><span class="tag tag-accent">钻石</span></td></tr>
+        <tr><td><span class="rank-badge rank-3">3</span></td><td>BeautyNails_JP</td><td>东京涉谷</td><td>752单</td><td>¥520,000</td><td><span class="tag tag-accent">白金</span></td></tr>
+        <tr><td>4</td><td>星光璀璨NailArt</td><td>上海徐汇</td><td>638单</td><td>¥198,000</td><td><span class="tag tag-info">黄金</span></td></tr>
+        <tr><td>5</td><td>ParisGlamour_FR</td><td>巴黎1区</td><td>520单</td><td>¥420,000</td><td><span class="tag tag-info">黄金</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- POD跨境市场 -->
+<div id="comm-podmarket" class="hidden">
+  <div style="display:grid;grid-template-columns:2fr 1fr;gap:16px">
+    <div class="card">
+      <div class="card-header"><div class="card-title">🌍 全球POD定制采购市场</div></div>
+      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px;padding:16px">
+        <div style="padding:16px;background:var(--bg-tertiary);border-radius:8px">
+          <div style="font-weight:700;margin-bottom:4px;font-size:14px">🇺🇸 赛博朋克渐变套装</div>
+          <div style="font-size:12px;color:var(--text-secondary)">起订量：50套 · ¥35/套</div>
+          <div style="font-size:11px;color:var(--text-tertiary);margin-top:4px">POD工厂：中国深圳 · 交付时效：48h</div>
+          <div style="margin-top:8px"><button class="btn btn-xs btn-accent">询价下单</button></div>
+        </div>
+        <div style="padding:16px;background:var(--bg-tertiary);border-radius:8px">
+          <div style="font-weight:700;margin-bottom:4px;font-size:14px">🇯🇵 和风浮世绘系列</div>
+          <div style="font-size:12px;color:var(--text-secondary)">起订量：100套 · ¥58/套</div>
+          <div style="font-size:11px;color:var(--text-tertiary);margin-top:4px">POD工厂：越南胡志明 · 交付时效：72h</div>
+          <div style="margin-top:8px"><button class="btn btn-xs btn-accent">询价下单</button></div>
+        </div>
+        <div style="padding:16px;background:var(--bg-tertiary);border-radius:8px">
+          <div style="font-weight:700;margin-bottom:4px;font-size:14px">🇫🇷 巴黎时装周联名款</div>
+          <div style="font-size:12px;color:var(--text-secondary)">起订量：200套 · ¥68/套</div>
+          <div style="font-size:11px;color:var(--text-tertiary);margin-top:4px">POD工厂：中国深圳 · 交付时效：48h</div>
+          <div style="margin-top:8px"><button class="btn btn-xs btn-accent">询价下单</button></div>
+        </div>
+        <div style="padding:16px;background:var(--bg-tertiary);border-radius:8px">
+          <div style="font-weight:700;margin-bottom:4px;font-size:14px">🇰🇷 韩式极简美学</div>
+          <div style="font-size:12px;color:var(--text-secondary)">起订量：80套 · ¥42/套</div>
+          <div style="font-size:11px;color:var(--text-tertiary);margin-top:4px">POD工厂：中国深圳 · 交付时效：36h</div>
+          <div style="margin-top:8px"><button class="btn btn-xs btn-accent">询价下单</button></div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header"><div class="card-title">📊 POD平台数据</div></div>
+      <div style="padding:16px">
+        <div style="margin-bottom:12px;padding:8px;background:var(--bg-tertiary);border-radius:6px">
+          <div style="font-size:12px;color:var(--text-secondary)">全球已注册卖家</div>
+          <div style="font-size:24px;font-weight:700;color:var(--accent)">3,286</div>
+        </div>
+        <div style="margin-bottom:12px;padding:8px;background:var(--bg-tertiary);border-radius:6px">
+          <div style="font-size:12px;color:var(--text-secondary)">月均POD订单量</div>
+          <div style="font-size:24px;font-weight:700;color:var(--accent)">8,520单</div>
+        </div>
+        <div style="margin-bottom:12px;padding:8px;background:var(--bg-tertiary);border-radius:6px">
+          <div style="font-size:12px;color:var(--text-secondary)">月均交易额</div>
+          <div style="font-size:24px;font-weight:700;color:var(--accent)">¥420万</div>
+        </div>
+        <div style="padding:8px;background:var(--bg-tertiary);border-radius:6px">
+          <div style="font-size:12px;color:var(--text-secondary)">覆盖国家/地区</div>
+          <div style="font-size:24px;font-weight:700;color:var(--accent)">38</div>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 <div id="comm-leaderboard" class="hidden">
 <table class="leaderboard-table"><thead><tr><th>#</th><th>创作者</th><th>作品数</th><th>获赞</th><th>销量</th></tr></thead><tbody>
@@ -1614,9 +1709,13 @@ html[dir="rtl"] .lang-dropdown {
 <div class="provider-grid">
 <div class="provider-card active-provider" id="provider-openai" onclick="setDefaultProvider('openai')">
 <div class="provider-badge badge-default">默认</div>
-<div class="provider-header"><span class="provider-icon">🧠</span><div><div class="provider-name">OpenAI</div><div class="provider-model">GPT-4o · GPT-4o-mini · o1</div></div></div>
+<div class="provider-header"><span class="provider-icon">🧠</span><div><div class="provider-name">OpenAI</div><div class="provider-model">GPT-4o · GPT-4o-mini · o1 · o3-mini</div></div></div>
 <div class="provider-desc">最强大的通用大模型，支持文本/图像/代码多模态理解与生成</div>
-<div class="provider-status"><span class="status-dot status-online"></span>已连接 · API Key: sk-••••••••aB3x</div>
+<div class="provider-status"><span id="openai-status" class="status-dot status-online"></span><span id="openai-status-text">已连接 · 官方API · GPT-4o就绪</span></div>
+<div class="provider-actions" style="margin-top:8px;display:flex;gap:6px">
+<button class="btn btn-xs btn-accent" onclick="event.stopPropagation();openOpenAISettings()">🔑 设置API Key</button>
+<button class="btn btn-xs btn-secondary" onclick="event.stopPropagation();testOpenAIConnection()">🔌 测试连接</button>
+</div>
 </div>
 <div class="provider-card" id="provider-anthropic" onclick="setDefaultProvider('anthropic')">
 <div class="provider-badge badge-recommend">推荐</div>
@@ -1718,60 +1817,501 @@ html[dir="rtl"] .lang-dropdown {
 <!-- PAGE: PRODUCT CENTER -->
 <div class="content-page" id="page-productcenter">
 <div style="margin-bottom:20px">
-  <h2 style="font-size:24px;margin:0 0 8px">💅 产品中心</h2>
-  <p style="color:var(--text-secondary);margin:0">AI 智能美甲机 · 重新定义美甲体验</p>
+  <h2 style="font-size:24px;margin:0 0 8px">💅 产品中心 · AI美甲智能生态系统</h2>
+  <p style="color:var(--text-secondary);margin:0">斯密爱科技 · 重新定义美甲体验 | 无UV健康固化 · 单原子抗菌 · AI百万色智能调色</p>
 </div>
-<div class="card" style="margin-bottom:20px;padding:24px;text-align:center;background:linear-gradient(135deg,var(--bg-secondary),var(--bg-tertiary));border:2px solid var(--accent)">
-  <div style="font-size:80px;margin-bottom:16px">💅✨</div>
-  <h3 style="font-size:20px;margin:0 0 8px">AI NAILS 智能美甲打印机</h3>
-  <p style="color:var(--text-secondary);margin:0 0 8px">一键 AI 生成 · 精准打印 · 30秒完成美甲</p>
-  <div style="display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin-top:8px">
-    <span class="tag tag-success">AI 设计引擎</span>
-    <span class="tag tag-accent">高精度打印</span>
-    <span class="tag tag-warning">FDA 认证墨水</span>
-    <span class="tag tag-info">10万+ 图案库</span>
+
+<!-- 五大技术壁垒 -->
+<div class="card" style="margin-bottom:20px;padding:20px;background:linear-gradient(135deg,rgba(139,92,246,0.08),rgba(59,130,246,0.08));border:1px solid rgba(139,92,246,0.3)">
+  <div class="card-header" style="border:none;padding:0 0 16px;margin:0"><div class="card-title">🔬 五大核心技术壁垒</div></div>
+  <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px">
+    <div style="text-align:center;padding:16px;background:rgba(255,255,255,0.03);border-radius:12px">
+      <div style="font-size:32px;margin-bottom:8px">☀️</div>
+      <div style="font-weight:700;font-size:13px;margin-bottom:4px">无UV健康光学固化体系</div>
+      <div style="font-size:11px;color:var(--text-tertiary)">全球唯一可见光固化<br>零紫外线伤害</div>
+    </div>
+    <div style="text-align:center;padding:16px;background:rgba(255,255,255,0.03);border-radius:12px">
+      <div style="font-size:32px;margin-bottom:8px">🛡️</div>
+      <div style="font-weight:700;font-size:13px;margin-bottom:4px">单原子抗菌+生物基材料</div>
+      <div style="font-size:11px;color:var(--text-tertiary)">99.9%抗菌率<br>植物矿物基材料</div>
+    </div>
+    <div style="text-align:center;padding:16px;background:rgba(255,255,255,0.03);border-radius:12px">
+      <div style="font-size:32px;margin-bottom:8px">🎨</div>
+      <div style="font-weight:700;font-size:13px;margin-bottom:4px">AI百万色智能调色</div>
+      <div style="font-size:11px;color:var(--text-tertiary)">纳米级颜料混合<br>色差 ＜0.5%</div>
+    </div>
+    <div style="text-align:center;padding:16px;background:rgba(255,255,255,0.03);border-radius:12px">
+      <div style="font-size:32px;margin-bottom:8px">🤖</div>
+      <div style="font-weight:700;font-size:13px;margin-bottom:4px">AIGC创意设计大模型</div>
+      <div style="font-size:11px;color:var(--text-tertiary)">10万+专属训练集<br>风格迁移引擎</div>
+    </div>
+    <div style="text-align:center;padding:16px;background:rgba(255,255,255,0.03);border-radius:12px">
+      <div style="font-size:32px;margin-bottom:8px">🏪</div>
+      <div style="font-weight:700;font-size:13px;margin-bottom:4px">「未来创造家」全链路POD</div>
+      <div style="font-size:11px;color:var(--text-tertiary)">3D穿戴甲24h交付<br>全球跨境定制</div>
+    </div>
   </div>
 </div>
+
+<!-- 硬件矩阵 -->
 <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:20px">
-  <div class="stat-card">
-    <div style="font-size:32px;margin-bottom:4px">30s</div>
-    <div class="stat-label">单指打印速度</div>
-    <div style="font-size:11px;color:var(--text-tertiary);margin-top:4px">从设计到打印一气呵成</div>
+  <div class="card" style="padding:20px;text-align:center;border:2px solid var(--accent)">
+    <div style="font-size:48px;margin-bottom:12px">🖨️</div>
+    <h3 style="font-size:16px;margin:0 0 8px">3D穿戴甲打印主机</h3>
+    <p style="font-size:12px;color:var(--text-secondary);margin:0 0 12px">1200 DPI · 30s/指 · 五轴联动<br>100万次无故障运行寿命</p>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:center">
+      <span class="tag tag-accent">旗舰版 ¥29800</span>
+      <span class="tag tag-info">标准版 ¥19800</span>
+    </div>
   </div>
-  <div class="stat-card">
-    <div style="font-size:32px;margin-bottom:4px">1200 DPI</div>
-    <div class="stat-label">打印精度</div>
-    <div style="font-size:11px;color:var(--text-tertiary);margin-top:4px">超高清图案还原</div>
+  <div class="card" style="padding:20px;text-align:center;border:1px solid var(--accent)">
+    <div style="font-size:48px;margin-bottom:12px">💡</div>
+    <h3 style="font-size:16px;margin:0 0 8px">可见光健康固化灯</h3>
+    <p style="font-size:12px;color:var(--text-secondary);margin:0 0 12px">无UV辐射 · 20s速固<br>全球独家可见光波段固化技术</p>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:center">
+      <span class="tag tag-success">¥2980</span>
+    </div>
   </div>
-  <div class="stat-card">
-    <div style="font-size:32px;margin-bottom:4px">100+</div>
-    <div class="stat-label">已装机门店</div>
-    <div style="font-size:11px;color:var(--text-tertiary);margin-top:4px">覆盖全国30+城市</div>
+  <div class="card" style="padding:20px;text-align:center;border:1px solid var(--accent)">
+    <div style="font-size:48px;margin-bottom:12px">📐</div>
+    <h3 style="font-size:16px;margin:0 0 8px">高精度AI指扫扫描仪</h3>
+    <p style="font-size:12px;color:var(--text-secondary);margin:0 0 12px">0.01mm精度 · 3D建模<br>自动识别甲型弧度尺寸</p>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:center">
+      <span class="tag tag-warning">¥12800</span>
+    </div>
   </div>
 </div>
-<div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:20px">
-  <button class="btn btn-accent btn-lg" onclick="window.open('https://ainailsprinter.lovable.app','_blank')" style="flex:1;min-width:200px;padding:16px 24px;font-size:15px">🌐 访问产品官网</button>
-  <button class="btn btn-primary btn-lg" onclick="window.open('https://github.com/simieye/ainailsprinters/releases/tag/v4.2.1','_blank')" style="flex:1;min-width:200px;padding:16px 24px;font-size:15px">📦 GitHub Release</button>
-  <button class="btn btn-secondary btn-lg" onclick="window.open('https://github.com/simieye/ainailsprinters/releases/download/v4.2.1/AI.NAILS-4.2.0-arm64.dmg','_blank')" style="flex:1;min-width:200px;padding:16px 24px;font-size:15px">⬇️ 直接下载 DMG</button>
+
+<!-- 四层收益模型 -->
+<div class="card" style="margin-bottom:20px;padding:20px">
+  <div class="card-header" style="border:none;padding:0 0 16px;margin:0"><div class="card-title">💰 四层收益模型</div></div>
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px">
+    <div style="text-align:center;padding:12px;background:var(--bg-tertiary);border-radius:8px">
+      <div style="font-size:28px;margin-bottom:6px">🖨️</div>
+      <div style="font-weight:700;font-size:14px">智能硬件销售</div>
+      <div style="font-size:12px;color:var(--text-tertiary);margin-top:4px">3D穿戴甲打印主机<br>可见光固化灯+扫描仪</div>
+    </div>
+    <div style="text-align:center;padding:12px;background:var(--bg-tertiary);border-radius:8px">
+      <div style="font-size:28px;margin-bottom:6px">🌿</div>
+      <div style="font-weight:700;font-size:14px">生物基耗材复购</div>
+      <div style="font-size:12px;color:var(--text-tertiary);margin-top:4px">抗菌基材+光固化墨水<br>月均复购率 65%</div>
+    </div>
+    <div style="text-align:center;padding:12px;background:var(--bg-tertiary);border-radius:8px">
+      <div style="font-size:28px;margin-bottom:6px">🎨</div>
+      <div style="font-weight:700;font-size:14px">AIGC创意库订阅</div>
+      <div style="font-size:12px;color:var(--text-tertiary);margin-top:4px">10万+设计模板<br>月付/年付订阅制</div>
+    </div>
+    <div style="text-align:center;padding:12px;background:var(--bg-tertiary);border-radius:8px">
+      <div style="font-size:28px;margin-bottom:6px">🌍</div>
+      <div style="font-weight:700;font-size:14px">全球POD定制服务</div>
+      <div style="font-size:12px;color:var(--text-tertiary);margin-top:4px">跨境24h交付<br>按件分润模式</div>
+    </div>
+  </div>
 </div>
+
+<!-- 产品亮点 -->
 <div class="card" style="margin-bottom:16px">
   <div class="card-header"><div class="card-title">📸 产品亮点</div></div>
   <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px;padding:16px">
     <div style="padding:16px;background:var(--bg-tertiary);border-radius:var(--radius-sm)">
       <div style="font-size:24px;margin-bottom:8px">🤖 AI 智能设计</div>
-      <p style="font-size:13px;color:var(--text-secondary);margin:0">输入描述或上传参考图，AI 自动生成专属美甲图案，支持风格迁移和定制化设计</p>
+      <p style="font-size:13px;color:var(--text-secondary);margin:0">AIGC创意设计大模型，输入描述或上传参考图，AI自动生成专属美甲图案，支持风格迁移和定制化设计</p>
     </div>
     <div style="padding:16px;background:var(--bg-tertiary);border-radius:var(--radius-sm)">
-      <div style="font-size:24px;margin-bottom:8px">🖨️ 精准打印</div>
-      <p style="font-size:13px;color:var(--text-secondary);margin:0">1200 DPI 高精度打印头，色彩还原度达 98%，FDA 认证环保墨水</p>
+      <div style="font-size:24px;margin-bottom:8px">🖨️ 3D精准打印</div>
+      <p style="font-size:13px;color:var(--text-secondary);margin:0">1200 DPI高精度打印头，色彩还原度达98%，FDA认证环保墨水，0.01mm纳米级颜料混合</p>
     </div>
     <div style="padding:16px;background:var(--bg-tertiary);border-radius:var(--radius-sm)">
-      <div style="font-size:24px;margin-bottom:8px">📱 远程管理</div>
-      <p style="font-size:13px;color:var(--text-secondary);margin:0">App/Web 远程控制，实时查看打印进度，批量管理门店设备</p>
+      <div style="font-size:24px;margin-bottom:8px">☀️ 无UV健康固化</div>
+      <p style="font-size:13px;color:var(--text-secondary);margin:0">全球独家可见光固化技术，零紫外线伤害，20秒快速固化，通过REACH/FDA国际认证</p>
     </div>
     <div style="padding:16px;background:var(--bg-tertiary);border-radius:var(--radius-sm)">
-      <div style="font-size:24px;margin-bottom:8px">🔄 云端同步</div>
-      <p style="font-size:13px;color:var(--text-secondary);margin:0">设计作品云端保存，多设备同步，品牌连锁统一管理图案库</p>
+      <div style="font-size:24px;margin-bottom:8px">🛡️ 抗菌生物基材料</div>
+      <p style="font-size:13px;color:var(--text-secondary);margin:0">单原子抗菌体系99.9%抑菌率，植物矿物生物基材料，可生物降解，环保健康</p>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- PAGE: AI数字门店 — 全链路POD系统 -->
+<div class="content-page" id="page-digitalstore">
+<div style="margin-bottom:20px">
+  <h2 style="font-size:24px;margin:0 0 8px">🏪 AI数字门店 · 「未来创造家」全链路POD系统</h2>
+  <p style="color:var(--text-secondary);margin:0">智能建模 → AI智造 → 全链路闭环 · 3D穿戴甲24h交付 · 全球跨境定制</p>
+</div>
+
+<!-- 门店运营概览 -->
+<div class="stat-grid" style="margin-bottom:20px">
+  <div class="stat-card"><div class="stat-label">今日订单</div><div class="stat-value">1,284</div><div class="stat-change up">▲ 18%</div></div>
+  <div class="stat-card"><div class="stat-label">活跃设备</div><div class="stat-value">86台</div><div class="stat-change up">▲ 5台</div></div>
+  <div class="stat-card"><div class="stat-label">日均打印量</div><div class="stat-value">3,852指</div><div class="stat-change up">▲ 12%</div></div>
+  <div class="stat-card"><div class="stat-label">耗材库存充足率</div><div class="stat-value">92%</div><div class="stat-change down">▼ 3%</div></div>
+</div>
+
+<!-- 六步产业闭环 -->
+<div class="card" style="margin-bottom:20px;padding:20px;background:linear-gradient(135deg,rgba(34,197,94,0.06),rgba(59,130,246,0.06))">
+  <div class="card-header" style="border:none;padding:0 0 16px;margin:0"><div class="card-title">🔄 全链路POD六步闭环流程</div></div>
+  <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:8px;text-align:center">
+    <div style="padding:12px 8px;background:rgba(59,130,246,0.1);border-radius:10px;position:relative">
+      <div style="font-size:28px;margin-bottom:6px">📐</div>
+      <div style="font-weight:700;font-size:12px;margin-bottom:4px">1. 智能建模</div>
+      <div style="font-size:10px;color:var(--text-tertiary)">AI指扫采集<br>3D甲型建模</div>
+    </div>
+    <div style="padding:12px 8px;background:rgba(34,197,94,0.1);border-radius:10px">
+      <div style="font-size:28px;margin-bottom:6px">🤖</div>
+      <div style="font-weight:700;font-size:12px;margin-bottom:4px">2. AIGC创意</div>
+      <div style="font-size:10px;color:var(--text-tertiary)">AI设计生成<br>百万色调色</div>
+    </div>
+    <div style="padding:12px 8px;background:rgba(139,92,246,0.1);border-radius:10px">
+      <div style="font-size:28px;margin-bottom:6px">🖨️</div>
+      <div style="font-weight:700;font-size:12px;margin-bottom:4px">3. AI智造</div>
+      <div style="font-size:10px;color:var(--text-tertiary)">3D精准打印<br>健康固化</div>
+    </div>
+    <div style="padding:12px 8px;background:rgba(245,158,11,0.1);border-radius:10px">
+      <div style="font-size:28px;margin-bottom:6px">🔍</div>
+      <div style="font-weight:700;font-size:12px;margin-bottom:4px">4. 视觉质检</div>
+      <div style="font-size:10px;color:var(--text-tertiary)">AI自动检测<br>质量追溯</div>
+    </div>
+    <div style="padding:12px 8px;background:rgba(239,68,68,0.1);border-radius:10px">
+      <div style="font-size:28px;margin-bottom:6px">📦</div>
+      <div style="font-weight:700;font-size:12px;margin-bottom:4px">5. 包装交付</div>
+      <div style="font-size:10px;color:var(--text-tertiary)">智能分拣<br>跨境物流</div>
+    </div>
+    <div style="padding:12px 8px;background:rgba(16,185,129,0.1);border-radius:10px">
+      <div style="font-size:28px;margin-bottom:6px">📊</div>
+      <div style="font-weight:700;font-size:12px;margin-bottom:4px">6. 复购闭环</div>
+      <div style="font-size:10px;color:var(--text-tertiary)">数据分析<br>推荐上新</div>
+    </div>
+  </div>
+</div>
+
+<!-- POD 任务管理 -->
+<div style="display:grid;grid-template-columns:2fr 1fr;gap:16px;margin-bottom:20px">
+  <div class="card">
+    <div class="card-header"><div class="card-title">📋 POD打印任务队列</div>
+    <div style="display:flex;gap:8px"><button class="btn btn-sm btn-accent" onclick="createNewPODOrder()">+ 新建订单</button><button class="btn btn-sm btn-secondary">🔄 刷新</button></div></div>
+    <div style="overflow-x:auto">
+      <table><thead><tr><th>订单号</th><th>客户</th><th>款式</th><th>数量</th><th>状态</th><th>配送</th><th>操作</th></tr></thead>
+      <tbody>
+        <tr><td>#POD-20260726-001</td><td>花漾工作室</td><td>春日樱花·渐变</td><td>50套</td><td><span class="tag tag-info">打印中</span></td><td>顺丰国内</td><td><button class="btn btn-xs btn-accent">详情</button></td></tr>
+        <tr><td>#POD-20260726-002</td><td>BeautyNails_US</td><td>Cyber Punk 2077</td><td>200套</td><td><span class="tag tag-success">质检中</span></td><td>DHL跨境</td><td><button class="btn btn-xs btn-accent">详情</button></td></tr>
+        <tr><td>#POD-20260726-003</td><td>Tokyo Nail Art</td><td>和风水墨·限定</td><td>120套</td><td><span class="tag tag-warning">待打印</span></td><td>EMS国际</td><td><button class="btn btn-xs btn-accent">详情</button></td></tr>
+        <tr><td>#POD-20260726-004</td><td>蝶变美甲连锁</td><td>极简北欧风</td><td>80套</td><td><span class="tag tag-accent">已交付</span></td><td>京东物流</td><td><button class="btn btn-xs btn-secondary">回访</button></td></tr>
+        <tr><td>#POD-20260726-005</td><td>Paris Glamour</td><td>巴黎时装周联名</td><td>300套</td><td><span class="tag tag-info">建模中</span></td><td>FedEx优先</td><td><button class="btn btn-xs btn-accent">详情</button></td></tr>
+      </tbody></table>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-header"><div class="card-title">🏭 产线实时状态</div></div>
+    <div style="padding:16px">
+      <div style="margin-bottom:16px">
+        <div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="font-size:13px">🖨️ 产线A - 中国深圳</span><span style="color:var(--accent);font-size:13px">运转中</span></div>
+        <div style="height:6px;background:var(--bg-tertiary);border-radius:3px"><div style="height:100%;width:85%;background:var(--accent);border-radius:3px"></div></div>
+        <div style="font-size:11px;color:var(--text-tertiary);margin-top:4px">负载 85% · 待打印 42件 · 预计完成 14:30</div>
+      </div>
+      <div style="margin-bottom:16px">
+        <div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="font-size:13px">🖨️ 产线B - 中国深圳</span><span style="color:var(--warning);font-size:13px">维护中</span></div>
+        <div style="height:6px;background:var(--bg-tertiary);border-radius:3px"><div style="height:100%;width:0%;background:var(--warning);border-radius:3px"></div></div>
+        <div style="font-size:11px;color:var(--text-tertiary);margin-top:4px">计划维护 · 预计恢复 15:00</div>
+      </div>
+      <div style="margin-bottom:16px">
+        <div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="font-size:13px">🖨️ 产线C - 越南胡志明</span><span style="color:var(--accent);font-size:13px">运转中</span></div>
+        <div style="height:6px;background:var(--bg-tertiary);border-radius:3px"><div style="height:100%;width:60%;background:var(--accent);border-radius:3px"></div></div>
+        <div style="font-size:11px;color:var(--text-tertiary);margin-top:4px">负载 60% · 待打印 28件 · 预计完成 16:00</div>
+      </div>
+      <div style="font-size:12px;color:var(--text-secondary);padding:8px;background:var(--bg-tertiary);border-radius:6px">📊 今日产出：1,286套穿戴甲 · 良品率 98.2% · 平均交付时效 6.5h</div>
+    </div>
+  </div>
+</div>
+
+<!-- 跨境POD市场 -->
+<div class="card" style="margin-bottom:20px">
+  <div class="card-header"><div class="card-title">🌍 跨境POD定制市场 · 热门区域</div></div>
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;padding:16px">
+    <div style="padding:16px;background:var(--bg-tertiary);border-radius:8px;text-align:center">
+      <div style="font-size:24px;margin-bottom:6px">🇺🇸</div>
+      <div style="font-weight:700;font-size:14px">北美市场</div>
+      <div style="font-size:12px;color:var(--text-tertiary);margin-top:4px">日均订单 386 · 客单价 ¥199</div>
+      <div style="font-size:11px;color:var(--accent);margin-top:4px">🔥 增长趋势 +35%</div>
+    </div>
+    <div style="padding:16px;background:var(--bg-tertiary);border-radius:8px;text-align:center">
+      <div style="font-size:24px;margin-bottom:6px">🇯🇵</div>
+      <div style="font-weight:700;font-size:14px">日本市场</div>
+      <div style="font-size:12px;color:var(--text-tertiary);margin-top:4px">日均订单 254 · 客单价 ¥298</div>
+      <div style="font-size:11px;color:var(--accent);margin-top:4px">🔥 增长趋势 +28%</div>
+    </div>
+    <div style="padding:16px;background:var(--bg-tertiary);border-radius:8px;text-align:center">
+      <div style="font-size:24px;margin-bottom:6px">🇪🇺</div>
+      <div style="font-weight:700;font-size:14px">欧洲市场</div>
+      <div style="font-size:12px;color:var(--text-tertiary);margin-top:4px">日均订单 198 · 客单价 ¥358</div>
+      <div style="font-size:11px;color:var(--accent);margin-top:4px">📈 增长趋势 +22%</div>
+    </div>
+    <div style="padding:16px;background:var(--bg-tertiary);border-radius:8px;text-align:center">
+      <div style="font-size:24px;margin-bottom:6px">🌏</div>
+      <div style="font-weight:700;font-size:14px">东南亚市场</div>
+      <div style="font-size:12px;color:var(--text-tertiary);margin-top:4px">日均订单 142 · 客单价 ¥128</div>
+      <div style="font-size:11px;color:var(--accent);margin-top:4px">🚀 增长趋势 +48%</div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- PAGE: 健康材料中心 -->
+<div class="content-page" id="page-materialcenter">
+<div style="margin-bottom:20px">
+  <h2 style="font-size:24px;margin:0 0 8px">🌿 健康材料中心 · 生物基材料溯源体系</h2>
+  <p style="color:var(--text-secondary);margin:0">单原子抗菌 · 植物矿物生物基 · REACH/FDA国际认证 · 纳米级百万色调色</p>
+</div>
+
+<!-- 材料认证 -->
+<div class="card" style="margin-bottom:20px;padding:20px;background:linear-gradient(135deg,rgba(34,197,94,0.08),rgba(16,185,129,0.08))">
+  <div class="card-header" style="border:none;padding:0 0 16px;margin:0"><div class="card-title">🏆 国际认证体系</div></div>
+  <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px;text-align:center">
+    <div style="padding:12px;background:rgba(255,255,255,0.05);border-radius:10px">
+      <div style="font-size:28px;margin-bottom:6px">🇪🇺</div>
+      <div style="font-weight:700;font-size:13px">REACH</div>
+      <div style="font-size:10px;color:var(--text-tertiary);margin-top:4px">欧盟化学品注册<br>评估授权限制</div>
+    </div>
+    <div style="padding:12px;background:rgba(255,255,255,0.05);border-radius:10px">
+      <div style="font-size:28px;margin-bottom:6px">🇺🇸</div>
+      <div style="font-weight:700;font-size:13px">FDA</div>
+      <div style="font-size:10px;color:var(--text-tertiary);margin-top:4px">美国食品药物<br>安全认证</div>
+    </div>
+    <div style="padding:12px;background:rgba(255,255,255,0.05);border-radius:10px">
+      <div style="font-size:28px;margin-bottom:6px">🌱</div>
+      <div style="font-weight:700;font-size:13px">Bio-Based</div>
+      <div style="font-size:10px;color:var(--text-tertiary);margin-top:4px">生物基材料<br>可生物降解</div>
+    </div>
+    <div style="padding:12px;background:rgba(255,255,255,0.05);border-radius:10px">
+      <div style="font-size:28px;margin-bottom:6px">🛡️</div>
+      <div style="font-weight:700;font-size:13px">ISO 10993</div>
+      <div style="font-size:10px;color:var(--text-tertiary);margin-top:4px">医疗器械生物<br>相容性测试</div>
+    </div>
+    <div style="padding:12px;background:rgba(255,255,255,0.05);border-radius:10px">
+      <div style="font-size:28px;margin-bottom:6px">♻️</div>
+      <div style="font-weight:700;font-size:13px">EPA Safer</div>
+      <div style="font-size:10px;color:var(--text-tertiary);margin-top:4px">美国环保署<br>安全化学品认证</div>
+    </div>
+  </div>
+</div>
+
+<!-- 材料体系 -->
+<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:20px">
+  <div class="card" style="padding:20px">
+    <div style="font-size:36px;margin-bottom:12px;text-align:center">🛡️</div>
+    <h3 style="font-size:15px;margin:0 0 8px;text-align:center">单原子抗菌体系</h3>
+    <div style="font-size:12px;color:var(--text-secondary);line-height:1.6">
+      <div style="margin-bottom:6px">🔬 <b>抗菌率：99.9%</b>（经SGS检测认证）</div>
+      <div style="margin-bottom:6px">⚛️ 单原子银/锌离子缓释技术</div>
+      <div style="margin-bottom:6px">📊 抗菌持久性：24个月长效防护</div>
+      <div>🌿 不添加有机抗菌剂，零刺激性</div>
+    </div>
+  </div>
+  <div class="card" style="padding:20px">
+    <div style="font-size:36px;margin-bottom:12px;text-align:center">🌱</div>
+    <h3 style="font-size:15px;margin:0 0 8px;text-align:center">植物矿物生物基材料</h3>
+    <div style="font-size:12px;color:var(--text-secondary);line-height:1.6">
+      <div style="margin-bottom:6px">🌽 蓖麻油基聚氨酯树脂</div>
+      <div style="margin-bottom:6px">🪨 纳米矿物粉末填料</div>
+      <div style="margin-bottom:6px">🌿 生物基碳含量 ≥60%</div>
+      <div>♻️ 180天自然降解率 ＞85%</div>
+    </div>
+  </div>
+  <div class="card" style="padding:20px">
+    <div style="font-size:36px;margin-bottom:12px;text-align:center">🎨</div>
+    <h3 style="font-size:15px;margin:0 0 8px;text-align:center">AI百万色调色系统</h3>
+    <div style="font-size:12px;color:var(--text-secondary);line-height:1.6">
+      <div style="margin-bottom:6px">🎯 纳米级颜料颗粒 ＜100nm</div>
+      <div style="margin-bottom:6px">🌈 色域覆盖：1,000,000+ 色值</div>
+      <div style="margin-bottom:6px">📐 色差控制：ΔE ≤ 0.5</div>
+      <div>🤖 AI自适应配色算法</div>
+    </div>
+  </div>
+</div>
+
+<!-- 耗材库存管理 -->
+<div class="card" style="margin-bottom:20px">
+  <div class="card-header"><div class="card-title">📦 生物基耗材库存</div></div>
+  <div style="overflow-x:auto">
+    <table><thead><tr><th>材料编号</th><th>材料名称</th><th>类型</th><th>库存量</th><th>安全库存</th><th>状态</th><th>认证</th><th>供应商</th><th>操作</th></tr></thead>
+      <tbody>
+        <tr><td>MAT-001</td><td>生物基透明底胶</td><td>固化材料</td><td>8,500支</td><td>2,000支</td><td><span class="tag tag-success">充足</span></td><td>REACH/FDA</td><td>深圳斯密爱</td><td><button class="btn btn-xs">采购</button></td></tr>
+        <tr><td>MAT-002</td><td>单原子抗菌甲片基材</td><td>基材</td><td>120,000片</td><td>30,000片</td><td><span class="tag tag-success">充足</span></td><td>FDA/ISO</td><td>深圳斯密爱</td><td><button class="btn btn-xs">采购</button></td></tr>
+        <tr><td>MAT-003</td><td>CMYK+W纳米颜料组</td><td>颜料</td><td>3,200组</td><td>1,000组</td><td><span class="tag tag-warning">偏低</span></td><td>REACH</td><td>日本DIC</td><td><button class="btn btn-xs btn-accent">紧急采购</button></td></tr>
+        <tr><td>MAT-004</td><td>可见光固化封层</td><td>固化材料</td><td>6,800支</td><td>1,500支</td><td><span class="tag tag-success">充足</span></td><td>FDA/EPA</td><td>深圳斯密爱</td><td><button class="btn btn-xs">采购</button></td></tr>
+        <tr><td>MAT-005</td><td>生物基彩色色胶套装</td><td>固化材料</td><td>4,200套</td><td>2,000套</td><td><span class="tag tag-info">正常</span></td><td>REACH</td><td>德国CQV</td><td><button class="btn btn-xs">采购</button></td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+</div>
+
+<!-- PAGE: 数据驾驶舱 -->
+<div class="content-page" id="page-datacockpit">
+<div style="margin-bottom:20px">
+  <h2 style="font-size:24px;margin:0 0 8px">📊 数据驾驶舱 · 商业智能BI</h2>
+  <p style="color:var(--text-secondary);margin:0">三年财务预测 · 四层收益模型 · 实时经营仪表盘 · 战略决策支持</p>
+</div>
+
+<!-- 核心财务指标 -->
+<div class="stat-grid" style="margin-bottom:20px">
+  <div class="stat-card"><div class="stat-label">年化营收 (RRR)</div><div class="stat-value">¥1,500万</div><div class="stat-change up">▲ 目标本年5000万</div></div>
+  <div class="stat-card"><div class="stat-label">设备出货量</div><div class="stat-value">186台</div><div class="stat-change up">▲ 本月+24台</div></div>
+  <div class="stat-card"><div class="stat-label">耗材复购率</div><div class="stat-value">65%</div><div class="stat-change up">▲ 环比+5%</div></div>
+  <div class="stat-card"><div class="stat-label">全球门店数</div><div class="stat-value">128家</div><div class="stat-change up">▲ 3国市场</div></div>
+  <div class="stat-card"><div class="stat-label">AIGC创意库订阅</div><div class="stat-value">3,200</div><div class="stat-change up">▲ 月增+280</div></div>
+</div>
+
+<!-- 三年财务预测 -->
+<div class="card" style="margin-bottom:20px;padding:20px">
+  <div class="card-header" style="border:none;padding:0 0 16px;margin:0"><div class="card-title">📈 三年财务预测（单位：万元）</div></div>
+  <div class="chart-container" style="overflow-x:auto">
+    <table style="width:100%">
+      <thead>
+        <tr style="background:var(--bg-tertiary)">
+          <th style="text-align:left;padding:12px">收益层级</th>
+          <th style="text-align:right;padding:12px">Year 1</th>
+          <th style="text-align:right;padding:12px">Year 2</th>
+          <th style="text-align:right;padding:12px">Year 3</th>
+          <th style="text-align:right;padding:12px">复合增长率</th>
+          <th style="text-align:right;padding:12px">占比趋势</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="padding:12px">🖨️ 智能硬件销售</td>
+          <td style="text-align:right;padding:12px;font-weight:700">2,500</td>
+          <td style="text-align:right;padding:12px">3,200</td>
+          <td style="text-align:right;padding:12px">4,500</td>
+          <td style="text-align:right;padding:12px;color:var(--accent)">34.2%</td>
+          <td style="text-align:right;padding:12px">50%→30%</td>
+        </tr>
+        <tr>
+          <td style="padding:12px">🌿 生物基耗材复购</td>
+          <td style="text-align:right;padding:12px;font-weight:700">1,200</td>
+          <td style="text-align:right;padding:12px">2,400</td>
+          <td style="text-align:right;padding:12px">4,500</td>
+          <td style="text-align:right;padding:12px;color:var(--accent)">93.6%</td>
+          <td style="text-align:right;padding:12px">24%→30%</td>
+        </tr>
+        <tr>
+          <td style="padding:12px">🎨 AIGC创意库订阅</td>
+          <td style="text-align:right;padding:12px;font-weight:700">800</td>
+          <td style="text-align:right;padding:12px">1,500</td>
+          <td style="text-align:right;padding:12px">3,000</td>
+          <td style="text-align:right;padding:12px;color:var(--accent)">93.6%</td>
+          <td style="text-align:right;padding:12px">16%→20%</td>
+        </tr>
+        <tr>
+          <td style="padding:12px">🌍 全球POD定制服务</td>
+          <td style="text-align:right;padding:12px;font-weight:700">500</td>
+          <td style="text-align:right;padding:12px">1,400</td>
+          <td style="text-align:right;padding:12px">3,000</td>
+          <td style="text-align:right;padding:12px;color:var(--accent)">144.9%</td>
+          <td style="text-align:right;padding:12px">10%→20%</td>
+        </tr>
+        <tr style="background:rgba(59,130,246,0.1);font-weight:700">
+          <td style="padding:12px">💰 合计总收入</td>
+          <td style="text-align:right;padding:12px;font-size:16px;color:var(--accent)">5,000</td>
+          <td style="text-align:right;padding:12px;font-size:16px;color:var(--accent)">8,500</td>
+          <td style="text-align:right;padding:12px;font-size:16px;color:var(--accent)">15,000</td>
+          <td style="text-align:right;padding:12px;color:var(--accent)">73.2%</td>
+          <td style="text-align:right;padding:12px">100%</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- 收入来源占比 -->
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px">
+  <div class="card" style="padding:20px">
+    <div class="card-header" style="border:none;padding:0 0 16px;margin:0"><div class="card-title">🎯 三年目标里程碑</div></div>
+    <div style="padding:8px 0">
+      <div style="margin-bottom:16px">
+        <div style="display:flex;justify-content:space-between;margin-bottom:6px"><span>Year 1: 国内深耕</span><span style="color:var(--accent)">5000万</span></div>
+        <div style="height:8px;background:var(--bg-tertiary);border-radius:4px"><div style="height:100%;width:33%;background:linear-gradient(90deg,var(--accent),var(--success));border-radius:4px"></div></div>
+        <div style="font-size:11px;color:var(--text-tertiary);margin-top:4px">100+门店 · 200台设备 · 国内市场占有率25%</div>
+      </div>
+      <div style="margin-bottom:16px">
+        <div style="display:flex;justify-content:space-between;margin-bottom:6px"><span>Year 2: 海外筹备</span><span style="color:var(--accent)">8500万</span></div>
+        <div style="height:8px;background:var(--bg-tertiary);border-radius:4px"><div style="height:100%;width:57%;background:linear-gradient(90deg,var(--accent),var(--warning));border-radius:4px"></div></div>
+        <div style="font-size:11px;color:var(--text-tertiary);margin-top:4px">300+门店 · 500台设备 · 进入日韩+东南亚市场</div>
+      </div>
+      <div>
+        <div style="display:flex;justify-content:space-between;margin-bottom:6px"><span>Year 3: 全球扩张</span><span style="color:var(--accent)">1.5亿</span></div>
+        <div style="height:8px;background:var(--bg-tertiary);border-radius:4px"><div style="height:100%;width:100%;background:linear-gradient(90deg,var(--accent),var(--danger));border-radius:4px"></div></div>
+        <div style="font-size:11px;color:var(--text-tertiary);margin-top:4px">800+门店 · 1500台设备 · 覆盖全球10+国家</div>
+      </div>
+    </div>
+  </div>
+  <div class="card" style="padding:20px">
+    <div class="card-header" style="border:none;padding:0 0 16px;margin:0"><div class="card-title">🏢 客户结构分析</div></div>
+    <div style="padding:8px">
+      <div style="display:flex;align-items:center;margin-bottom:12px;gap:12px">
+        <div style="width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,var(--accent),#2563eb);display:flex;align-items:center;justify-content:center;font-size:20px">🏢</div>
+        <div style="flex:1">
+          <div style="font-weight:700;font-size:14px">B端连锁美甲机构</div>
+          <div style="font-size:12px;color:var(--text-tertiary)">128家门店 · 占总营收 55%</div>
+        </div>
+        <div style="color:var(--accent);font-weight:700">¥2,750万</div>
+      </div>
+      <div style="display:flex;align-items:center;margin-bottom:12px;gap:12px">
+        <div style="width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,#8b5cf6,#6366f1);display:flex;align-items:center;justify-content:center;font-size:20px">🌍</div>
+        <div style="flex:1">
+          <div style="font-weight:700;font-size:14px">小B/OPC跨境卖家</div>
+          <div style="font-size:12px;color:var(--text-tertiary)">86家合作 · 占总营收 25%</div>
+        </div>
+        <div style="color:#8b5cf6;font-weight:700">¥1,250万</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px">
+        <div style="width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,#f59e0b,#ef4444);display:flex;align-items:center;justify-content:center;font-size:20px">👤</div>
+        <div style="flex:1">
+          <div style="font-weight:700;font-size:14px">C端Z世代消费者</div>
+          <div style="font-size:12px;color:var(--text-tertiary)">3,200名订阅 · 占总营收 20%</div>
+        </div>
+        <div style="color:#f59e0b;font-weight:700">¥1,000万</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 战略路线图 -->
+<div class="card" style="margin-bottom:20px;padding:20px">
+  <div class="card-header" style="border:none;padding:0 0 16px;margin:0"><div class="card-title">🗺️ 三步市场战略 · 三年全球化路线图</div></div>
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px">
+    <div style="padding:16px;background:var(--bg-tertiary);border-radius:10px;border-top:3px solid var(--accent)">
+      <div style="font-size:14px;font-weight:700;margin-bottom:8px">📅 Phase 1 · 0-12月</div>
+      <div style="font-size:16px;color:var(--accent);font-weight:700;margin-bottom:8px">国内深耕</div>
+      <div style="font-size:12px;color:var(--text-secondary);line-height:1.6">
+        <div>✓ 100+家门店装机</div>
+        <div>✓ 200台设备出货</div>
+        <div>✓ 国内市场占有率25%</div>
+        <div>✓ 锁定5省B端渠道</div>
+        <div>✓ 建立耗材复购体系</div>
+      </div>
+    </div>
+    <div style="padding:16px;background:var(--bg-tertiary);border-radius:10px;border-top:3px solid #8b5cf6">
+      <div style="font-size:14px;font-weight:700;margin-bottom:8px">📅 Phase 2 · 12-24月</div>
+      <div style="font-size:16px;color:#8b5cf6;font-weight:700;margin-bottom:8px">海外筹备</div>
+      <div style="font-size:12px;color:var(--text-secondary);line-height:1.6">
+        <div>✓ 获取REACH/FDA认证</div>
+        <div>✓ 布局东南亚生产基地</div>
+        <div>✓ 跨境电商基础设施</div>
+        <div>✓ 日韩市场准入</div>
+        <div>✓ 500台设备出海</div>
+      </div>
+    </div>
+    <div style="padding:16px;background:var(--bg-tertiary);border-radius:10px;border-top:3px solid #f59e0b">
+      <div style="font-size:14px;font-weight:700;margin-bottom:8px">📅 Phase 3 · 24-36月</div>
+      <div style="font-size:16px;color:#f59e0b;font-weight:700;margin-bottom:8px">全球扩张</div>
+      <div style="font-size:12px;color:var(--text-secondary);line-height:1.6">
+        <div>✓ 10+国家市场覆盖</div>
+        <div>✓ 1500台全球装机</div>
+        <div>✓ 欧洲/北美直营中心</div>
+        <div>✓ 800+家合作门店</div>
+        <div>✓ IPO/战略退出准备</div>
+      </div>
     </div>
   </div>
 </div>
@@ -1797,6 +2337,7 @@ html[dir="rtl"] .lang-dropdown {
   <button class="admin-tab" onclick="switchAdminTab('logistics',this)" style="padding:10px 20px;border:none;background:none;cursor:pointer;font-size:14px;color:var(--text-secondary);white-space:nowrap">🚚 物流管理</button>
   <button class="admin-tab" onclick="switchAdminTab('inventory',this)" style="padding:10px 20px;border:none;background:none;cursor:pointer;font-size:14px;color:var(--text-secondary);white-space:nowrap">📊 库存管理</button>
   <button class="admin-tab" onclick="switchAdminTab('production',this)" style="padding:10px 20px;border:none;background:none;cursor:pointer;font-size:14px;color:var(--text-secondary);white-space:nowrap">🏭 生产管理</button>
+  <button class="admin-tab" onclick="switchAdminTab('quality',this)" style="padding:10px 20px;border:none;background:none;cursor:pointer;font-size:14px;color:var(--text-secondary);white-space:nowrap">🔍 质检追溯</button>
 </div>
 
 <!-- ===== 客户管理面板 ===== -->
@@ -2742,6 +3283,70 @@ html[dir="rtl"] .lang-dropdown {
 </div>
 </div>
 
+<!-- ===== 质检追溯面板 ===== -->
+<div id="admin-quality-panel" style="display:none">
+  <div class="stat-grid" style="margin-bottom:16px">
+    <div class="stat-card"><div class="stat-label">今日质检批次</div><div class="stat-value">86</div><div style="font-size:11px;color:var(--accent)">良品率 98.2%</div></div>
+    <div class="stat-card"><div class="stat-label">不合格数量</div><div class="stat-value">3</div><div style="font-size:11px;color:var(--danger)">待处理</div></div>
+    <div class="stat-card"><div class="stat-label">返工率</div><div class="stat-value">1.8%</div><div style="font-size:11px;color:var(--warning)">目标 ＜2%</div></div>
+    <div class="stat-card"><div class="stat-label">本月合格率</div><div class="stat-value">98.5%</div><div class="stat-change up">▲ 0.3%</div></div>
+  </div>
+  <div class="card" style="margin-bottom:16px">
+    <div class="card-header"><div class="card-title">🔍 质量检测记录</div>
+    <div style="display:flex;gap:8px"><button class="btn btn-sm btn-accent">+ 新增质检</button><button class="btn btn-sm btn-secondary">📋 导出报告</button></div></div>
+    <div style="overflow-x:auto">
+      <table><thead><tr><th>质检编号</th><th>工单号</th><th>产品名称</th><th>批次数量</th><th>不合格数</th><th>检测员</th><th>结果</th><th>时间</th><th>操作</th></tr></thead>
+        <tbody>
+          <tr><td>QC-20260726-001</td><td>#WO-086</td><td>春日樱花·渐变</td><td>50套</td><td>0</td><td>张工</td><td><span class="tag tag-success">合格</span></td><td>10:30</td><td><button class="btn btn-xs btn-accent">详情</button></td></tr>
+          <tr><td>QC-20260726-002</td><td>#WO-087</td><td>CyberPunk 2070</td><td>200套</td><td>1</td><td>李工</td><td><span class="tag tag-warning">返工</span></td><td>11:15</td><td><button class="btn btn-xs btn-accent">详情</button></td></tr>
+          <tr><td>QC-20260726-003</td><td>#WO-088</td><td>极简北欧风</td><td>80套</td><td>0</td><td>王工</td><td><span class="tag tag-success">合格</span></td><td>13:45</td><td><button class="btn btn-xs btn-accent">详情</button></td></tr>
+          <tr><td>QC-20260726-004</td><td>#WO-089</td><td>和风水墨·限定</td><td>120套</td><td>2</td><td>张工</td><td><span class="tag tag-danger">不合格</span></td><td>14:20</td><td><button class="btn btn-xs btn-accent">详情</button></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+    <div class="card">
+      <div class="card-header"><div class="card-title">📋 质量追溯体系</div></div>
+      <div style="padding:16px">
+        <div style="margin-bottom:12px">
+          <div style="font-size:13px;font-weight:600;margin-bottom:6px">🔗 材料溯源</div>
+          <div style="font-size:12px;color:var(--text-secondary)">
+            <div>✓ 原材料批次号 → 供应商 → 入库时间 → 质检证书</div>
+            <div>✓ REACH/FDA/ISO 认证自动核验</div>
+            <div>✓ 耗材有效期预警（提前30天）</div>
+          </div>
+        </div>
+        <div>
+          <div style="font-size:13px;font-weight:600;margin-bottom:6px">📦 工单溯源</div>
+          <div style="font-size:12px;color:var(--text-secondary)">
+            <div>✓ 建模 → 打印 → 固化 → 质检 → 包装 → 物流</div>
+            <div>✓ 全流程操作人员 + 时间戳记录</div>
+            <div>✓ 问题工单自动回溯根因分析</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header"><div class="card-title">⚠ 质量预警</div></div>
+      <div style="padding:16px">
+        <div style="padding:8px;background:rgba(239,68,68,0.08);border-radius:6px;margin-bottom:8px;border-left:3px solid var(--danger)">
+          <div style="font-size:13px;font-weight:600">🔴 耗材 MAT-003 颜料库存偏低</div>
+          <div style="font-size:11px;color:var(--text-tertiary);margin-top:4px">当前3,200组 · 安全库存1,000组 · 建议48h内补货</div>
+        </div>
+        <div style="padding:8px;background:rgba(245,158,11,0.08);border-radius:6px;margin-bottom:8px;border-left:3px solid var(--warning)">
+          <div style="font-size:13px;font-weight:600">🟡 产线B计划维护中</div>
+          <div style="font-size:11px;color:var(--text-tertiary);margin-top:4px">预计15:00恢复 · 已调度产线A+C分担负载</div>
+        </div>
+        <div style="padding:8px;background:rgba(239,68,68,0.08);border-radius:6px;border-left:3px solid var(--danger)">
+          <div style="font-size:13px;font-weight:600">🔴 #WO-089 和风水墨批次2件不合格</div>
+          <div style="font-size:11px;color:var(--text-tertiary);margin-top:4px">原因：纳米颜料色差超标 · 已启动根因追溯</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- PAGE: SETTINGS -->
 <div class="content-page" id="page-settings">
 <div class="settings-section"><h3>账户设置</h3>
@@ -2824,6 +3429,21 @@ html[dir="rtl"] .lang-dropdown {
 <option value="qwen/qwen-max">Qwen-Max (Alibaba)</option>
 </select></div>
 <div class="modal-actions"><button class="btn btn-secondary btn-sm" onclick="closeOpenRouterSettings()">取消</button><button class="btn btn-primary btn-sm" onclick="saveOpenRouterSettings()">💾 保存配置</button></div>
+</div></div>
+
+<!-- OPENAI API KEY MODAL -->
+<div class="modal-overlay hidden" id="openai-modal"><div class="modal" style="width:480px">
+<h3>🧠 OpenAI API 配置</h3>
+<p style="font-size:12px;color:var(--text-secondary);margin-bottom:16px">OpenAI 官方 API，支持 GPT-4o/GPT-4o-mini/o1/o3-mini 等顶级模型。获取 API Key: <a href="https://platform.openai.com/api-keys" target="_blank" style="color:var(--accent)">OpenAI Keys</a></p>
+<div class="form-group"><label>API Key</label><div class="input-row"><input class="form-input" id="openai-api-key" type="password" placeholder="sk-proj-..."><button class="btn btn-secondary btn-sm" onclick="togglePassword('openai-api-key')" style="white-space:nowrap">👁</button></div></div>
+<div class="form-group"><label>默认模型</label><select class="form-input" id="openai-model-select" style="width:100%">
+<option value="gpt-4o">GPT-4o (多模态)</option>
+<option value="gpt-4o-mini">GPT-4o-mini (轻量)</option>
+<option value="o1">o1 (深度推理)</option>
+<option value="o3-mini">o3-mini (高效推理)</option>
+<option value="gpt-4-turbo">GPT-4 Turbo</option>
+</select></div>
+<div class="modal-actions"><button class="btn btn-secondary btn-sm" onclick="closeOpenAISettings()">取消</button><button class="btn btn-primary btn-sm" onclick="saveOpenAISettings()">💾 保存配置</button></div>
 </div></div>
 
 <!-- FORGOT PASSWORD MODAL -->
@@ -3953,6 +4573,7 @@ const OllamaService = {
 <script src="clipcat_service.js"></script>
 <script src="gptimage_service.js"></script>
 <script src="openrouter_service.js"></script>
+<script src="openai_service.js"></script>
 <script src="revor_service.js"></script>
 <script src="agent_reach_service.js"></script>
 <script src="monid_service.js"></script>
